@@ -716,10 +716,7 @@
       <div class="p-3.5 rounded-2xl border surface-input flex items-center gap-3.5">
         <div id="prof-preview-avatar" class="w-14 h-14 rounded-full accent-btn flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 shadow-sm">S</div>
         <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <div id="prof-preview-name" class="text-sm font-extrabold truncate">Student</div>
-            <span id="prof-preview-userid" class="hidden px-2 py-0.5 rounded-lg accent-soft text-[10px] font-mono-tab font-extrabold"></span>
-          </div>
+          <div id="prof-preview-name" class="text-sm font-extrabold truncate">Student</div>
           <div id="prof-preview-target" class="text-[11px] text-[var(--text-muted)] truncate">Set your target exam or motto</div>
           <div id="prof-stats-summary" class="text-[11px] font-mono-tab font-bold accent-text mt-1">0d streak · 0.0 Hrs total</div>
         </div>
@@ -3176,16 +3173,6 @@
       if (authUserEl) authUserEl.textContent = authLabel;
       const formUserEl = document.getElementById("prof-form-username");
       if (formUserEl) formUserEl.textContent = authLabel;
-      const idBadgeEl = document.getElementById("prof-preview-userid");
-      if (idBadgeEl) {
-        if (auth?.userId) {
-          idBadgeEl.textContent = `ID: ${auth.userId}`;
-          idBadgeEl.classList.remove("hidden");
-        } else {
-          idBadgeEl.textContent = "";
-          idBadgeEl.classList.add("hidden");
-        }
-      }
       resetCredPanels();
       updateProfileModalPreview();
       openModal("profile-modal");
