@@ -664,25 +664,6 @@
         </div>
         <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Save Profile</button>
       </form>
-      <div class="pt-3 border-t border-slate-500/15 space-y-2.5">
-        <div class="text-[11px] font-extrabold uppercase text-[var(--text-muted)]">Appearance</div>
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <!-- Emoji-style Theme Switcher -->
-          <div class="flex items-center gap-1 p-1 rounded-xl border surface-input" role="group" aria-label="Color Mode">
-            <button type="button" onclick="setTheme('light')" data-theme-opt="light" title="Light Mode" aria-label="Light Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">☀️</button>
-            <button type="button" onclick="setTheme('dark')" data-theme-opt="dark" title="Midnight Mode" aria-label="Midnight Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">🌙</button>
-            <button type="button" onclick="setTheme('paper')" data-theme-opt="paper" title="Paper Mode" aria-label="Paper Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">📜</button>
-          </div>
-          <!-- Accent Color Picker -->
-          <div class="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border surface-input">
-            <button type="button" onclick="setAccent('indigo')" class="w-4 h-4 rounded-full bg-indigo-600 cursor-pointer" title="Indigo"></button>
-            <button type="button" onclick="setAccent('emerald')" class="w-4 h-4 rounded-full bg-emerald-600 cursor-pointer" title="Emerald"></button>
-            <button type="button" onclick="setAccent('teal')" class="w-4 h-4 rounded-full bg-teal-600 cursor-pointer" title="Teal"></button>
-            <button type="button" onclick="setAccent('amber')" class="w-4 h-4 rounded-full bg-amber-500 cursor-pointer" title="Amber"></button>
-            <button type="button" onclick="setAccent('rose')" class="w-4 h-4 rounded-full bg-rose-600 cursor-pointer" title="Rose"></button>
-          </div>
-        </div>
-      </div>
       <div class="pt-3 border-t border-slate-500/15 space-y-3">
         <div class="flex items-center justify-between gap-2">
           <div>
@@ -691,32 +672,76 @@
           </div>
           <button type="button" onclick="logoutUser()" class="logout-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer shrink-0">Log Out</button>
         </div>
-        <button type="button" id="prof-toggle-cred-btn" onclick="toggleChangeCredForm()" class="w-full py-2 px-3 rounded-xl border surface-input text-xs font-extrabold text-left flex items-center justify-between cursor-pointer hover:opacity-90">
-          <span>Change Username &amp; Password</span>
-          <span id="prof-cred-chevron" class="text-[10px] text-[var(--text-muted)]">&#9660;</span>
-        </button>
-        <form id="prof-change-cred-form" onsubmit="handleChangeCredentials(event)" class="hidden space-y-2.5 p-3 rounded-2xl border surface-input">
-          <div class="space-y-1">
-            <label class="text-[11px] font-bold text-[var(--text-muted)]">Current Password</label>
-            <input type="password" id="cred-current-pass" required autocomplete="current-password" placeholder="Enter current password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
-          </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <button type="button" id="prof-toggle-user-btn" onclick="toggleCredPanel('username')" class="py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="truncate">Change Username</span>
+          </button>
+          <button type="button" id="prof-toggle-pass-btn" onclick="toggleCredPanel('password')" class="py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="truncate">Change Password</span>
+          </button>
+          <button type="button" id="prof-toggle-theme-btn" onclick="toggleCredPanel('theme')" class="col-span-2 sm:col-span-1 py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+            <span class="truncate">Change Theme</span>
+          </button>
+        </div>
+
+        <form id="prof-change-user-form" onsubmit="handleChangeUsername(event)" class="hidden space-y-2.5 p-3 rounded-2xl border surface-input">
+          <div class="text-[11px] font-extrabold accent-text">Change Username</div>
           <div class="space-y-1">
             <label class="text-[11px] font-bold text-[var(--text-muted)]">New Username</label>
-            <input type="text" id="cred-new-user" required minlength="3" autocomplete="username" placeholder="New username (min 3 chars)" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+            <input type="text" id="user-new-name" required minlength="3" autocomplete="username" placeholder="Enter new username (min 3 chars)" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+          </div>
+          <div class="space-y-1">
+            <label class="text-[11px] font-bold text-[var(--text-muted)]">Current Password</label>
+            <input type="password" id="user-current-pass" required autocomplete="current-password" placeholder="Verify current password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+          </div>
+          <div id="user-status-msg" class="hidden text-[11px] font-bold rounded-xl px-2.5 py-2"></div>
+          <button type="submit" id="user-submit-btn" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Update Username</button>
+        </form>
+
+        <form id="prof-change-pass-form" onsubmit="handleChangePassword(event)" class="hidden space-y-2.5 p-3 rounded-2xl border surface-input">
+          <div class="text-[11px] font-extrabold accent-text">Change Password</div>
+          <div class="space-y-1">
+            <label class="text-[11px] font-bold text-[var(--text-muted)]">Current Password</label>
+            <input type="password" id="pass-current-pass" required autocomplete="current-password" placeholder="Enter current password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div class="space-y-1">
               <label class="text-[11px] font-bold text-[var(--text-muted)]">New Password</label>
-              <input type="password" id="cred-new-pass" required minlength="4" autocomplete="new-password" placeholder="Min 4 chars" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+              <input type="password" id="pass-new-pass" required minlength="4" autocomplete="new-password" placeholder="Min 4 chars" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
             </div>
             <div class="space-y-1">
               <label class="text-[11px] font-bold text-[var(--text-muted)]">Confirm Password</label>
-              <input type="password" id="cred-confirm-pass" required minlength="4" autocomplete="new-password" placeholder="Re-enter password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+              <input type="password" id="pass-confirm-pass" required minlength="4" autocomplete="new-password" placeholder="Re-enter password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
             </div>
           </div>
-          <div id="cred-status-msg" class="hidden text-[11px] font-bold rounded-xl px-2.5 py-2"></div>
-          <button type="submit" id="cred-submit-btn" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Update Login in Google Apps Script</button>
+          <div id="pass-status-msg" class="hidden text-[11px] font-bold rounded-xl px-2.5 py-2"></div>
+          <button type="submit" id="pass-submit-btn" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Update Password</button>
         </form>
+
+        <div id="prof-change-theme-panel" class="hidden space-y-3 p-3 rounded-2xl border surface-input">
+          <div class="text-[11px] font-extrabold accent-text">Change Theme &amp; Accent</div>
+          <div class="space-y-1.5">
+            <div class="text-[11px] font-bold text-[var(--text-muted)]">Color Mode</div>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="setTheme('light')" data-theme-card="light" class="py-2 px-2 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition">☀️ <span>Light</span></button>
+              <button type="button" onclick="setTheme('dark')" data-theme-card="dark" class="py-2 px-2 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition">🌙 <span>Midnight</span></button>
+              <button type="button" onclick="setTheme('paper')" data-theme-card="paper" class="py-2 px-2 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition">📜 <span>Paper</span></button>
+            </div>
+          </div>
+          <div class="space-y-1.5">
+            <div class="text-[11px] font-bold text-[var(--text-muted)]">Accent Color</div>
+            <div class="grid grid-cols-5 gap-1.5">
+              <button type="button" onclick="setAccent('indigo')" data-accent-card="indigo" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-indigo-600"></span><span>Indigo</span></button>
+              <button type="button" onclick="setAccent('emerald')" data-accent-card="emerald" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-emerald-600"></span><span>Emerald</span></button>
+              <button type="button" onclick="setAccent('teal')" data-accent-card="teal" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-teal-600"></span><span>Teal</span></button>
+              <button type="button" onclick="setAccent('amber')" data-accent-card="amber" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-amber-500"></span><span>Amber</span></button>
+              <button type="button" onclick="setAccent('rose')" data-accent-card="rose" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-rose-600"></span><span>Rose</span></button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1515,6 +1540,14 @@
       document.querySelectorAll("[data-theme-opt]").forEach(btn => {
         const active = btn.getAttribute("data-theme-opt") === t;
         btn.className = `px-2 py-1 rounded-lg text-sm leading-none cursor-pointer transition ${active ? "accent-btn shadow-sm scale-105" : "opacity-70 hover:opacity-100"}`;
+      });
+      document.querySelectorAll("[data-theme-card]").forEach(btn => {
+        const active = btn.getAttribute("data-theme-card") === t;
+        btn.className = `py-2 px-2 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition ${active ? "accent-btn shadow-sm" : "border surface-input hover:opacity-90"}`;
+      });
+      document.querySelectorAll("[data-accent-card]").forEach(btn => {
+        const active = btn.getAttribute("data-accent-card") === a;
+        btn.className = `py-1.5 px-1 rounded-xl text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition ${active ? "accent-soft border border-[var(--accent-primary)] shadow-sm" : "border surface-input hover:opacity-90"}`;
       });
     }
     function setTheme(t) { appState.theme = t; saveState(); applyThemeAccent(); }
@@ -2873,17 +2906,7 @@
       const auth = getAuthSession();
       const authUserEl = document.getElementById("prof-auth-username");
       if (authUserEl) authUserEl.textContent = auth?.username ? "@" + auth.username : "—";
-      const credForm = document.getElementById("prof-change-cred-form");
-      if (credForm) {
-        credForm.classList.add("hidden");
-        credForm.reset();
-        const newUserInp = document.getElementById("cred-new-user");
-        if (newUserInp && auth?.username) newUserInp.value = auth.username;
-      }
-      const credStatus = document.getElementById("cred-status-msg");
-      if (credStatus) credStatus.classList.add("hidden");
-      const credChev = document.getElementById("prof-cred-chevron");
-      if (credChev) credChev.innerHTML = "&#9660;";
+      resetCredPanels();
       updateProfileModalPreview();
       openModal("profile-modal");
     }
@@ -3859,21 +3882,63 @@
       showToast("Logged out successfully.", "info");
     }
 
-    function toggleChangeCredForm() {
-      const form = document.getElementById("prof-change-cred-form");
-      const chev = document.getElementById("prof-cred-chevron");
-      if (!form) return;
-      const willShow = form.classList.contains("hidden");
-      form.classList.toggle("hidden", !willShow);
-      if (chev) chev.innerHTML = willShow ? "&#9650;" : "&#9660;";
-      if (willShow) {
+    function resetCredPanels() {
+      const userForm = document.getElementById("prof-change-user-form");
+      const passForm = document.getElementById("prof-change-pass-form");
+      const themePanel = document.getElementById("prof-change-theme-panel");
+      const userBtn = document.getElementById("prof-toggle-user-btn");
+      const passBtn = document.getElementById("prof-toggle-pass-btn");
+      const themeBtn = document.getElementById("prof-toggle-theme-btn");
+      const userStatus = document.getElementById("user-status-msg");
+      const passStatus = document.getElementById("pass-status-msg");
+      if (userForm) { userForm.classList.add("hidden"); userForm.reset(); }
+      if (passForm) { passForm.classList.add("hidden"); passForm.reset(); }
+      if (themePanel) themePanel.classList.add("hidden");
+      if (userStatus) userStatus.classList.add("hidden");
+      if (passStatus) passStatus.classList.add("hidden");
+      const baseBtn = "py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition";
+      if (userBtn) userBtn.className = baseBtn;
+      if (passBtn) passBtn.className = baseBtn;
+      if (themeBtn) themeBtn.className = `col-span-2 sm:col-span-1 ${baseBtn}`;
+    }
+
+    function toggleCredPanel(mode) {
+      const userForm = document.getElementById("prof-change-user-form");
+      const passForm = document.getElementById("prof-change-pass-form");
+      const themePanel = document.getElementById("prof-change-theme-panel");
+      const userBtn = document.getElementById("prof-toggle-user-btn");
+      const passBtn = document.getElementById("prof-toggle-pass-btn");
+      const themeBtn = document.getElementById("prof-toggle-theme-btn");
+      if (!userForm || !passForm) return;
+
+      const isOpeningUser = mode === "username" && userForm.classList.contains("hidden");
+      const isOpeningPass = mode === "password" && passForm.classList.contains("hidden");
+      const isOpeningTheme = mode === "theme" && themePanel && themePanel.classList.contains("hidden");
+      resetCredPanels();
+
+      const activeBtn = "py-2 px-2.5 rounded-xl accent-btn text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition";
+      if (isOpeningUser) {
+        userForm.classList.remove("hidden");
+        if (userBtn) userBtn.className = activeBtn;
         const auth = getAuthSession();
-        const newUserInp = document.getElementById("cred-new-user");
-        if (newUserInp && !newUserInp.value && auth?.username) newUserInp.value = auth.username;
+        const newUserInp = document.getElementById("user-new-name");
+        if (newUserInp && auth?.username) {
+          newUserInp.value = auth.username;
+          newUserInp.focus();
+          newUserInp.select();
+        }
+      } else if (isOpeningPass) {
+        passForm.classList.remove("hidden");
+        if (passBtn) passBtn.className = activeBtn;
+        document.getElementById("pass-current-pass")?.focus();
+      } else if (isOpeningTheme && themePanel) {
+        themePanel.classList.remove("hidden");
+        if (themeBtn) themeBtn.className = `col-span-2 sm:col-span-1 ${activeBtn}`;
+        applyThemeAccent();
       }
     }
 
-    async function handleChangeCredentials(e) {
+    async function handleChangeUsername(e) {
       e.preventDefault();
       const auth = getAuthSession();
       const currentUsername = auth?.username || "";
@@ -3881,29 +3946,23 @@
         logoutUser();
         return;
       }
-      const currentPassword = document.getElementById("cred-current-pass")?.value || "";
-      const newUsername = (document.getElementById("cred-new-user")?.value || "").trim();
-      const newPassword = document.getElementById("cred-new-pass")?.value || "";
-      const confirmPassword = document.getElementById("cred-confirm-pass")?.value || "";
-      const statusEl = document.getElementById("cred-status-msg");
-      const btn = document.getElementById("cred-submit-btn");
+      const newUsername = (document.getElementById("user-new-name")?.value || "").trim();
+      const currentPassword = document.getElementById("user-current-pass")?.value || "";
+      const statusEl = document.getElementById("user-status-msg");
+      const btn = document.getElementById("user-submit-btn");
 
-      const showCredStatus = (text, isErr) => {
+      const showStatus = (text, isErr) => {
         if (!statusEl) return;
         statusEl.textContent = text;
         statusEl.className = `text-[11px] font-bold rounded-xl px-2.5 py-2 ${isErr ? "login-error-box" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"}`;
       };
 
       if (newUsername.length < 3) {
-        showCredStatus("New username must be at least 3 characters.", true);
+        showStatus("New username must be at least 3 characters.", true);
         return;
       }
-      if (newPassword.length < 4) {
-        showCredStatus("New password must be at least 4 characters.", true);
-        return;
-      }
-      if (newPassword !== confirmPassword) {
-        showCredStatus("New password and confirm password do not match.", true);
+      if (!currentPassword) {
+        showStatus("Please enter your current password.", true);
         return;
       }
 
@@ -3918,27 +3977,91 @@
           currentUsername,
           currentPassword,
           newUsername,
-          newPassword
+          newPassword: currentPassword
         });
         if (res && res.status === "success") {
+          const updatedUser = res.username || newUsername;
           const remembered = Boolean(localStorage.getItem(AUTH_SESSION_KEY));
-          saveAuthSession(res.username || newUsername, auth?.token || "", remembered);
+          saveAuthSession(updatedUser, auth?.token || "", remembered);
           const authUserEl = document.getElementById("prof-auth-username");
-          if (authUserEl) authUserEl.textContent = "@" + (res.username || newUsername);
-          document.getElementById("prof-change-cred-form")?.reset();
-          showCredStatus("Username & password updated in Google Apps Script!", false);
-          showToast("Login credentials updated!", "success");
+          if (authUserEl) authUserEl.textContent = "@" + updatedUser;
+          document.getElementById("prof-change-user-form")?.reset();
+          const newUserInp = document.getElementById("user-new-name");
+          if (newUserInp) newUserInp.value = updatedUser;
+          showStatus("Username updated in Google Apps Script!", false);
+          showToast("Username updated!", "success");
         } else if (res && /Missing state payload/i.test(res.message || "")) {
-          showCredStatus("Please paste & deploy the updated Code.gs in Google Apps Script first.", true);
+          showStatus("Please paste & deploy the updated Code.gs in Google Apps Script first.", true);
         } else {
-          showCredStatus(res?.message || "Failed to update credentials.", true);
+          showStatus(res?.message || "Failed to update username.", true);
         }
       } catch {
-        showCredStatus("Could not reach Google Apps Script. Check your Web App deployment.", true);
+        showStatus("Could not reach Google Apps Script. Check your Web App deployment.", true);
       } finally {
         if (btn) {
           btn.disabled = false;
-          btn.textContent = "Update Login in Google Apps Script";
+          btn.textContent = "Update Username";
+        }
+      }
+    }
+
+    async function handleChangePassword(e) {
+      e.preventDefault();
+      const auth = getAuthSession();
+      const currentUsername = auth?.username || "";
+      if (!currentUsername) {
+        logoutUser();
+        return;
+      }
+      const currentPassword = document.getElementById("pass-current-pass")?.value || "";
+      const newPassword = document.getElementById("pass-new-pass")?.value || "";
+      const confirmPassword = document.getElementById("pass-confirm-pass")?.value || "";
+      const statusEl = document.getElementById("pass-status-msg");
+      const btn = document.getElementById("pass-submit-btn");
+
+      const showStatus = (text, isErr) => {
+        if (!statusEl) return;
+        statusEl.textContent = text;
+        statusEl.className = `text-[11px] font-bold rounded-xl px-2.5 py-2 ${isErr ? "login-error-box" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"}`;
+      };
+
+      if (newPassword.length < 4) {
+        showStatus("New password must be at least 4 characters.", true);
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        showStatus("New password and confirm password do not match.", true);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Updating...";
+      }
+
+      try {
+        const res = await callGasAuthAction({
+          action: "changeCredentials",
+          currentUsername,
+          currentPassword,
+          newUsername: currentUsername,
+          newPassword
+        });
+        if (res && res.status === "success") {
+          document.getElementById("prof-change-pass-form")?.reset();
+          showStatus("Password updated in Google Apps Script!", false);
+          showToast("Password updated!", "success");
+        } else if (res && /Missing state payload/i.test(res.message || "")) {
+          showStatus("Please paste & deploy the updated Code.gs in Google Apps Script first.", true);
+        } else {
+          showStatus(res?.message || "Failed to update password.", true);
+        }
+      } catch {
+        showStatus("Could not reach Google Apps Script. Check your Web App deployment.", true);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Update Password";
         }
       }
     }
