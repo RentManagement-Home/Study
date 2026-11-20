@@ -298,7 +298,6 @@
           <div class="flex items-center gap-2 flex-wrap">
             <h1 id="hdr-title" class="text-sm sm:text-lg font-extrabold truncate">DAILY STUDY TIMETABLE</h1>
             <span id="hdr-day-badge" class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">TODAY</span>
-            <span id="hdr-hours" class="text-xs font-bold accent-text font-mono-tab"></span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <p id="hdr-subtitle" class="text-[11px] sm:text-xs text-[var(--text-muted)] truncate max-w-[240px] sm:max-w-xs"></p>
@@ -2742,7 +2741,8 @@
 
       document.getElementById("hdr-title").textContent = sched.title || "DAILY STUDY TIMETABLE";
       document.getElementById("hdr-subtitle").textContent = sched.subtitle || "";
-      document.getElementById("hdr-hours").textContent = `· ${totalHrs.toFixed(1)} Hrs Study`;
+      const hdrHoursEl = document.getElementById("hdr-hours");
+      if (hdrHoursEl) hdrHoursEl.textContent = `· ${totalHrs.toFixed(1)} Hrs Study`;
 
       const badge = document.getElementById("hdr-day-badge");
       if (isToday) {
