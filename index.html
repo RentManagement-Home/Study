@@ -5,54 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Daily Study Timetable Tracker — Pro Exam Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'class' };
-  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
   <style>
     :root, [data-theme="light"] {
       --bg-gradient: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 38%, #e0f2fe 74%, #f0fdf4 100%);
       --surface-panel: rgba(255, 255, 255, 0.88);
       --surface-card: rgba(255, 255, 255, 0.96);
-      --surface-card-hover: #ffffff;
       --surface-input: rgba(255, 255, 255, 0.92);
-      --border-panel: rgba(203, 213, 225, 0.75);
-      --border-subtle: rgba(226, 232, 240, 0.95);
+      --border-panel: rgba(203, 213, 225, 0.78);
       --text-primary: #0f172a;
       --text-secondary: #334155;
       --text-muted: #64748b;
+      --accent-primary: #4f46e5;
+      --accent-hover: #4338ca;
+      --accent-soft: rgba(79, 70, 229, 0.12);
+      --accent-text: #4f46e5;
+      --accent-glow: rgba(79, 70, 229, 0.2);
     }
     [data-theme="dark"] {
       --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #0f172a 100%);
-      --surface-panel: rgba(17, 24, 39, 0.88);
-      --surface-card: rgba(30, 41, 59, 0.88);
-      --surface-card-hover: rgba(30, 41, 59, 0.98);
-      --surface-input: rgba(15, 23, 42, 0.86);
+      --surface-panel: rgba(17, 24, 39, 0.9);
+      --surface-card: rgba(30, 41, 59, 0.9);
+      --surface-input: rgba(15, 23, 42, 0.88);
       --border-panel: rgba(51, 65, 85, 0.85);
-      --border-subtle: rgba(51, 65, 85, 0.92);
       --text-primary: #f8fafc;
       --text-secondary: #cbd5e1;
       --text-muted: #94a3b8;
+      --accent-glow: rgba(99, 102, 241, 0.3);
     }
     [data-theme="paper"] {
       --bg-gradient: linear-gradient(135deg, #f8f3e8 0%, #f1e8d6 50%, #eae0cc 100%);
-      --surface-panel: rgba(253, 249, 241, 0.92);
-      --surface-card: rgba(255, 253, 247, 0.97);
-      --surface-card-hover: #fffef9;
+      --surface-panel: rgba(253, 249, 241, 0.94);
+      --surface-card: rgba(255, 253, 247, 0.98);
       --surface-input: rgba(250, 245, 235, 0.96);
       --border-panel: rgba(196, 181, 158, 0.85);
-      --border-subtle: rgba(212, 199, 178, 0.95);
       --text-primary: #1c1917;
       --text-secondary: #44403c;
       --text-muted: #78716c;
+      --accent-glow: rgba(180, 83, 9, 0.16);
     }
-    [data-accent="indigo"] { --accent-primary: #4f46e5; --accent-hover: #4338ca; --accent-soft: rgba(79,70,229,0.12); --accent-text: #4f46e5; --accent-glow: rgba(79,70,229,0.22); }
-    [data-accent="emerald"] { --accent-primary: #059669; --accent-hover: #047857; --accent-soft: rgba(5,150,105,0.12); --accent-text: #059669; --accent-glow: rgba(5,150,105,0.22); }
-    [data-accent="teal"] { --accent-primary: #0d9488; --accent-hover: #0f766e; --accent-soft: rgba(13,148,136,0.12); --accent-text: #0d9488; --accent-glow: rgba(13,148,136,0.22); }
-    [data-accent="amber"] { --accent-primary: #d97706; --accent-hover: #b45309; --accent-soft: rgba(217,119,6,0.14); --accent-text: #b45309; --accent-glow: rgba(217,119,6,0.22); }
-    [data-accent="rose"] { --accent-primary: #e11d48; --accent-hover: #be123c; --accent-soft: rgba(225,29,72,0.12); --accent-text: #e11d48; --accent-glow: rgba(225,29,72,0.22); }
+    [data-accent="indigo"] { --accent-primary: #4f46e5; --accent-hover: #4338ca; --accent-soft: rgba(79,70,229,.12); --accent-text: #4f46e5; }
+    [data-accent="emerald"] { --accent-primary: #059669; --accent-hover: #047857; --accent-soft: rgba(5,150,105,.12); --accent-text: #059669; }
+    [data-accent="teal"] { --accent-primary: #0d9488; --accent-hover: #0f766e; --accent-soft: rgba(13,148,136,.12); --accent-text: #0d9488; }
+    [data-accent="amber"] { --accent-primary: #d97706; --accent-hover: #b45309; --accent-soft: rgba(217,119,6,.14); --accent-text: #b45309; }
+    [data-accent="rose"] { --accent-primary: #e11d48; --accent-hover: #be123c; --accent-soft: rgba(225,29,72,.12); --accent-text: #e11d48; }
     [data-theme="dark"][data-accent="indigo"] { --accent-text: #818cf8; }
     [data-theme="dark"][data-accent="emerald"] { --accent-text: #34d399; }
     [data-theme="dark"][data-accent="teal"] { --accent-text: #2dd4bf; }
@@ -61,1151 +72,1407 @@
 
     html, body { max-width: 100%; overflow-x: clip; -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       background: var(--bg-gradient);
       background-attachment: fixed;
       color: var(--text-primary);
       min-height: 100dvh;
-      transition: background 0.3s ease, color 0.2s ease;
     }
-    button, input, select, textarea { touch-action: manipulation; }
-    .font-mono-tabular { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
-    .accent-btn { background-color: var(--accent-primary); color: #fff; }
-    .accent-btn:hover { background-color: var(--accent-hover); }
+    .font-mono-tab { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+    .surface-panel { background: var(--surface-panel); backdrop-filter: blur(16px); border: 1px solid var(--border-panel); box-shadow: 0 8px 28px rgba(15,23,42,0.06); }
+    .surface-card { background: var(--surface-card); border: 1px solid var(--border-panel); transition: transform 0.16s ease, box-shadow 0.16s ease; }
+    .surface-input { background: var(--surface-input); color: var(--text-primary); border-color: var(--border-panel); }
+    .accent-btn { background: var(--accent-primary); color: #fff; }
+    .accent-btn:hover { background: var(--accent-hover); }
     .accent-text { color: var(--accent-text); }
-    .accent-bg-soft { background-color: var(--accent-soft); color: var(--accent-text); }
-    .surface-panel {
-      background: var(--surface-panel);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid var(--border-panel);
-      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
-    }
-    .surface-card {
-      background: var(--surface-card);
-      border: 1px solid var(--border-panel);
-      transition: transform 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
-    }
-    .surface-card:hover { background: var(--surface-card-hover); transform: translateY(-1px); box-shadow: 0 10px 24px -10px var(--accent-glow); }
-    .surface-input { background: var(--surface-input); color: var(--text-primary); border-color: var(--border-subtle); }
-    .active-slot-ring { border-color: var(--accent-primary) !important; box-shadow: 0 0 0 3px var(--accent-glow), 0 10px 24px -8px var(--accent-glow) !important; }
-    .thin-scrollbar { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-    .thin-scrollbar:hover { scrollbar-color: rgba(148, 163, 184, 0.45) transparent; }
-    .thin-scrollbar::-webkit-scrollbar { height: 4px; }
-    .thin-scrollbar::-webkit-scrollbar-thumb { background: transparent; border-radius: 9999px; }
-    .thin-scrollbar:hover::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.5); }
-    @media print {
-      body { background: #fff !important; color: #000 !important; padding: 0 !important; }
-      .no-print { display: none !important; }
-      .surface-panel, .surface-card { background: #fff !important; backdrop-filter: none !important; border: 1px solid #cbd5e1 !important; box-shadow: none !important; break-inside: avoid; }
-    }
+    .accent-soft { background: var(--accent-soft); color: var(--accent-text); }
+    .active-slot-ring { border-color: var(--accent-primary) !important; box-shadow: 0 0 0 3px var(--accent-glow) !important; }
+    .thin-scroll { scrollbar-width: thin; }
+    .thin-scroll::-webkit-scrollbar { height: 4px; width: 6px; }
+    .thin-scroll::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.45); border-radius: 9999px; }
   </style>
 </head>
-<body data-theme="light" data-accent="indigo" class="antialiased selection:bg-indigo-500 selection:text-white pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-16">
+<body data-theme="light" data-accent="indigo" class="pb-24 lg:pb-14 antialiased selection:bg-indigo-500 selection:text-white">
+  <div id="toast-root" class="fixed bottom-20 lg:bottom-5 right-3 sm:right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-1.5rem)]"></div>
 
-  <div id="toast-container" class="no-print fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] lg:bottom-5 right-3 sm:right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-1.5rem)]"></div>
-
-  <!-- Header -->
+  <!-- HEADER -->
   <header class="sticky top-0 z-30 surface-panel border-b">
-    <div class="max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 py-3">
-      <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 min-w-0">
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl accent-btn flex items-center justify-center shadow-md shrink-0">
-              <span class="text-lg">📅</span>
-            </div>
-            <div class="min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <h1 id="app-main-title" class="text-sm sm:text-lg font-extrabold tracking-tight text-[var(--text-primary)] truncate">DAILY STUDY TIMETABLE</h1>
-                <span id="plan-hours-badge" class="px-2 py-0.5 text-[11px] font-bold rounded-md accent-bg-soft font-mono-tabular">10 Hrs Study</span>
-              </div>
-              <p id="app-subtitle" class="text-xs font-medium text-[var(--text-muted)] truncate">Backlog Focus + Typing + Reasoning + GK/GS</p>
-            </div>
+    <div class="max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2.5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 min-w-0">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 id="hdr-title" class="text-sm sm:text-lg font-extrabold truncate">DAILY STUDY TIMETABLE</h1>
+            <span id="hdr-hours" class="text-xs font-bold accent-text font-mono-tab"></span>
           </div>
-
-          <div class="no-print flex items-center gap-1.5 self-start sm:self-auto shrink-0">
-            <div class="flex items-center gap-0.5 p-1 rounded-xl border surface-input shadow-sm">
-              <button onclick="setTheme('light')" id="theme-btn-light" class="px-2 py-1 rounded-lg text-xs font-bold transition">☀️</button>
-              <button onclick="setTheme('dark')" id="theme-btn-dark" class="px-2 py-1 rounded-lg text-xs font-bold transition">🌙</button>
-              <button onclick="setTheme('paper')" id="theme-btn-paper" class="px-2 py-1 rounded-lg text-xs font-bold transition">📜</button>
-            </div>
-            <div class="flex items-center gap-1 p-1.5 rounded-xl border surface-input shadow-sm" id="accent-picker">
-              <button onclick="setAccent('indigo')" data-accent="indigo" class="w-4 h-4 rounded-full bg-indigo-600"></button>
-              <button onclick="setAccent('emerald')" data-accent="emerald" class="w-4 h-4 rounded-full bg-emerald-600"></button>
-              <button onclick="setAccent('teal')" data-accent="teal" class="w-4 h-4 rounded-full bg-teal-600"></button>
-              <button onclick="setAccent('amber')" data-accent="amber" class="w-4 h-4 rounded-full bg-amber-600"></button>
-              <button onclick="setAccent('rose')" data-accent="rose" class="w-4 h-4 rounded-full bg-rose-600"></button>
-            </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <p id="hdr-subtitle" class="text-[11px] sm:text-xs text-[var(--text-muted)] truncate max-w-[240px] sm:max-w-xs"></p>
+            <button type="button" onclick="openModal('exam-modal')" id="hdr-goal-btn" class="text-[11px] font-bold accent-text hover:underline cursor-pointer"></button>
           </div>
         </div>
-
-        <!-- Horizontal Wheel & Drag Scrollable Toolbar -->
-        <div id="header-toolbar" class="no-print flex items-center gap-2 overflow-x-auto thin-scrollbar pb-1 xl:pb-0 cursor-grab select-none">
-          <div class="flex items-center gap-2 bg-slate-900 text-white px-3 py-1.5 rounded-xl border border-slate-700 shrink-0">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span id="live-clock" class="font-mono-tabular text-xs sm:text-sm font-bold">00:00:00 AM</span>
+        <div class="flex items-center gap-2 shrink-0">
+          <div class="flex items-center gap-1 p-1 rounded-xl border surface-input">
+            <button type="button" onclick="setTheme('light')" data-theme-opt="light" class="px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer">Light</button>
+            <button type="button" onclick="setTheme('dark')" data-theme-opt="dark" class="px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer">Midnight</button>
+            <button type="button" onclick="setTheme('paper')" data-theme-opt="paper" class="px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer">Paper</button>
           </div>
-
-          <div class="flex items-center border surface-input rounded-xl px-1.5 py-1 shadow-sm shrink-0">
-            <button onclick="changeDate(-1)" class="p-1 text-xs font-bold text-[var(--text-muted)]">◀</button>
-            <input type="date" id="date-selector" class="text-xs font-semibold bg-transparent border-none focus:outline-none px-1 cursor-pointer" />
-            <button onclick="changeDate(1)" class="p-1 text-xs font-bold text-[var(--text-muted)]">▶</button>
-            <button onclick="jumpToday()" class="ml-1 px-2 py-0.5 rounded-md accent-bg-soft text-[11px] font-bold">Today</button>
+          <div class="flex items-center gap-1 px-2 py-1.5 rounded-xl border surface-input">
+            <button type="button" onclick="setAccent('indigo')" class="w-3.5 h-3.5 rounded-full bg-indigo-600 cursor-pointer" title="Indigo"></button>
+            <button type="button" onclick="setAccent('emerald')" class="w-3.5 h-3.5 rounded-full bg-emerald-600 cursor-pointer" title="Emerald"></button>
+            <button type="button" onclick="setAccent('teal')" class="w-3.5 h-3.5 rounded-full bg-teal-600 cursor-pointer" title="Teal"></button>
+            <button type="button" onclick="setAccent('amber')" class="w-3.5 h-3.5 rounded-full bg-amber-500 cursor-pointer" title="Amber"></button>
+            <button type="button" onclick="setAccent('rose')" class="w-3.5 h-3.5 rounded-full bg-rose-600 cursor-pointer" title="Rose"></button>
           </div>
-
-          <button onclick="openExamGoalsModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border surface-input shadow-sm shrink-0">
-            <span>🏁</span><span id="exam-goals-label">Exam Goals</span>
-          </button>
-
-          <button onclick="openZenModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border surface-input shadow-sm shrink-0">
-            <span>🧘</span><span>Zen</span>
-          </button>
-
-          <button id="btn-edit-mode" onclick="requestEditModeToggle()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border surface-input shadow-sm shrink-0">
-            <span id="edit-lock-icon">🔓</span><span id="edit-mode-label">Edit Mode</span>
-          </button>
-
-          <button onclick="openHistoryModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border surface-input shadow-sm shrink-0">
-            <span>📊 History</span>
-            <span id="streak-badge" class="px-1.5 py-0.5 text-[11px] rounded-md bg-orange-500/15 text-orange-600 font-extrabold">🔥 0d</span>
-          </button>
         </div>
+      </div>
+
+      <!-- Scrollable Toolbar -->
+      <div id="hdr-toolbar" class="thin-scroll flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 select-none cursor-grab">
+        <div id="live-clock" class="shrink-0 bg-slate-900 text-white px-3 py-1.5 rounded-xl border border-slate-700 font-mono-tab text-xs sm:text-sm font-bold whitespace-nowrap">00:00:00 AM</div>
+        <div class="shrink-0 flex items-center border surface-input rounded-xl px-1 py-0.5">
+          <button type="button" onclick="shiftDate(-1)" class="p-1.5 text-xs font-bold cursor-pointer">&#9664;</button>
+          <input type="date" id="date-input" class="text-xs sm:text-sm font-semibold bg-transparent border-none focus:outline-none px-1 font-mono-tab" />
+          <button type="button" onclick="shiftDate(1)" class="p-1.5 text-xs font-bold cursor-pointer">&#9654;</button>
+          <button type="button" id="today-btn" onclick="jumpToday()" class="hidden ml-1 px-2 py-1 rounded-lg accent-soft text-[11px] font-extrabold cursor-pointer">Today</button>
+        </div>
+        <button type="button" onclick="openModal('history-modal')" id="history-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">History</button>
+        <button type="button" onclick="toggleEditMode()" id="edit-mode-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">Edit Mode</button>
       </div>
     </div>
   </header>
 
   <main class="max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-5">
+    <!-- MULTIPLE CONCURRENT REMINDERS STACK -->
+    <div id="reminders-stack" class="space-y-2.5 hidden"></div>
 
-    <!-- On-Screen Study Shift Reminder -->
-    <div id="shift-reminder-banner" class="no-print hidden surface-panel rounded-2xl p-3.5 sm:p-4 border-2 border-[var(--accent-primary)] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
-      <div class="min-w-0">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-[11px] font-extrabold uppercase tracking-wider accent-text">🔔 Study Shift Reminder</span>
-          <span id="shift-reminder-time" class="font-mono-tabular text-[11px] font-bold text-[var(--text-muted)]">--:--</span>
-        </div>
-        <h2 id="shift-reminder-subject" class="text-sm sm:text-base font-extrabold truncate">Shift Started</h2>
-        <p id="shift-reminder-focus" class="text-xs text-[var(--text-secondary)]"></p>
-      </div>
-      <div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
-        <button id="shift-reminder-start-btn" onclick="startReminderSlotTimer()" class="hidden px-3 py-1.5 rounded-xl accent-btn text-xs font-extrabold">Start Shift Timer</button>
-        <button onclick="dismissShiftReminder()" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold">Dismiss</button>
-      </div>
-    </div>
+    <!-- PROMOTED TOP LIVE SCHEDULE STATUS + DAILY MANUAL STUDY DURATION BOX (Desktop & Mobile) -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+      <div id="live-status-card" class="lg:col-span-7 rounded-2xl p-4 sm:p-5 border surface-panel flex flex-col justify-between"></div>
+      <div id="daily-study-card" class="lg:col-span-5 rounded-2xl p-4 sm:p-5 surface-panel flex flex-col justify-between gap-3"></div>
+    </section>
 
-    <!-- Admin Edit Mode Banner -->
-    <div id="edit-mode-banner" class="no-print hidden surface-panel rounded-2xl p-4 border-2 border-amber-400/80 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+    <!-- EDIT MODE TOOLBAR -->
+    <div id="edit-banner" class="hidden surface-panel rounded-2xl p-4 border-2 border-amber-400/80 flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h2 class="text-sm font-extrabold text-amber-600 uppercase tracking-wide">Admin / Full Edit Mode Active</h2>
-        <p class="text-xs text-[var(--text-secondary)]">Edit slots, save templates, configure custom categories &amp; weekday auto-rules, or export JSON.</p>
+        <div class="text-xs sm:text-sm font-extrabold text-amber-600 dark:text-amber-400 uppercase">Edit Mode Active</div>
+        <div class="text-xs text-[var(--text-secondary)]">Add or edit slots, manage study plans, or export/import JSON backups.</div>
       </div>
-      <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-        <button onclick="openSlotModal()" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">+ Add Slot</button>
-        <button onclick="openSaveTemplateModal()" class="px-3 py-2 rounded-xl accent-btn text-xs font-bold">💾 Save Template</button>
-        <button id="btn-delete-template" onclick="deleteCustomTemplate()" class="hidden px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">🗑️ Delete Template</button>
-        <button onclick="openCategoriesModal()" class="px-3 py-2 rounded-xl border surface-input text-xs font-bold">🏷️ Categories</button>
-        <button onclick="openWeekdayModal()" class="px-3 py-2 rounded-xl border surface-input text-xs font-bold">📆 Weekday Rules</button>
-        <button onclick="openTitleEditModal()" class="px-3 py-2 rounded-xl border surface-input text-xs font-bold">✏️ Titles</button>
-        <button onclick="openPinModal()" class="px-3 py-2 rounded-xl border surface-input text-xs font-bold">🔐 <span id="pin-btn-label">Set PIN</span></button>
-        <button onclick="exportJSON()" class="px-3 py-2 rounded-xl border surface-input text-xs font-bold">⬇️ Export</button>
-        <label class="px-3 py-2 rounded-xl border surface-input text-xs font-bold cursor-pointer">
-          ⬆️ Import <input type="file" accept=".json" onchange="importJSON(event)" class="hidden" />
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="openSlotModal(null)" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold cursor-pointer">+ Add Slot</button>
+        <button type="button" onclick="openModal('plans-modal')" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-bold cursor-pointer">Manage Plans</button>
+        <button type="button" onclick="exportJson()" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Export JSON</button>
+        <label class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">
+          Import JSON <input type="file" accept=".json" class="hidden" onchange="importJson(this)" />
         </label>
-        <button onclick="confirmResetDefault()" class="px-3 py-2 rounded-xl bg-rose-500/15 text-rose-600 text-xs font-bold">↺ Reset</button>
+        <button type="button" onclick="openModal('pin-modal')" id="pin-btn" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Set PIN</button>
       </div>
     </div>
 
-    <!-- Summary Cards -->
+    <!-- STATS GRID -->
     <section id="stats-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5"></section>
 
-    <!-- Main Two-Column Layout -->
+    <!-- MAIN CONTENT + SIDEBAR -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- TIMETABLE LIST -->
       <div class="lg:col-span-8 space-y-4">
-        <div id="yesterday-banner" class="no-print hidden surface-panel rounded-2xl p-3.5 border-l-4 border-l-amber-500 flex flex-wrap items-center justify-between gap-2 text-xs"></div>
-        <div id="carried-tasks-banner" class="no-print hidden surface-panel rounded-2xl p-3.5 border-l-4 border-l-indigo-500 space-y-2"></div>
-
-        <div class="no-print surface-panel rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5">
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <button onclick="setFilter('all')" id="filter-all" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold accent-btn">All Slots</button>
-            <button onclick="setFilter('study')" id="filter-study" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold text-[var(--text-secondary)]">Study</button>
-            <button onclick="setFilter('break')" id="filter-break" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold text-[var(--text-secondary)]">Breaks</button>
-            <button onclick="setFilter('pending')" id="filter-pending" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold text-[var(--text-secondary)]">Remaining</button>
-          </div>
-          <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
-            <select id="profile-selector" onchange="switchProfile(this.value)" class="flex-1 sm:flex-none min-w-0 rounded-xl border surface-input px-2.5 py-1.5 text-xs font-bold"></select>
-            <button onclick="toggleDensity()" id="btn-density" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold">Compact</button>
-            <button onclick="window.print()" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold">🖨️ Print</button>
-            <button onclick="archiveCurrentDay()" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold">📥 Archive</button>
+        <div class="surface-panel rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5">
+          <div id="filter-bar" class="flex items-center gap-1.5 flex-wrap"></div>
+          <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+            <select id="profile-select" onchange="switchProfile(this.value)" class="flex-1 sm:flex-none rounded-xl border surface-input px-2.5 py-1.5 text-xs font-bold cursor-pointer"></select>
+            <button type="button" onclick="openModal('plans-modal')" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Plans</button>
+            <div class="flex items-center p-0.5 rounded-xl border surface-input" role="group" aria-label="View type">
+              <button type="button" id="view-compact-btn" onclick="setDensity('compact')" class="px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer">Compact</button>
+              <button type="button" id="view-cards-btn" onclick="setDensity('comfortable')" class="px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer">Cards</button>
+            </div>
+            <button type="button" onclick="archiveDay(currentDateStr)" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold cursor-pointer">Archive Day</button>
           </div>
         </div>
 
-        <div id="timetable-container" class="space-y-3"></div>
+        <div id="slots-container" class="space-y-3"></div>
 
-        <div class="no-print surface-panel rounded-2xl p-4 sm:p-5 border-t-4 border-t-emerald-500 space-y-3">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <!-- REFLECTION -->
+        <div class="surface-panel rounded-2xl p-4 space-y-2">
+          <div class="flex items-center justify-between gap-2">
             <div>
-              <h3 class="text-sm font-extrabold">🌙 End-of-Day Reflection &amp; Carry Forward</h3>
-              <p class="text-xs text-[var(--text-muted)]">Summarize key takeaways or carry unfinished study tasks to tomorrow.</p>
+              <h3 class="text-sm font-extrabold">End-of-Day Reflection</h3>
+              <p class="text-xs text-[var(--text-muted)]">Summarize key takeaways or pending backlog topics.</p>
             </div>
-            <button onclick="carryUnfinishedToTomorrow()" class="px-3 py-1.5 rounded-xl accent-bg-soft text-xs font-bold self-start sm:self-auto">➡️ Carry Unfinished</button>
           </div>
-          <textarea id="daily-reflection-input" rows="2" onchange="saveDailyReflection(this.value)" placeholder="Write today's Current Affairs highlights or tomorrow's priority..." class="w-full rounded-xl border surface-input p-3 text-xs"></textarea>
+          <textarea id="reflection-input" rows="2" oninput="saveReflection(this.value)" placeholder="Write today's study reflection..." class="w-full rounded-xl border surface-input p-3 text-xs focus:outline-none"></textarea>
         </div>
       </div>
 
-      <!-- Right Sidebar -->
-      <aside class="no-print lg:col-span-4 space-y-5 lg:sticky lg:top-24">
-        <!-- 1. Live Schedule Status -->
-        <div class="surface-panel rounded-2xl p-4 sm:p-5 border-2 border-indigo-500/30 space-y-3">
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <span class="px-2 py-0.5 rounded-md text-[11px] font-extrabold accent-bg-soft">● LIVE SCHEDULE STATUS</span>
-            <div class="flex items-center gap-1.5">
-              <button onclick="toggleNotifications()" id="btn-notify-toggle" class="px-2.5 py-1 rounded-lg border surface-input text-[11px] font-bold">🔕 Alerts</button>
-              <button onclick="triggerTestAlert()" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold">Test Alert</button>
-            </div>
-          </div>
-          <div>
-            <div class="flex items-center justify-between gap-2">
-              <h3 id="live-slot-title" class="text-base font-extrabold truncate">Checking schedule...</h3>
-              <span id="live-slot-remaining" class="font-mono-tabular text-xs font-bold accent-text shrink-0">-- left</span>
-            </div>
-            <p id="live-slot-time" class="font-mono-tabular text-xs text-[var(--text-muted)] mt-0.5">--:--</p>
-            <p id="live-slot-focus" class="text-xs text-[var(--text-secondary)] mt-2 p-2.5 rounded-xl border surface-input">...</p>
-          </div>
-          <div>
-            <div class="flex justify-between text-[11px] font-bold text-[var(--text-muted)] mb-1">
-              <span>Slot Elapsed</span><span id="live-slot-pct" class="font-mono-tabular">0%</span>
-            </div>
-            <div class="w-full h-2 bg-slate-500/20 rounded-full overflow-hidden">
-              <div id="live-slot-progress" class="h-full rounded-full transition-all duration-700" style="width:0%;background-color:var(--accent-primary)"></div>
-            </div>
-          </div>
-          <div class="pt-2.5 border-t border-slate-500/15 flex items-center justify-between gap-2 text-xs">
-            <label class="flex items-center gap-1.5 text-[11px] font-bold text-[var(--text-secondary)] cursor-pointer">
-              <input type="checkbox" id="chk-shift-alerts" checked onchange="toggleShiftAlerts(this.checked)" />
-              <span>Shift-change alerts</span>
-            </label>
-            <span id="next-slot-label" class="font-bold truncate max-w-[160px]">--</span>
-          </div>
-        </div>
+      <!-- SIDEBAR -->
+      <aside class="lg:col-span-4 space-y-5 lg:sticky lg:top-24">
+        <!-- FOLDABLE STICKY NOTES -->
+        <div id="sticky-notes-card" class="surface-panel rounded-2xl p-4 sm:p-5"></div>
 
-        <!-- 2. Quick Sticky Notes -->
-        <div class="surface-panel rounded-2xl p-4 sm:p-5 space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-extrabold">📌 Quick Sticky Notes</h3>
-            <span id="sticky-count" class="font-mono-tabular text-[11px] font-bold text-[var(--text-muted)]">0 notes</span>
-          </div>
-          <div class="space-y-2">
-            <textarea id="sticky-draft" rows="2" placeholder="Jot down a formula, shortcut, or reminder..." class="w-full rounded-xl border surface-input px-3 py-2 text-xs"></textarea>
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-1.5" id="sticky-color-picker">
-                <button type="button" onclick="selectStickyColor('amber')" data-color="amber" class="w-5 h-5 rounded-md bg-amber-400 ring-2 ring-slate-900"></button>
-                <button type="button" onclick="selectStickyColor('sky')" data-color="sky" class="w-5 h-5 rounded-md bg-sky-400 opacity-70"></button>
-                <button type="button" onclick="selectStickyColor('emerald')" data-color="emerald" class="w-5 h-5 rounded-md bg-emerald-400 opacity-70"></button>
-                <button type="button" onclick="selectStickyColor('rose')" data-color="rose" class="w-5 h-5 rounded-md bg-rose-400 opacity-70"></button>
-                <button type="button" onclick="selectStickyColor('violet')" data-color="violet" class="w-5 h-5 rounded-md bg-violet-400 opacity-70"></button>
-              </div>
-              <button onclick="addStickyNote()" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-bold">+ Add Note</button>
-            </div>
-          </div>
-          <div id="sticky-notes-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2 max-h-64 overflow-y-auto"></div>
-        </div>
-
-        <!-- 3. Focus & Typing Timer + Ambient Audio + WPM -->
-        <div class="surface-panel rounded-2xl p-4 sm:p-5 space-y-3">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 class="text-sm font-extrabold">⌨️ Focus &amp; Typing Timer</h3>
-              <p id="timer-mode-label" class="text-[11px] text-[var(--text-muted)]">Pomodoro (25m)</p>
+        <!-- FOCUS & SHIFT COUNTDOWN TIMER -->
+        <div class="surface-panel rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <h3 class="text-sm font-extrabold">Focus &amp; Shift Countdown</h3>
+              <p id="timer-label" class="text-[11px] font-semibold text-[var(--text-muted)] truncate">Pomodoro Focus (25m)</p>
             </div>
             <div class="flex items-center gap-1.5">
-              <button onclick="openZenModal()" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold">Zen</button>
-              <button onclick="toggleSound()" id="btn-sound-toggle" class="w-8 h-8 rounded-xl border surface-input text-xs">🔊</button>
+              <button type="button" onclick="toggleNotifications()" id="notif-btn" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Alerts</button>
+              <button type="button" onclick="toggleSound()" id="sound-btn" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Sound: On</button>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-1.5">
-            <button onclick="setTimerPreset(25, '🎯 25m Focus')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400">25m Focus</button>
-            <button onclick="setTimerPreset(50, '🔥 50m Deep')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400">50m Deep</button>
-            <button onclick="setTimerPreset(15, '⌨️ 15m Eng Typing')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400">15m Eng</button>
-            <button onclick="setTimerPreset(15, '⌨️ 15m Hindi Typing')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-orange-500/15 text-orange-700 dark:text-orange-400">15m Hindi</button>
+            <button type="button" onclick="setPresetTimer(25,'Pomodoro Focus (25m)')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold accent-soft cursor-pointer">25m Focus</button>
+            <button type="button" onclick="setPresetTimer(50,'Deep Study Block (50m)')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-purple-500/15 text-purple-600 dark:text-purple-300 cursor-pointer">50m Block</button>
+            <button type="button" onclick="setPresetTimer(15,'English Typing (15m)')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 cursor-pointer">15m Eng Typing</button>
+            <button type="button" onclick="setPresetTimer(15,'Hindi Typing (15m)')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-orange-500/15 text-orange-700 dark:text-orange-300 cursor-pointer">15m Hindi Typing</button>
           </div>
-          <div class="bg-slate-900 rounded-2xl p-3.5 text-center">
-            <div id="timer-display" class="font-mono-tabular text-3xl sm:text-4xl font-extrabold text-white">25:00</div>
-            <div class="w-full h-1.5 bg-slate-800 rounded-full mt-2 overflow-hidden"><div id="timer-bar" class="h-full bg-emerald-400" style="width:100%"></div></div>
+          <div class="bg-slate-900 rounded-2xl p-4 text-center border border-slate-800">
+            <div id="timer-display" class="font-mono-tab text-3xl font-extrabold text-white">25:00</div>
+            <div id="timer-status" class="text-[11px] font-bold text-slate-400 mt-1">Ready</div>
           </div>
           <div class="grid grid-cols-3 gap-2">
-            <button id="btn-timer-start" onclick="toggleTimer()" class="col-span-2 py-2 rounded-xl accent-btn text-xs font-extrabold">▶ Start</button>
-            <button onclick="resetTimer()" class="py-2 rounded-xl border surface-input text-xs font-bold">↺ Reset</button>
+            <button type="button" onclick="toggleCountdownTimer()" id="timer-toggle-btn" class="col-span-2 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Start</button>
+            <button type="button" onclick="resetCountdownTimer()" class="py-2 rounded-xl border surface-input text-xs font-bold cursor-pointer">Reset</button>
           </div>
-          <div class="flex items-center justify-between gap-2 text-[11px]">
-            <span class="font-bold text-[var(--text-muted)]">Ambient Sound</span>
-            <select id="ambient-select" onchange="setAmbientMode(this.value)" class="rounded-lg border surface-input px-2 py-1 font-bold">
-              <option value="off">Off</option><option value="brown">Brown Noise</option><option value="rain">Soft Rain</option><option value="library">Library Hum</option>
+          <div class="pt-3 border-t border-slate-500/15 grid grid-cols-4 gap-1.5">
+            <select id="wpm-lang" class="rounded-lg border surface-input px-1.5 py-1.5 text-xs font-bold">
+              <option value="Eng">Eng</option>
+              <option value="Hindi">Hindi</option>
             </select>
-          </div>
-          <div class="pt-3 border-t border-slate-500/15 space-y-2">
-            <div class="flex justify-between text-[11px]">
-              <span class="font-bold text-[var(--text-muted)] uppercase">Typing WPM Log</span>
-              <span id="latest-wpm-badge" class="font-bold text-amber-600 dark:text-amber-400">No log yet</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-              <select id="wpm-lang" class="min-w-0 rounded-lg border surface-input px-1.5 py-1.5 text-xs font-bold"><option value="Eng">Eng</option><option value="Hindi">Hindi</option></select>
-              <input type="number" id="wpm-speed" placeholder="WPM" min="1" max="200" class="min-w-0 rounded-lg border surface-input px-2 py-1.5 text-xs font-bold" />
-              <input type="number" id="wpm-acc" placeholder="Acc%" min="1" max="100" class="min-w-0 rounded-lg border surface-input px-2 py-1.5 text-xs font-bold" />
-              <button onclick="logTypingScore()" class="rounded-lg bg-amber-500 text-white text-xs font-extrabold py-1.5">Save</button>
-            </div>
+            <input type="number" id="wpm-speed" placeholder="WPM" class="rounded-lg border surface-input px-2 py-1.5 text-xs font-mono-tab" />
+            <input type="number" id="wpm-acc" placeholder="Acc%" class="rounded-lg border surface-input px-2 py-1.5 text-xs font-mono-tab" />
+            <button type="button" onclick="logTyping()" class="rounded-lg bg-amber-500 text-white text-xs font-extrabold cursor-pointer">Save</button>
           </div>
         </div>
 
-        <!-- 4. Backlog Tracker & Speed Calc -->
-        <div class="surface-panel rounded-2xl p-4 sm:p-5 space-y-3">
-          <h3 class="text-sm font-extrabold">⏩ Backlog Progress &amp; Speed Calc</h3>
-          <div class="grid grid-cols-3 gap-2">
-            <input type="number" id="calc-hrs" value="6" min="0" oninput="calculateBacklogTime()" class="w-full rounded-xl border surface-input px-2.5 py-1.5 text-xs font-bold" />
-            <input type="number" id="calc-mins" value="15" min="0" max="59" oninput="calculateBacklogTime()" class="w-full rounded-xl border surface-input px-2.5 py-1.5 text-xs font-bold" />
-            <select id="calc-speed" onchange="calculateBacklogTime()" class="w-full rounded-xl border surface-input px-2 py-1.5 text-xs font-bold">
-              <option value="1.0">1.0x</option><option value="1.25" selected>1.25x</option><option value="1.5">1.5x</option><option value="1.75">1.75x</option><option value="2.0">2.0x</option>
-            </select>
-          </div>
-          <div class="p-2.5 rounded-xl bg-blue-500/10 flex items-center justify-between text-xs font-bold">
-            <div>Watch: <span id="calc-result-time" class="text-blue-600 dark:text-blue-400 font-mono-tabular">5h 0m</span></div>
-            <div id="calc-saved-time" class="text-emerald-600 dark:text-emerald-400 font-mono-tabular">1h 15m saved</div>
-          </div>
-          <div id="backlog-list" class="space-y-2"></div>
-          <div class="grid grid-cols-3 gap-1.5">
-            <input type="text" id="bk-subj" placeholder="Subject..." class="col-span-2 rounded-lg border surface-input px-2 py-1 text-xs" />
-            <div class="flex gap-1">
-              <input type="number" id="bk-total" value="20" min="1" class="w-12 rounded-lg border surface-input px-1.5 py-1 text-xs font-mono-tabular" />
-              <button onclick="addBacklogItem()" class="px-2 rounded-lg accent-btn text-xs font-bold">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. Spaced Revision Queue -->
-        <div class="surface-panel rounded-2xl p-4 sm:p-5 space-y-2.5">
+        <!-- HEATMAP -->
+        <div class="surface-panel rounded-2xl p-5 space-y-3">
           <div class="flex items-center justify-between">
-            <h3 class="text-sm font-extrabold">🔁 Spaced Revision (1d/3d/7d)</h3>
-            <span id="rev-count" class="text-[11px] font-bold text-[var(--text-muted)]">0 due</span>
+            <div>
+              <h3 class="text-sm font-extrabold">Consistency Heatmap</h3>
+              <p id="streak-label" class="text-[11px] text-[var(--text-muted)]">0d active streak</p>
+            </div>
           </div>
-          <div id="revision-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
-        </div>
-
-        <!-- 6. 14-Day Mini Heatmap -->
-        <div class="surface-panel rounded-2xl p-4 sm:p-5 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-extrabold">🔥 14-Day Heatmap</h3>
-            <span id="heatmap-streak-label" class="text-xs font-extrabold text-orange-600">0d</span>
-          </div>
-          <div id="mini-heatmap-grid" class="grid grid-cols-7 gap-1.5"></div>
+          <div id="heatmap-grid" class="grid grid-cols-7 gap-1.5"></div>
         </div>
       </aside>
     </div>
   </main>
 
-  <!-- Mobile Floating Mini-Timer -->
-  <div class="no-print lg:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] inset-x-3 z-40 surface-panel rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-xl">
+  <!-- MOBILE FLOATING BAR -->
+  <div class="lg:hidden fixed bottom-3 inset-x-3 z-40 surface-panel rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-xl">
     <div class="min-w-0">
-      <div id="mini-timer-title" class="text-[10px] font-extrabold uppercase accent-text truncate">Pomodoro (25m)</div>
-      <div id="mini-timer-display" class="font-mono-tabular text-base font-extrabold">25:00</div>
+      <div id="mob-slot-label" class="text-[10px] font-extrabold uppercase accent-text truncate">Pomodoro</div>
+      <div id="mob-timer-val" class="font-mono-tab text-base font-extrabold">25:00</div>
     </div>
-    <div class="flex items-center gap-2 shrink-0">
-      <button id="mini-timer-btn" onclick="toggleTimer()" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-extrabold">▶ Start</button>
-      <button onclick="openZenModal()" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold">🧘</button>
-    </div>
+    <button type="button" onclick="toggleCountdownTimer()" id="mob-timer-btn" class="px-3.5 py-1.5 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Start</button>
   </div>
 
   <!-- MODALS -->
-  <div id="slot-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="surface-panel rounded-3xl max-w-lg w-full p-4 sm:p-6 shadow-2xl max-h-[90dvh] overflow-y-auto">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-500/15"><h3 id="slot-modal-title" class="text-lg font-extrabold">Time Slot</h3><button onclick="closeModal('slot-modal')" class="w-8 h-8 rounded-full border surface-input text-sm">✕</button></div>
-      <form onsubmit="saveSlotForm(event)" class="mt-4 space-y-3">
-        <input type="hidden" id="slot-id" />
-        <div class="grid grid-cols-2 gap-3">
-          <div><label class="block text-xs font-bold mb-1">Start</label><input type="time" id="slot-start" required class="w-full rounded-xl border surface-input px-3 py-2 text-sm" /></div>
-          <div><label class="block text-xs font-bold mb-1">End</label><input type="time" id="slot-end" required class="w-full rounded-xl border surface-input px-3 py-2 text-sm" /></div>
+  <div id="slot-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-3">
+      <div class="flex justify-between items-center"><h3 id="slot-modal-title" class="text-base font-extrabold">Add / Edit Slot</h3><button type="button" onclick="closeModal('slot-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
+      <form onsubmit="saveSlotForm(event)" class="space-y-3">
+        <input type="hidden" id="sm-id" />
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="text-[11px] font-bold">Start</label><input type="time" id="sm-start" required class="w-full rounded-xl border surface-input px-2.5 py-2 text-xs font-bold" /></div>
+          <div><label class="text-[11px] font-bold">End</label><input type="time" id="sm-end" required class="w-full rounded-xl border surface-input px-2.5 py-2 text-xs font-bold" /></div>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div><label class="block text-xs font-bold mb-1">Category</label><select id="slot-category" class="w-full rounded-xl border surface-input px-3 py-2 text-sm"></select></div>
-          <div><label class="block text-xs font-bold mb-1">Duration Label</label><input type="text" id="slot-duration-label" required class="w-full rounded-xl border surface-input px-3 py-2 text-sm" /></div>
+        <div>
+          <label class="text-[11px] font-bold">Category</label>
+          <select id="sm-cat" class="w-full rounded-xl border surface-input px-2.5 py-2 text-xs font-bold">
+            <option value="online">Online Classes</option>
+            <option value="gk">GK/GS &amp; Revision</option>
+            <option value="reasoning">Reasoning</option>
+            <option value="typing">Typing Practice</option>
+            <option value="other_study">Other Study</option>
+            <option value="break">Break</option>
+          </select>
         </div>
-        <div><label class="block text-xs font-bold mb-1">Subject</label><input type="text" id="slot-subject" required class="w-full rounded-xl border surface-input px-3 py-2 text-sm" /></div>
-        <div><label class="block text-xs font-bold mb-1">Focus</label><textarea id="slot-focus" rows="2" required class="w-full rounded-xl border surface-input px-3 py-2 text-sm"></textarea></div>
-        <div class="flex justify-end gap-2"><button type="button" onclick="closeModal('slot-modal')" class="px-4 py-2 text-xs font-bold">Cancel</button><button type="submit" class="px-5 py-2 rounded-xl accent-btn text-xs font-bold">Save Slot</button></div>
+        <input type="text" id="sm-subject" required placeholder="Subject / Break Name" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
+        <textarea id="sm-focus" rows="2" required placeholder="Focus instructions" class="w-full rounded-xl border surface-input px-3 py-2 text-xs"></textarea>
+        <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Save Time Slot</button>
       </form>
     </div>
   </div>
 
-  <div id="title-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="surface-panel rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-500/15"><h3 class="text-lg font-extrabold">Edit Titles</h3><button onclick="closeModal('title-modal')" class="w-8 h-8 rounded-full border surface-input text-sm">✕</button></div>
-      <form onsubmit="saveHeaderTitles(event)" class="mt-4 space-y-3">
-        <input type="text" id="input-main-title" required class="w-full rounded-xl border surface-input px-3 py-2 text-sm font-bold" />
-        <input type="text" id="input-subtitle" required class="w-full rounded-xl border surface-input px-3 py-2 text-sm" />
-        <div class="flex justify-end gap-2"><button type="button" onclick="closeModal('title-modal')" class="px-4 py-2 text-xs font-bold">Cancel</button><button type="submit" class="px-5 py-2 rounded-xl accent-btn text-xs font-bold">Save</button></div>
+  <div id="plans-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-lg w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
+      <div class="flex justify-between items-center"><h3 class="text-base font-extrabold">Manage Study Plans</h3><button type="button" onclick="closeModal('plans-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
+      <div id="plans-list" class="space-y-2"></div>
+      <form onsubmit="savePlanForm(event)" class="p-3 rounded-2xl border surface-input space-y-2">
+        <input type="hidden" id="pm-edit-id" />
+        <div id="pm-form-heading" class="text-xs font-extrabold">Create New Study Plan</div>
+        <input type="text" id="pm-name" required placeholder="Plan Name (e.g., 12-Hr Marathon Plan)" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="pm-title" placeholder="Header Title" class="rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+          <input type="text" id="pm-subtitle" placeholder="Subtitle" class="rounded-xl border surface-input px-3 py-2 text-xs" />
+        </div>
+        <select id="pm-copy-from" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold"></select>
+        <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Save Study Plan</button>
       </form>
     </div>
   </div>
 
-  <div id="template-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="surface-panel rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-500/15"><h3 class="text-lg font-extrabold">Save Template</h3><button onclick="closeModal('template-modal')" class="w-8 h-8 rounded-full border surface-input text-sm">✕</button></div>
-      <form onsubmit="saveNewTemplate(event)" class="mt-4 space-y-3">
-        <input type="text" id="input-template-name" placeholder="Template name..." required class="w-full rounded-xl border surface-input px-3 py-2 text-sm font-bold" />
-        <div class="flex justify-end gap-2"><button type="button" onclick="closeModal('template-modal')" class="px-4 py-2 text-xs font-bold">Cancel</button><button type="submit" class="px-5 py-2 rounded-xl accent-btn text-xs font-bold">Save</button></div>
-      </form>
-    </div>
-  </div>
-
-  <div id="pin-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="surface-panel rounded-3xl max-w-sm w-full p-4 sm:p-6 shadow-2xl">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-500/15"><h3 id="pin-modal-title" class="text-lg font-extrabold">Admin PIN</h3><button onclick="closeModal('pin-modal')" class="w-8 h-8 rounded-full border surface-input text-sm">✕</button></div>
-      <form onsubmit="handlePinSubmit(event)" class="mt-3 space-y-3">
-        <input type="password" id="pin-input" maxlength="4" inputmode="numeric" placeholder="0000" required class="w-full rounded-xl border surface-input px-3 py-2 text-center text-lg font-mono-tabular font-bold tracking-widest" />
-        <div class="flex justify-between gap-2">
-          <button type="button" id="btn-remove-pin" onclick="removeAdminPin()" class="hidden px-3 py-2 rounded-xl bg-rose-500/15 text-rose-600 text-xs font-bold">Remove PIN</button>
-          <button type="submit" class="ml-auto px-5 py-2 rounded-xl accent-btn text-xs font-bold">Confirm</button>
+  <div id="reminders-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
+      <div class="flex justify-between items-center"><h3 class="text-base font-extrabold">Multiple Study Reminders</h3><button type="button" onclick="closeModal('reminders-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
+      <form onsubmit="addCustomReminder(event)" class="space-y-2">
+        <div class="grid grid-cols-3 gap-2">
+          <input type="text" id="rm-title" required placeholder="Reminder Title" class="col-span-2 rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
+          <input type="time" id="rm-time" required value="18:00" class="rounded-xl border surface-input px-2 py-2 text-xs font-mono-tab font-bold" />
+        </div>
+        <div class="flex gap-2">
+          <input type="text" id="rm-msg" placeholder="Reminder message" class="flex-1 rounded-xl border surface-input px-3 py-2 text-xs" />
+          <button type="submit" class="px-4 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Add</button>
         </div>
       </form>
+      <div id="custom-reminders-list" class="space-y-2"></div>
     </div>
   </div>
 
-  <div id="exam-goals-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="surface-panel rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl max-h-[90dvh] flex flex-col">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-500/15"><h3 class="text-lg font-extrabold">🏁 Exam Goals &amp; Countdowns</h3><button onclick="closeModal('exam-goals-modal')" class="w-8 h-8 rounded-full border surface-input text-sm">✕</button></div>
-      <form onsubmit="addExamGoal(event)" class="mt-3 space-y-2">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input type="text" id="goal-title-input" placeholder="Exam name..." required class="rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
-          <input type="date" id="goal-date-input" required class="rounded-xl border surface-input px-3 py-2 text-xs font-mono-tabular font-bold" />
+  <div id="exam-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
+      <div class="flex justify-between items-center"><h3 class="text-base font-extrabold">Multiple Exam Goals</h3><button type="button" onclick="closeModal('exam-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
+      <form onsubmit="addExamGoal(event)" class="space-y-2">
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text" id="eg-title" required placeholder="Exam Name" class="rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
+          <input type="date" id="eg-date" required class="rounded-xl border surface-input px-3 py-2 text-xs font-mono-tab" />
         </div>
-        <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-bold">+ Add Exam Goal</button>
+        <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Add Exam Goal</button>
       </form>
-      <div id="exam-goals-list" class="mt-3 space-y-2 overflow-y-auto max-h-60"></div>
+      <div id="exam-goals-list" class="space-y-2"></div>
     </div>
   </div>
 
-  <div id="categories-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="surface-panel rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl max-h-[90dvh] flex flex-col">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-500/15"><h3 class="text-lg font-extrabold">🏷️ Custom Categories</h3><button onclick="closeModal('categories-modal')" class="w-8 h-8 rounded-full border surface-input text-sm">✕</button></div>
-      <form onsubmit="addCustomCategory(event)" class="mt-3 flex gap-2">
-        <input type="text" id="cat-label-input" placeholder="e.g., Maths / English" required class="flex-1 rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
-        <select id="cat-color-input" class="rounded-xl border surface-input px-2 py-2 text-xs font-bold">
-          <option value="indigo">Indigo</option><option value="emerald">Emerald</option><option value="teal">Teal</option><option value="amber">Amber</option><option value="rose">Rose</option>
-        </select>
-        <button type="submit" class="px-3 py-2 rounded-xl accent-btn text-xs font-bold">Add</button>
+  <div id="history-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-2xl w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
+      <div class="flex justify-between items-center"><h3 class="text-base font-extrabold">History &amp; Daily Study Durations</h3><button type="button" onclick="closeModal('history-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
+      <div id="history-list" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <div id="pin-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-sm w-full p-5 space-y-3">
+      <div class="flex justify-between items-center"><h3 id="pin-modal-title" class="text-base font-extrabold">Admin PIN</h3><button type="button" onclick="closeModal('pin-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
+      <form onsubmit="submitPin(event)" class="space-y-3">
+        <input type="password" id="pin-input" maxlength="4" inputmode="numeric" placeholder="4-digit PIN" class="w-full rounded-xl border surface-input px-3 py-2 text-center font-mono-tab text-lg font-bold" />
+        <div class="flex gap-2">
+          <button type="button" onclick="removePin()" id="remove-pin-btn" class="hidden px-3 py-2 rounded-xl bg-rose-500/15 text-rose-600 text-xs font-bold cursor-pointer">Remove PIN</button>
+          <button type="submit" class="flex-1 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Confirm</button>
+        </div>
       </form>
-      <div id="custom-categories-list" class="mt-3 space-y-2 overflow-y-auto max-h-56"></div>
-    </div>
-  </div>
-
-  <div id="weekday-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="surface-panel rounded-3xl max-w-md w-full p-4 sm:p-6 shadow-2xl max-h-[90dvh] flex flex-col">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-500/15"><h3 class="text-lg font-extrabold">📆 Weekday Auto-Schedule</h3><button onclick="closeModal('weekday-modal')" class="w-8 h-8 rounded-full border surface-input text-sm">✕</button></div>
-      <div id="weekday-rules-list" class="mt-3 space-y-2 overflow-y-auto"></div>
-    </div>
-  </div>
-
-  <div id="history-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="surface-panel rounded-3xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl max-h-[90dvh] flex flex-col">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-500/15"><h3 class="text-lg font-extrabold">📊 History, Streaks &amp; Mock Tests</h3><button onclick="closeModal('history-modal')" class="w-8 h-8 rounded-full border surface-input text-sm">✕</button></div>
-      <div class="grid grid-cols-3 gap-2 mt-3 text-center">
-        <div class="p-2.5 rounded-xl border surface-input"><div class="text-[11px] text-[var(--text-muted)]">Streak</div><div id="modal-streak-count" class="font-bold">0 Days</div></div>
-        <div class="p-2.5 rounded-xl border surface-input"><div class="text-[11px] text-[var(--text-muted)]">Archived</div><div id="modal-archive-count" class="font-bold">0</div></div>
-        <div class="p-2.5 rounded-xl border surface-input"><div class="text-[11px] text-[var(--text-muted)]">Average</div><div id="modal-avg-pct" class="font-bold">0%</div></div>
-      </div>
-      <form onsubmit="addMockTest(event)" class="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-1.5">
-        <input type="text" id="mock-name" placeholder="Mock name..." required class="col-span-2 rounded-lg border surface-input px-2 py-1.5 text-xs font-bold" />
-        <input type="number" id="mock-score" placeholder="Score" required class="rounded-lg border surface-input px-2 py-1.5 text-xs font-mono-tabular" />
-        <input type="number" id="mock-max" placeholder="Max" required class="rounded-lg border surface-input px-2 py-1.5 text-xs font-mono-tabular" />
-        <button type="submit" class="rounded-lg accent-btn text-xs font-bold py-1.5">+ Mock</button>
-      </form>
-      <div id="history-list" class="mt-3 space-y-2 overflow-y-auto flex-1"></div>
-    </div>
-  </div>
-
-  <div id="zen-modal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center bg-slate-950/95 text-white p-6">
-    <button onclick="closeModal('zen-modal')" class="absolute top-5 right-5 px-4 py-2 rounded-xl bg-white/10 text-xs font-bold">Exit Zen</button>
-    <div class="text-xs font-bold uppercase tracking-widest text-indigo-400">Zen Focus Mode</div>
-    <h2 id="zen-subject" class="text-2xl sm:text-3xl font-extrabold mt-2 text-center">Deep Study</h2>
-    <div id="zen-timer-display" class="font-mono-tabular text-6xl sm:text-7xl font-extrabold my-8">25:00</div>
-    <div class="flex gap-3">
-      <button onclick="toggleTimer()" id="zen-timer-btn" class="px-6 py-3 rounded-2xl accent-btn text-sm font-extrabold">▶ Start</button>
-      <button onclick="resetTimer()" class="px-5 py-3 rounded-2xl bg-white/10 text-sm font-bold">↺ Reset</button>
-    </div>
-  </div>
-
-  <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-    <div class="surface-panel rounded-3xl max-w-sm w-full p-5 shadow-2xl text-center">
-      <h3 id="confirm-title" class="text-lg font-extrabold">Are you sure?</h3>
-      <p id="confirm-message" class="text-xs text-[var(--text-muted)] mt-1.5"></p>
-      <div class="grid grid-cols-2 gap-2.5 mt-4">
-        <button onclick="closeModal('confirm-modal')" class="py-2 rounded-xl border surface-input text-xs font-bold">Cancel</button>
-        <button id="confirm-yes-btn" class="py-2 rounded-xl bg-rose-600 text-white text-xs font-bold">Yes, Proceed</button>
-      </div>
     </div>
   </div>
 
   <script>
-    // Connected silently inside code (never exposed on public UI)
+    // Private Apps Script Endpoint (embedded directly; never displayed on UI)
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwHwLCXgeZyiEfuVJT3pO7RAgSTyM5Jx0CFjRB9MMSDxwr2E4aquzs14wuqwjtmtqXs/exec";
     const STORAGE_KEY = "daily_study_timetable_pro_v2";
 
     const DEFAULT_TIMETABLE = [
-      { id: 'slot-1', start: '07:00', end: '09:30', durationLabel: '2.5 hrs', durationHours: 2.5, category: 'online', subject: 'Online Classes (Slot 1)', focus: 'Recorded backlog classes at 1.25x-1.5x speed + short notes.', emoji: '💻' },
-      { id: 'slot-2', start: '09:30', end: '11:30', durationLabel: '2 hrs', durationHours: 2.0, category: 'break', subject: 'Morning Break', focus: 'Breakfast & rest eyes.', emoji: '☕' },
-      { id: 'slot-3', start: '11:30', end: '14:00', durationLabel: '2.5 hrs', durationHours: 2.5, category: 'online', subject: 'Online Classes (Slot 2)', focus: 'Remaining backlog or live classes', emoji: '💻' },
-      { id: 'slot-4', start: '14:00', end: '15:30', durationLabel: '1.5 hrs', durationHours: 1.5, category: 'break', subject: 'Afternoon Break', focus: 'Lunch & short power nap.', emoji: '🍱' },
-      { id: 'slot-5', start: '15:30', end: '16:00', durationLabel: '30 mins', durationHours: 0.5, category: 'typing', subject: 'Typing Practice', focus: '15 mins English + 15 mins Hindi typing.', emoji: '⌨️' },
-      { id: 'slot-6', start: '16:00', end: '17:30', durationLabel: '1.5 hrs', durationHours: 1.5, category: 'reasoning', subject: 'Reasoning', focus: '1 topic daily + 1 mixed sectional set.', emoji: '🧠' },
-      { id: 'slot-7', start: '17:30', end: '18:00', durationLabel: '30 mins', durationHours: 0.5, category: 'break', subject: 'Evening Break', focus: 'Tea/snacks & light walk', emoji: '🍵' },
-      { id: 'slot-8', start: '18:00', end: '20:30', durationLabel: '2.5 hrs', durationHours: 2.5, category: 'gk', subject: 'GK / GS & Static GK', focus: 'Standard books, Static GK & class notes revision', emoji: '📚' },
-      { id: 'slot-9', start: '20:30', end: '22:00', durationLabel: '1.5 hrs', durationHours: 1.5, category: 'break', subject: 'Dinner Break', focus: 'Dinner & relaxation', emoji: '🍽️' },
-      { id: 'slot-10', start: '22:00', end: '23:00', durationLabel: '1 hr', durationHours: 1.0, category: 'gk', subject: 'Daily Revision & Current Affairs', focus: 'Quick recap of online classes & daily CA', emoji: '📰' }
+      { id: "slot-1", start: "07:00", end: "09:30", durationLabel: "2.5 hrs", durationHours: 2.5, category: "online", subject: "Online Classes (Slot 1)", focus: "Recorded backlog classes at 1.25x-1.5x speed + short notes." },
+      { id: "slot-2", start: "09:30", end: "11:30", durationLabel: "2 hrs", durationHours: 2.0, category: "break", subject: "Morning Break", focus: "Breakfast & rest eyes." },
+      { id: "slot-3", start: "11:30", end: "14:00", durationLabel: "2.5 hrs", durationHours: 2.5, category: "online", subject: "Online Classes (Slot 2)", focus: "Remaining backlog or live classes" },
+      { id: "slot-4", start: "14:00", end: "15:30", durationLabel: "1.5 hrs", durationHours: 1.5, category: "break", subject: "Afternoon Break", focus: "Lunch & short power nap." },
+      { id: "slot-5", start: "15:30", end: "16:00", durationLabel: "30 mins", durationHours: 0.5, category: "typing", subject: "Typing Practice", focus: "15 mins English + 15 mins Hindi typing." },
+      { id: "slot-6", start: "16:00", end: "17:30", durationLabel: "1.5 hrs", durationHours: 1.5, category: "reasoning", subject: "Reasoning", focus: "1 topic daily + 1 mixed sectional set." },
+      { id: "slot-7", start: "17:30", end: "18:00", durationLabel: "30 mins", durationHours: 0.5, category: "break", subject: "Evening Break", focus: "Tea/snacks & light walk" },
+      { id: "slot-8", start: "18:00", end: "20:30", durationLabel: "2.5 hrs", durationHours: 2.5, category: "gk", subject: "GK / GS & Static GK", focus: "Standard books, Static GK & class notes revision" },
+      { id: "slot-9", start: "20:30", end: "22:00", durationLabel: "1.5 hrs", durationHours: 1.5, category: "break", subject: "Dinner Break", focus: "Dinner & relaxation" },
+      { id: "slot-10", start: "22:00", end: "23:00", durationLabel: "1 hr", durationHours: 1.0, category: "gk", subject: "Daily Revision & Current Affairs", focus: "Quick recap of online classes & daily CA" }
     ];
 
     const WEEKEND_MOCK_TIMETABLE = [
-      { id: 'wk-1', start: '08:00', end: '10:00', durationLabel: '2 hrs', durationHours: 2.0, category: 'other_study', subject: 'Full-Length Mock Test', focus: 'Attempt full CBT mock test under strict exam conditions.', emoji: '📝' },
-      { id: 'wk-2', start: '10:00', end: '11:30', durationLabel: '1.5 hrs', durationHours: 1.5, category: 'break', subject: 'Breakfast & Relax', focus: 'Step away from screen, stretch & hydrate.', emoji: '☕' },
-      { id: 'wk-3', start: '11:30', end: '14:00', durationLabel: '2.5 hrs', durationHours: 2.5, category: 'reasoning', subject: 'Deep Mock Analysis', focus: 'Analyze all wrong & skipped questions; note weak concepts.', emoji: '🔍' },
-      { id: 'wk-4', start: '14:00', end: '16:00', durationLabel: '2 hrs', durationHours: 2.0, category: 'break', subject: 'Lunch & Power Nap', focus: 'Rest & recharge.', emoji: '🍱' },
-      { id: 'wk-5', start: '16:00', end: '16:45', durationLabel: '45 mins', durationHours: 0.75, category: 'typing', subject: 'Typing Speed Drill', focus: '20 mins English + 25 mins Hindi passage practice.', emoji: '⌨️' },
-      { id: 'wk-6', start: '17:00', end: '20:00', durationLabel: '3 hrs', durationHours: 3.0, category: 'gk', subject: 'Weekly GK/GS & CA Mega Revision', focus: 'Revise entire week Current Affairs + Static GK notes.', emoji: '📚' }
+      { id: "wk-1", start: "08:00", end: "10:00", durationLabel: "2 hrs", durationHours: 2.0, category: "other_study", subject: "Full-Length Mock Test", focus: "Attempt full CBT mock test under strict exam conditions." },
+      { id: "wk-2", start: "10:00", end: "11:30", durationLabel: "1.5 hrs", durationHours: 1.5, category: "break", subject: "Breakfast & Relax", focus: "Step away from screen, stretch & hydrate." },
+      { id: "wk-3", start: "11:30", end: "14:00", durationLabel: "2.5 hrs", durationHours: 2.5, category: "reasoning", subject: "Deep Mock Analysis", focus: "Analyze all wrong & skipped questions." },
+      { id: "wk-4", start: "14:00", end: "16:00", durationLabel: "2 hrs", durationHours: 2.0, category: "break", subject: "Lunch & Power Nap", focus: "Rest & recharge." },
+      { id: "wk-5", start: "16:00", end: "16:45", durationLabel: "45 mins", durationHours: 0.75, category: "typing", subject: "Typing Speed Drill", focus: "20 mins English + 25 mins Hindi practice." },
+      { id: "wk-6", start: "17:00", end: "20:00", durationLabel: "3 hrs", durationHours: 3.0, category: "gk", subject: "Weekly GK/GS Mega Revision", focus: "Revise week Current Affairs & Static GK." }
     ];
 
-    let appState = {
-      theme: 'light', accent: 'indigo', density: 'comfortable', autoArchive: true, shiftAlertsEnabled: true,
-      adminPin: null, updatedAt: 0, activeProfileId: 'default-10hr',
-      profiles: {
-        'default-10hr': { name: '10-Hr Backlog Plan', title: 'DAILY STUDY TIMETABLE', subtitle: 'Backlog Focus + Typing + Reasoning + GK/GS', slots: JSON.parse(JSON.stringify(DEFAULT_TIMETABLE)) },
-        'weekend-mock': { name: 'Weekend Mock & Revision', title: 'WEEKEND MOCK & REVISION PLAN', subtitle: 'Full Mock + Deep Analysis + Weekly CA Revision', slots: JSON.parse(JSON.stringify(WEEKEND_MOCK_TIMETABLE)) }
-      },
-      dailyLogs: {}, reflections: {}, archives: {}, typingLogs: [],
-      examGoals: [], stickyNotes: [], customCategories: {}, weekdayRules: {},
-      carriedTasks: {}, revisionQueue: [],
-      backlogItems: [
-        { id: 'bk-1', subject: 'GS / Polity Backlog', completed: 4, total: 15 },
-        { id: 'bk-2', subject: 'Quant / Maths Backlog', completed: 7, total: 20 }
-      ],
-      mockTests: []
+    const CAT_META = {
+      online: { label: "Online Classes", text: "text-blue-600 dark:text-blue-400", border: "border-l-blue-500", bar: "bg-blue-500" },
+      gk: { label: "GK/GS & Revision", text: "text-emerald-600 dark:text-emerald-400", border: "border-l-emerald-500", bar: "bg-emerald-500" },
+      reasoning: { label: "Reasoning", text: "text-purple-600 dark:text-purple-400", border: "border-l-purple-500", bar: "bg-purple-500" },
+      typing: { label: "Typing Practice", text: "text-amber-700 dark:text-amber-400", border: "border-l-amber-500", bar: "bg-amber-500" },
+      other_study: { label: "Other Study", text: "text-indigo-600 dark:text-indigo-400", border: "border-l-indigo-500", bar: "bg-indigo-500" },
+      break: { label: "Break", text: "text-amber-700 dark:text-amber-400", border: "border-l-amber-400", bar: "bg-slate-400" }
     };
 
-    const BUILT_IN_CATEGORIES = {
-      online: { label: 'Online Classes', hex: '#3b82f6', badge: 'bg-blue-500/15 text-blue-600 dark:text-blue-400', border: 'border-l-blue-500' },
-      gk: { label: 'GK/GS & Revision', hex: '#10b981', badge: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400', border: 'border-l-emerald-500' },
-      reasoning: { label: 'Reasoning', hex: '#a855f7', badge: 'bg-purple-500/15 text-purple-600 dark:text-purple-400', border: 'border-l-purple-500' },
-      typing: { label: 'Typing', hex: '#f59e0b', badge: 'bg-amber-500/15 text-amber-700 dark:text-amber-400', border: 'border-l-amber-500' },
-      other_study: { label: 'Other Study', hex: '#6366f1', badge: 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400', border: 'border-l-indigo-500' },
-      break: { label: 'Break', hex: '#64748b', badge: 'bg-slate-500/15 text-slate-600 dark:text-slate-400', border: 'border-l-slate-400' }
-    };
-    const STICKY_COLORS = {
-      amber: 'bg-amber-100/90 dark:bg-amber-950/50 border-amber-300 dark:border-amber-700/60 text-amber-950 dark:text-amber-100',
-      sky: 'bg-sky-100/90 dark:bg-sky-950/50 border-sky-300 dark:border-sky-700/60 text-sky-950 dark:text-sky-100',
-      emerald: 'bg-emerald-100/90 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-700/60 text-emerald-950 dark:text-emerald-100',
-      rose: 'bg-rose-100/90 dark:bg-rose-950/50 border-rose-300 dark:border-rose-700/60 text-rose-950 dark:text-rose-100',
-      violet: 'bg-violet-100/90 dark:bg-violet-950/50 border-violet-300 dark:border-violet-700/60 text-violet-950 dark:text-violet-100'
-    };
-
-    let currentDateStr = getTodayDateString();
-    let isEditMode = false, currentFilter = 'all', pinActionMode = 'set', selectedStickyColor = 'amber';
-    let dismissedYesterday = false, cloudSyncTimer = null;
-    let timerTotalSeconds = 25 * 60, timerRemainingSeconds = 25 * 60, timerInterval = null, isTimerRunning = false, isSoundEnabled = true;
-    let ambientCtx = null, ambientSource = null;
-    let notificationsEnabled = typeof Notification !== 'undefined' && Notification.permission === 'granted';
-    let swReg = null, lastActiveSlotId = null, slotMonitorMounted = false, reminderSlot = null;
-
-    function escapeHTML(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
-    function getTodayDateString(d = new Date()) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
-    function shiftDateStr(str, off) { const [y, m, d] = str.split('-').map(Number); return getTodayDateString(new Date(y, m - 1, d + off)); }
-    function timeToMinutes(t) { const [h, m] = t.split(':').map(Number); return (h || 0) * 60 + (m || 0); }
-    function formatTime12(t) { let [h, m] = t.split(':').map(Number); const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12; return `${String(h).padStart(2, '0')}:${String(m || 0).padStart(2, '0')} ${ap}`; }
-    function calculateHoursBetween(s, e) { let d = timeToMinutes(e) - timeToMinutes(s); if (d <= 0) d += 1440; return Math.round((d / 60) * 100) / 100; }
-    function isMinuteInSlot(mins, s, e) { const sm = timeToMinutes(s), em = timeToMinutes(e); return em > sm ? (mins >= sm && mins < em) : (mins >= sm || mins < em); }
-
-    function showToast(msg, type = 'info') {
-      const box = document.getElementById('toast-container'), el = document.createElement('div');
-      const cls = type === 'success' ? 'bg-emerald-600 text-white' : type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white';
-      el.className = `${cls} px-4 py-2 rounded-xl shadow-lg text-xs font-bold`;
-      el.textContent = msg; box.appendChild(el); setTimeout(() => el.remove(), 2600);
-    }
-    function openModal(id) { const el = document.getElementById(id); if (el) { el.classList.remove('hidden'); el.classList.add('flex'); } }
-    function closeModal(id) { const el = document.getElementById(id); if (el) { el.classList.add('hidden'); el.classList.remove('flex'); } }
-    function openConfirm(title, msg, onYes) {
-      document.getElementById('confirm-title').textContent = title;
-      document.getElementById('confirm-message').textContent = msg;
-      document.getElementById('confirm-yes-btn').onclick = () => { closeModal('confirm-modal'); onYes(); };
-      openModal('confirm-modal');
+    function createInitialState() {
+      return {
+        theme: "light",
+        accent: "indigo",
+        density: "comfortable",
+        autoArchive: true,
+        shiftAlertsEnabled: true,
+        stickyNotesFolded: true,
+        adminPin: null,
+        updatedAt: 0,
+        activeProfileId: "default-10hr",
+        profiles: {
+          "default-10hr": { name: "10-Hr Backlog Plan", title: "DAILY STUDY TIMETABLE", subtitle: "Backlog Focus + Typing + Reasoning + GK/GS", slots: JSON.parse(JSON.stringify(DEFAULT_TIMETABLE)) },
+          "weekend-mock": { name: "Weekend Mock & Revision", title: "WEEKEND MOCK & REVISION PLAN", subtitle: "Full Mock + Deep Analysis + Weekly CA Revision", slots: JSON.parse(JSON.stringify(WEEKEND_MOCK_TIMETABLE)) }
+        },
+        dailyLogs: {},
+        dailyStudyLogs: {},
+        gapBreakNames: {},
+        slotAdjustments: {},
+        customReminders: [],
+        reflections: {},
+        archives: {},
+        typingLogs: [],
+        examGoals: [],
+        stickyNotes: []
+      };
     }
 
-    async function initServiceWorkerForNotifications() {
-      if (!('serviceWorker' in navigator)) return null;
+    let appState = createInitialState();
+    let currentDateStr = getTodayStr();
+    let currentFilter = "all";
+    let isEditMode = false;
+    let pinMode = "set";
+
+    // Timers & Reminder state
+    let timerTotalSecs = 25 * 60;
+    let timerRemSecs = 25 * 60;
+    let timerLabel = "Pomodoro Focus (25m)";
+    let isTimerRunning = false;
+
+    let isManualRunning = false;
+    let activeRoutineSlotId = null;
+    let isRoutineRunning = false;
+    let breakHold = null; // { startedAtMs, breakId, breakLabel, nextStudySlotId, nextStudySubject }
+
+    let isSoundEnabled = true;
+    let notificationsEnabled = typeof Notification !== "undefined" && Notification.permission === "granted";
+    let activeReminders = [];
+    let renamingBreakId = null;
+    let syncTimeout = null;
+    let tickCounter = 0;
+
+    let prevLiveSlotId = null;
+    let mountedNotif = false;
+    const firedPreShiftKeys = new Set();
+    const firedCustomKeys = new Set();
+    const autoPausedKeys = new Set();
+
+    function esc(s) {
+      return String(s || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+    function getTodayStr(d = new Date()) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+    function shiftDateStr(dateStr, offset) {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      const dt = new Date(y, m - 1, d);
+      dt.setDate(dt.getDate() + offset);
+      return getTodayStr(dt);
+    }
+    function toMins(t24) {
+      const [h, m] = String(t24 || "00:00").split(":").map(Number);
+      return (h || 0) * 60 + (m || 0);
+    }
+    function minsTo24(m) {
+      const n = ((Math.round(m) % 1440) + 1440) % 1440;
+      return `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
+    }
+    function fmt12(t24) {
+      const [h, m] = String(t24 || "00:00").split(":").map(Number);
+      return `${String(h % 12 || 12).padStart(2, "0")}:${String(m || 0).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
+    }
+    function calcHrs(s, e) {
+      let d = toMins(e) - toMins(s);
+      if (d <= 0) d += 1440;
+      return Math.round((d / 60) * 100) / 100;
+    }
+    function fmtDurLabel(hrs) {
+      const m = Math.round(hrs * 60);
+      if (m < 60) return `${m} mins`;
+      const h = Math.floor(m / 60), rem = m % 60;
+      return rem ? `${h}h ${rem}m` : (h === 1 ? "1 hr" : `${h} hrs`);
+    }
+    function fmtHMS(secs) {
+      const s = Math.max(0, Math.floor(secs));
+      const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
+      return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}` : `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+    }
+    function fmtHM(secs) {
+      const mins = Math.floor(Math.max(0, secs) / 60);
+      const h = Math.floor(mins / 60), m = mins % 60;
+      return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    }
+    function isInSlot(currM, s24, e24) {
+      const s = toMins(s24), e = toMins(e24);
+      if (s === e) return false;
+      return e > s ? (currM >= s && currM < e) : (currM >= s || currM < e);
+    }
+    function remSecsToEnd(now, e24, s24) {
+      const currS = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+      const endM = toMins(e24), startM = s24 ? toMins(s24) : endM;
+      let endS = endM * 60;
+      if (s24 && endM <= startM && currS >= startM * 60) endS += 86400;
+      return Math.max(0, endS - currS);
+    }
+
+    function getActiveProfile() {
+      return appState.profiles[appState.activeProfileId] || Object.values(appState.profiles)[0];
+    }
+
+    function buildTimeline() {
+      const prof = getActiveProfile();
+      const sorted = [...(prof.slots || [])].sort((a, b) => toMins(a.start) - toMins(b.start));
+      const adj = (appState.slotAdjustments && appState.slotAdjustments[currentDateStr]) || {};
+      const out = [];
+      for (let i = 0; i < sorted.length; i++) {
+        const s = sorted[i];
+        const baseH = s.durationHours || calcHrs(s.start, s.end);
+        const baseM = Math.max(1, Math.round(baseH * 60));
+        const ded = s.category !== "break" ? Math.max(0, adj[s.id] || 0) : 0;
+        const effM = Math.max(5, baseM - ded);
+        const effH = Math.round((effM / 60) * 100) / 100;
+        out.push({
+          ...s,
+          end: ded > 0 ? minsTo24(toMins(s.start) + effM) : s.end,
+          originalEnd: s.end,
+          durationHours: effH,
+          durationLabel: fmtDurLabel(effH),
+          deductedMinutes: ded || 0,
+          isGapBreak: false
+        });
+        if (i < sorted.length - 1) {
+          const next = sorted[i + 1];
+          const currEndM = toMins(s.end), nextStartM = toMins(next.start);
+          if (currEndM >= toMins(s.start) && nextStartM > currEndM) {
+            const gapId = `gap-${s.end}-${next.start}`;
+            const gapH = Math.round(((nextStartM - currEndM) / 60) * 100) / 100;
+            const custom = appState.gapBreakNames?.[`${appState.activeProfileId}::${gapId}`];
+            out.push({
+              id: gapId, gapId, isGapBreak: true,
+              start: s.end, end: next.start,
+              durationHours: gapH, durationLabel: fmtDurLabel(gapH),
+              category: "break",
+              subject: custom || "Break (Schedule Gap)",
+              focus: `Automatic ${fmtDurLabel(gapH)} break before ${next.subject}.`
+            });
+          }
+        }
+      }
+      return out;
+    }
+
+    function showToast(msg, type = "info") {
+      const root = document.getElementById("toast-root");
+      const el = document.createElement("div");
+      const cls = type === "success" ? "bg-emerald-600" : type === "error" ? "bg-rose-600" : "bg-slate-900";
+      el.className = `${cls} text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-bold`;
+      el.textContent = msg;
+      root.appendChild(el);
+      setTimeout(() => el.remove(), 2600);
+    }
+
+    function playChime() {
+      if (!isSoundEnabled) return;
       try {
-        const swCode = "self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));self.addEventListener('notificationclick',e=>{e.notification.close();e.waitUntil(self.clients.matchAll({type:'window'}).then(cs=>cs[0]?cs[0].focus():self.clients.openWindow('/')))});";
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        swReg = await navigator.serviceWorker.register(URL.createObjectURL(blob));
-        return swReg;
-      } catch { return null; }
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        const ctx = new Ctx();
+        [440, 587.33, 880].forEach((freq, i) => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = "triangle"; o.frequency.value = freq;
+          g.gain.setValueAtTime(0.001, ctx.currentTime + i * 0.13);
+          g.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + i * 0.13 + 0.03);
+          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.13 + 0.42);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(ctx.currentTime + i * 0.13); o.stop(ctx.currentTime + i * 0.13 + 0.45);
+        });
+      } catch {}
     }
 
-    function initHeaderToolbarScroll() {
-      const bar = document.getElementById('header-toolbar');
-      if (!bar) return;
-      bar.addEventListener('wheel', e => {
-        if (bar.scrollWidth <= bar.clientWidth) return;
-        const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-        if (delta !== 0) { e.preventDefault(); bar.scrollLeft += delta; }
-      }, { passive: false });
-      let down = false, sx = 0, sl = 0;
-      bar.addEventListener('mousedown', e => { if (e.target.closest('button,input,select')) return; down = true; sx = e.pageX - bar.offsetLeft; sl = bar.scrollLeft; bar.style.cursor = 'grabbing'; });
-      window.addEventListener('mouseup', () => { down = false; bar.style.cursor = 'grab'; });
-      bar.addEventListener('mousemove', e => { if (!down) return; e.preventDefault(); bar.scrollLeft = sl - (e.pageX - bar.offsetLeft - sx); });
+    function sendDeviceNotif(title, body, tag) {
+      if (!notificationsEnabled || typeof Notification === "undefined" || Notification.permission !== "granted") return;
+      try { new Notification(title, { body, tag }); } catch {}
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadState();
-      const wd = new Date().getDay(), wdProf = appState.weekdayRules?.[wd];
-      if (wdProf && appState.profiles[wdProf]) appState.activeProfileId = wdProf;
-      applyThemeAccent();
-      document.getElementById('chk-shift-alerts').checked = appState.shiftAlertsEnabled !== false;
-      updateNotifyButtonUI();
-      const di = document.getElementById('date-selector');
-      di.value = currentDateStr;
-      di.addEventListener('change', e => { if (e.target.value) { currentDateStr = e.target.value; renderAll(); } });
-      initHeaderToolbarScroll();
-      initServiceWorkerForNotifications();
-      calculateBacklogTime();
-      renderAll();
-      updateClockAndLiveSlot();
-      setInterval(updateClockAndLiveSlot, 1000);
-      syncPullFromCloud();
-    });
+    function pushReminder(rem, notifTitle, notifBody) {
+      if (activeReminders.some(r => r.id === rem.id)) return;
+      activeReminders = [rem, ...activeReminders].slice(0, 6);
+      playChime();
+      if (notifTitle) sendDeviceNotif(notifTitle, notifBody || rem.message, rem.id);
+      renderReminders();
+    }
 
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const p = JSON.parse(raw);
-        if (p && p.profiles) {
-          appState = { ...appState, ...p, profiles: { ...appState.profiles, ...p.profiles } };
-          if (!Array.isArray(appState.examGoals) && p.examCountdown?.title) {
-            appState.examGoals = [{ id: 'goal-legacy', title: p.examCountdown.title, targetDate: p.examCountdown.targetDate, pinned: true }];
-          }
-          ['examGoals', 'stickyNotes', 'backlogItems', 'revisionQueue', 'mockTests', 'typingLogs'].forEach(k => { if (!Array.isArray(appState[k])) appState[k] = []; });
-        }
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) appState = { ...createInitialState(), ...JSON.parse(saved) };
       } catch {}
     }
 
     function saveState(skipCloud = false) {
       appState.updatedAt = Date.now();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-      if (!skipCloud) { clearTimeout(cloudSyncTimer); cloudSyncTimer = setTimeout(syncPushToCloud, 1500); }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
+      if (!skipCloud) {
+        clearTimeout(syncTimeout);
+        syncTimeout = setTimeout(() => pushCloud(), 1500);
+      }
     }
 
-    function isNativeGas() { return typeof google !== 'undefined' && google.script && google.script.run; }
-    async function syncPushToCloud() {
-      try {
-        if (isNativeGas()) google.script.run.saveTimetableState(JSON.stringify(appState));
-        else if (GAS_WEB_APP_URL) await fetch(GAS_WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'saveState', state: appState }) });
-      } catch {}
+    function hasGas() {
+      return (typeof google !== "undefined" && google.script && google.script.run) || Boolean(GAS_WEB_APP_URL);
     }
-    async function syncPullFromCloud() {
+
+    async function pullCloud() {
+      if (!hasGas()) return;
       try {
-        let remote = null;
-        if (isNativeGas()) remote = await new Promise((res, rej) => google.script.run.withSuccessHandler(r => res(r ? JSON.parse(r) : null)).withFailureHandler(rej).loadTimetableState());
-        else if (GAS_WEB_APP_URL) { const r = await fetch(`${GAS_WEB_APP_URL}?action=getState&t=${Date.now()}`); const d = await r.json(); if (d?.status === 'success') remote = d.state; }
-        if (remote && remote.profiles) {
-          if (!appState.updatedAt || (remote.updatedAt && remote.updatedAt >= appState.updatedAt)) {
-            appState = { ...appState, ...remote };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-            applyThemeAccent(); renderAll();
-          } else syncPushToCloud();
+        if (typeof google !== "undefined" && google.script && google.script.run) {
+          google.script.run.withSuccessHandler(raw => {
+            if (raw) applyRemoteState(JSON.parse(raw));
+          }).loadTimetableState();
+        } else {
+          const res = await fetch(`${GAS_WEB_APP_URL}${GAS_WEB_APP_URL.includes("?") ? "&" : "?"}action=getState&t=${Date.now()}`);
+          const data = await res.json();
+          if (data?.status === "success" && data.state) applyRemoteState(data.state);
         }
       } catch {}
     }
 
-    function setTheme(t) { appState.theme = t; applyThemeAccent(); saveState(); }
-    function setAccent(a) { appState.accent = a; applyThemeAccent(); saveState(); }
+    function applyRemoteState(remote) {
+      if (!remote || !remote.profiles) return;
+      if (!appState.updatedAt || (remote.updatedAt && remote.updatedAt >= appState.updatedAt)) {
+        appState = { ...createInitialState(), ...appState, ...remote };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        applyThemeAccent();
+        renderAll();
+      } else {
+        pushCloud();
+      }
+    }
+
+    async function pushCloud() {
+      if (!hasGas()) return;
+      try {
+        if (typeof google !== "undefined" && google.script && google.script.run) {
+          google.script.run.saveTimetableState(JSON.stringify(appState), false);
+        } else {
+          await fetch(GAS_WEB_APP_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "saveState", state: appState, force: false })
+          });
+        }
+      } catch {}
+    }
+
     function applyThemeAccent() {
-      const t = appState.theme || 'light', a = appState.accent || 'indigo';
-      document.body.setAttribute('data-theme', t);
-      document.body.setAttribute('data-accent', a);
-      document.documentElement.classList.toggle('dark', t === 'dark');
-      ['light', 'dark', 'paper'].forEach(x => {
-        const b = document.getElementById(`theme-btn-${x}`);
-        if (b) { b.classList.toggle('accent-btn', x === t); }
-      });
-      document.querySelectorAll('#accent-picker button').forEach(b => {
-        b.classList.toggle('ring-2', b.dataset.accent === a);
-        b.classList.toggle('ring-offset-1', b.dataset.accent === a);
+      const t = appState.theme || "light", a = appState.accent || "indigo";
+      document.body.setAttribute("data-theme", t);
+      document.body.setAttribute("data-accent", a);
+      document.documentElement.classList.toggle("dark", t === "dark");
+      document.querySelectorAll("[data-theme-opt]").forEach(btn => {
+        const active = btn.getAttribute("data-theme-opt") === t;
+        btn.className = `px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer ${active ? "accent-btn shadow-sm" : "text-[var(--text-secondary)]"}`;
       });
     }
+    function setTheme(t) { appState.theme = t; saveState(); applyThemeAccent(); }
+    function setAccent(a) { appState.accent = a; saveState(); applyThemeAccent(); }
+    function setDensity(d) { appState.density = d; saveState(); renderAll(); }
 
-    function getActiveProfile() { return appState.profiles[appState.activeProfileId] || Object.values(appState.profiles)[0]; }
-    function getCategoryMeta(cat) {
-      if (BUILT_IN_CATEGORIES[cat]) return BUILT_IN_CATEGORIES[cat];
-      const c = appState.customCategories?.[cat];
-      if (c) return { label: c.label, hex: '#0d9488', badge: 'accent-bg-soft', border: 'border-l-indigo-500' };
-      return BUILT_IN_CATEGORIES.other_study;
-    }
-    function getActiveSlotObj() {
-      if (currentDateStr !== getTodayDateString()) return null;
-      const now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
-      return getActiveProfile().slots.find(s => isMinuteInSlot(mins, s.start, s.end)) || null;
-    }
-    function changeDate(off) { currentDateStr = shiftDateStr(currentDateStr, off); document.getElementById('date-selector').value = currentDateStr; renderAll(); }
-    function jumpToday() { currentDateStr = getTodayDateString(); document.getElementById('date-selector').value = currentDateStr; renderAll(); }
-    function getDayLog(dateStr) { if (!appState.dailyLogs[dateStr]) appState.dailyLogs[dateStr] = {}; return appState.dailyLogs[dateStr]; }
-
-    function renderAll() {
-      const p = getActiveProfile();
-      document.getElementById('app-main-title').textContent = p.title;
-      document.getElementById('app-subtitle').textContent = p.subtitle;
-      document.getElementById('edit-lock-icon').textContent = appState.adminPin && !isEditMode ? '🔒' : '🔓';
-      document.getElementById('pin-btn-label').textContent = appState.adminPin ? 'PIN Lock' : 'Set PIN';
-      document.getElementById('btn-delete-template').classList.toggle('hidden', ['default-10hr', 'weekend-mock'].includes(appState.activeProfileId));
-      document.getElementById('btn-density').textContent = appState.density === 'compact' ? 'Comfortable' : 'Compact';
-      document.getElementById('daily-reflection-input').value = appState.reflections[currentDateStr] || '';
-      document.getElementById('profile-selector').innerHTML = Object.entries(appState.profiles).map(([id, prof]) => `<option value="${id}" ${id === appState.activeProfileId ? 'selected' : ''}>${escapeHTML(prof.name)}</option>`).join('');
-      renderYesterdayAndCarried();
-      renderStats();
-      renderTimetable();
-      renderStickyNotes();
-      renderExamGoalsHeader();
-      renderBacklog();
-      renderRevision();
-      renderMiniHeatmap();
-      updateLatestWpmBadge();
-      updateStreakBadge();
+    function evaluateRoutineTolerance(slot, trackedSecs) {
+      const today = getTodayStr();
+      const targetSecs = Math.max(60, Math.round((slot.durationHours || calcHrs(slot.start, slot.end)) * 3600));
+      if (trackedSecs >= Math.max(60, targetSecs - 1800)) {
+        appState.dailyLogs[today] = appState.dailyLogs[today] || {};
+        const prev = appState.dailyLogs[today][slot.id] || {};
+        appState.dailyLogs[today][slot.id] = { ...prev, status: "completed", loggedHours: Number((trackedSecs / 3600).toFixed(2)) };
+        if (appState.autoArchive !== false) archiveDay(today, true);
+        saveState();
+        playChime();
+        showToast(`"${slot.subject}" auto-completed (within 30-min tolerance)!`, "success");
+      }
     }
 
-    function renderYesterdayAndCarried() {
-      const yBanner = document.getElementById('yesterday-banner'), yStr = shiftDateStr(getTodayDateString(), -1);
-      const yDone = Object.values(appState.dailyLogs[yStr] || {}).filter(e => e.status === 'completed').length;
-      if (!dismissedYesterday && !appState.archives[yStr] && yDone > 0) {
-        yBanner.classList.remove('hidden');
-        yBanner.innerHTML = `<span>You completed <strong>${yDone}</strong> slot(s) yesterday (${yStr}) not archived yet.</span><div class="flex gap-2"><button onclick="archiveDate('${yStr}');dismissedYesterday=true;renderYesterdayAndCarried();" class="px-2.5 py-1 rounded-lg bg-amber-500 text-white font-bold">Archive Yesterday</button><button onclick="dismissedYesterday=true;renderYesterdayAndCarried();" class="px-2 py-1 rounded-lg border surface-input">Dismiss</button></div>`;
-      } else yBanner.classList.add('hidden');
-
-      const cBanner = document.getElementById('carried-tasks-banner'), list = appState.carriedTasks?.[currentDateStr] || [];
-      if (list.length) {
-        cBanner.classList.remove('hidden');
-        cBanner.innerHTML = `<div class="text-xs font-extrabold">Carried Tasks for ${currentDateStr}</div><div class="flex flex-wrap gap-1.5">${list.map(t => `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border surface-input text-xs font-bold"><button onclick="toggleCarried('${t.id}')">${t.done ? '✅' : '⬜'}</button><span class="${t.done ? 'line-through opacity-60' : ''}">${escapeHTML(t.subject)}</span><button onclick="dismissCarried('${t.id}')" class="text-rose-500">✕</button></span>`).join('')}</div>`;
-      } else cBanner.classList.add('hidden');
+    function toggleManualTimer() {
+      if (!isManualRunning) {
+        isRoutineRunning = false;
+        isManualRunning = true;
+        showToast("Manual daily study timer started!", "success");
+      } else {
+        isManualRunning = false;
+        saveState();
+        showToast("Manual study timer paused & saved.", "info");
+      }
+      renderLiveAndDailyCards();
+      renderTimelineList();
     }
 
-    function renderStats() {
-      const dl = getDayLog(currentDateStr), slots = getActiveProfile().slots;
-      let tTarget = 0, tDone = 0; const cats = { online: { t: 0, d: 0 }, gk: { t: 0, d: 0 }, reasoning: { t: 0, d: 0 }, typing: { t: 0, d: 0, mins: true } };
-      slots.forEach(s => {
-        if (s.category === 'break') return;
-        const hrs = s.durationHours || calculateHoursBetween(s.start, s.end), ent = dl[s.id];
-        const doneHrs = ent?.status === 'completed' ? hrs : (typeof ent?.loggedHours === 'number' ? Math.min(hrs, ent.loggedHours) : 0);
-        tTarget += hrs; tDone += doneHrs;
-        if (!cats[s.category]) cats[s.category] = { t: 0, d: 0 };
-        cats[s.category].t += hrs; cats[s.category].d += doneHrs;
-      });
-      const fmt = v => Number.isInteger(v) ? String(v) : v.toFixed(1), pct = tTarget > 0 ? Math.round((tDone / tTarget) * 100) : 0;
-      document.getElementById('plan-hours-badge').textContent = `${fmt(tTarget)} Hrs Study`;
-      const keys = ['online', 'gk', 'reasoning', 'typing'].concat(Object.keys(cats).filter(k => !['online', 'gk', 'reasoning', 'typing'].includes(k) && cats[k].t > 0));
-      const radius = 20, circ = 2 * Math.PI * radius; let offset = 0;
-      const segs = tTarget > 0 ? keys.filter(k => cats[k].d > 0).map(k => {
-        const len = (cats[k].d / tTarget) * circ, s = `<circle cx="26" cy="26" r="${radius}" fill="none" stroke="${getCategoryMeta(k).hex}" stroke-width="5" stroke-dasharray="${len} ${circ}" stroke-dashoffset="${-offset}" />`;
-        offset += len; return s;
-      }).join('') : '';
+    function resetManualTimer() {
+      const today = getTodayStr();
+      appState.dailyStudyLogs[today] = appState.dailyStudyLogs[today] || { manualSeconds: 0, routineSecondsBySlot: {}, heldBreakSeconds: 0 };
+      appState.dailyStudyLogs[today].manualSeconds = 0;
+      saveState();
+      renderLiveAndDailyCards();
+    }
 
-      let html = `
-        <div class="col-span-2 md:col-span-1 lg:col-span-2 surface-card rounded-2xl p-4 flex flex-col justify-between">
-          <div class="flex items-center justify-between gap-2">
-            <div><span class="text-xs font-bold text-[var(--text-muted)]">Total Study Goal</span><div class="mt-1.5 font-mono-tabular"><span class="text-2xl sm:text-3xl font-extrabold">${fmt(tDone)}</span> <span class="text-sm font-bold text-[var(--text-muted)]">/ ${fmt(tTarget)} Hrs</span></div></div>
-            <div class="relative w-14 h-14 shrink-0 flex items-center justify-center"><svg class="w-14 h-14 -rotate-90" viewBox="0 0 52 52"><circle cx="26" cy="26" r="${radius}" fill="none" stroke="rgba(148,163,184,0.2)" stroke-width="5" />${segs}</svg><span class="absolute text-[11px] font-extrabold font-mono-tabular accent-text">${pct}%</span></div>
+    function toggleRoutineTimer(slotId) {
+      const slot = buildTimeline().find(s => s.id === slotId);
+      if (!slot || slot.category === "break") return;
+      const today = getTodayStr();
+      const tracked = appState.dailyStudyLogs?.[today]?.routineSecondsBySlot?.[slot.id] || 0;
+
+      if (activeRoutineSlotId === slot.id && isRoutineRunning) {
+        isRoutineRunning = false;
+        appState.dailyLogs[today] = appState.dailyLogs[today] || {};
+        appState.dailyLogs[today][slot.id] = { ...(appState.dailyLogs[today][slot.id] || { status: "pending" }), loggedHours: Number((tracked / 3600).toFixed(2)) };
+        evaluateRoutineTolerance(slot, tracked);
+        saveState();
+        showToast(`Stopped routine timer for "${slot.subject}"`, "info");
+      } else {
+        isManualRunning = false;
+        activeRoutineSlotId = slot.id;
+        isRoutineRunning = true;
+        const now = new Date();
+        if (isInSlot(now.getHours() * 60 + now.getMinutes(), slot.start, slot.end)) {
+          const rem = Math.max(1, remSecsToEnd(now, slot.end, slot.start));
+          timerTotalSecs = rem; timerRemSecs = rem;
+          timerLabel = `${slot.subject} (Shift Remaining)`;
+          isTimerRunning = true;
+        }
+        showToast(`Tracking routine study: "${slot.subject}"`, "success");
+      }
+      renderAll();
+    }
+
+    function startShiftCountdown(slotId) {
+      const slot = buildTimeline().find(s => s.id === slotId);
+      if (!slot) return;
+      const now = new Date();
+      const isLive = currentDateStr === getTodayStr(now) && isInSlot(now.getHours() * 60 + now.getMinutes(), slot.start, slot.end);
+      const full = Math.max(60, Math.round((slot.durationHours || calcHrs(slot.start, slot.end)) * 3600));
+      const rem = isLive ? Math.max(1, remSecsToEnd(now, slot.end, slot.start)) : full;
+      timerTotalSecs = rem; timerRemSecs = rem;
+      timerLabel = isLive ? `${slot.subject} (Remaining)` : slot.subject;
+      isTimerRunning = true;
+      if (slot.category !== "break") {
+        isManualRunning = false; activeRoutineSlotId = slot.id; isRoutineRunning = true;
+      }
+      renderAll();
+      showToast(`Countdown started: ${fmtHMS(rem)} left`, "info");
+    }
+
+    function holdBreak(breakId) {
+      const timeline = buildTimeline();
+      const br = timeline.find(s => s.id === breakId);
+      if (!br) return;
+      const brEnd = toMins(br.end);
+      const study = timeline.filter(s => s.category !== "break");
+      const nextStudy = study.find(s => toMins(s.start) >= brEnd) || study[0] || null;
+      breakHold = {
+        startedAtMs: Date.now(),
+        breakId: br.id,
+        breakLabel: br.subject,
+        nextStudySlotId: nextStudy?.id,
+        nextStudySubject: nextStudy?.subject
+      };
+      activeReminders = activeReminders.filter(r => r.breakId !== br.id);
+      renderReminders();
+      renderLiveAndDailyCards();
+      showToast(`Holding break — continuing study.`, "info");
+    }
+
+    function releaseBreakHold() {
+      if (!breakHold) return;
+      const today = getTodayStr();
+      const heldSecs = Math.max(1, Math.floor((Date.now() - breakHold.startedAtMs) / 1000));
+      const heldMins = Math.max(1, Math.round(heldSecs / 60));
+      appState.dailyStudyLogs[today] = appState.dailyStudyLogs[today] || { manualSeconds: 0, routineSecondsBySlot: {}, heldBreakSeconds: 0 };
+      appState.dailyStudyLogs[today].heldBreakSeconds = (appState.dailyStudyLogs[today].heldBreakSeconds || 0) + heldSecs;
+      if (breakHold.nextStudySlotId) {
+        appState.slotAdjustments[today] = appState.slotAdjustments[today] || {};
+        appState.slotAdjustments[today][breakHold.nextStudySlotId] = (appState.slotAdjustments[today][breakHold.nextStudySlotId] || 0) + heldMins;
+      }
+      const subj = breakHold.nextStudySubject;
+      breakHold = null;
+      saveState();
+      renderAll();
+      showToast(subj ? `Break started! Deducted ${heldMins}m from "${subj}".` : `Break started! Credited ${heldMins}m.`, "success");
+    }
+
+    function saveBreakRename(itemId, isGap, gapId) {
+      const inp = document.getElementById(`rename-break-${itemId}`);
+      const val = inp ? inp.value.trim() : "";
+      if (val) {
+        if (isGap && gapId) {
+          appState.gapBreakNames[`${appState.activeProfileId}::${gapId}`] = val;
+        } else {
+          const prof = getActiveProfile();
+          prof.slots = prof.slots.map(s => s.id === itemId ? { ...s, subject: val } : s);
+        }
+        saveState();
+        showToast(`Break renamed to "${val}"`, "success");
+      }
+      renamingBreakId = null;
+      renderAll();
+    }
+
+    function renderReminders() {
+      const box = document.getElementById("reminders-stack");
+      if (!activeReminders.length) { box.classList.add("hidden"); box.innerHTML = ""; return; }
+      box.classList.remove("hidden");
+      box.innerHTML = activeReminders.map(r => `
+        <div class="surface-panel rounded-2xl p-3.5 border-2 ${r.isBreakPrompt ? "border-amber-500" : r.canResumeRoutine ? "border-emerald-500" : "border-[var(--accent-primary)]"} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="min-w-0">
+            <div class="text-[11px] font-extrabold uppercase accent-text">${esc(r.title)} · <span class="font-mono-tab text-[var(--text-muted)]">${esc(r.timeRange)}</span></div>
+            <div class="text-sm font-extrabold truncate">${esc(r.subject)}</div>
+            <div class="text-xs text-[var(--text-secondary)]">${esc(r.message)}</div>
           </div>
-          <div class="w-full h-2 bg-slate-500/20 rounded-full mt-3 overflow-hidden"><div class="h-full rounded-full" style="width:${Math.min(100, pct)}%;background-color:var(--accent-primary)"></div></div>
-        </div>`;
-      html += keys.map(k => {
-        const c = cats[k], m = getCategoryMeta(k), p = c.t > 0 ? (c.d / c.t) * 100 : 0;
-        const val = c.mins ? Math.round(c.d * 60) : fmt(c.d), tgt = c.mins ? `${Math.round(c.t * 60)} Mins` : `${fmt(c.t)} Hrs`;
-        return `<div class="surface-card rounded-2xl p-4 flex flex-col justify-between"><span class="text-xs font-bold truncate">${escapeHTML(m.label)}</span><div class="mt-2 font-mono-tabular"><span class="text-xl font-extrabold">${val}</span> <span class="text-xs text-[var(--text-muted)]">/ ${tgt}</span></div><div class="w-full h-1.5 bg-slate-500/15 rounded-full mt-3 overflow-hidden"><div class="h-full rounded-full" style="width:${Math.min(100, p)}%;background-color:${m.hex}"></div></div></div>`;
-      }).join('');
-      document.getElementById('stats-grid').innerHTML = html;
+          <div class="flex flex-wrap gap-2 shrink-0">
+            ${r.isBreakPrompt && !breakHold ? `
+              <button type="button" onclick="takeBreakNow('${esc(r.id)}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Take Break</button>
+              <button type="button" onclick="holdBreak('${esc(r.breakId)}')" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer">Continue Study (Hold Break)</button>
+            ` : ""}
+            ${r.canResumeRoutine && r.slotId ? `<button type="button" onclick="resumeFinishedRoutine('${esc(r.id)}','${esc(r.slotId)}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Resume Timer</button>` : ""}
+            ${!r.isBreakPrompt && !r.canResumeRoutine && r.slotId ? `<button type="button" onclick="startShiftCountdown('${esc(r.slotId)}');dismissReminder('${esc(r.id)}')" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Start Shift Timer</button>` : ""}
+            <button type="button" onclick="dismissReminder('${esc(r.id)}')" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Dismiss</button>
+          </div>
+        </div>
+      `).join("");
+    }
+    function dismissReminder(id) { activeReminders = activeReminders.filter(r => r.id !== id); renderReminders(); }
+    function takeBreakNow(remId) { isRoutineRunning = false; isManualRunning = false; dismissReminder(remId); renderAll(); }
+    function resumeFinishedRoutine(remId, slotId) { activeRoutineSlotId = slotId; isRoutineRunning = true; dismissReminder(remId); renderAll(); }
+
+    function renderLiveAndDailyCards() {
+      const now = new Date();
+      const timeline = buildTimeline();
+      const today = getTodayStr(now);
+      const isToday = currentDateStr === today;
+      const currM = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+      let active = null, next = null;
+      for (let i = 0; i < timeline.length; i++) {
+        if (isInSlot(currM, timeline[i].start, timeline[i].end)) { active = timeline[i]; next = timeline[i + 1] || timeline[0] || null; break; }
+        if (currM < toMins(timeline[i].start) && !next) next = timeline[i];
+      }
+      if (!active && !next && timeline.length) next = timeline[0];
+
+      const isBreak = active?.category === "break";
+      const remSecs = active ? remSecsToEnd(now, active.end, active.start) : 0;
+      const durMins = active ? Math.max(1, Math.round((active.durationHours || calcHrs(active.start, active.end)) * 60)) : 0;
+      const pct = active ? Math.min(100, Math.max(0, Math.round(((durMins * 60 - remSecs) / (durMins * 60)) * 100))) : 0;
+      const holdLiveSecs = breakHold ? Math.max(0, Math.floor((now.getTime() - breakHold.startedAtMs) / 1000)) : 0;
+
+      const liveEl = document.getElementById("live-status-card");
+      liveEl.className = `lg:col-span-7 rounded-2xl p-4 sm:p-5 border flex flex-col justify-between ${active ? "surface-panel" : "bg-slate-900 text-white border-slate-700"}`;
+      liveEl.innerHTML = `
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider accent-text">LIVE SCHEDULE STATUS ${active?.isGapBreak ? "· GAP BREAK" : isBreak ? "· BREAK" : ""}</span>
+            <span class="font-mono-tab text-xs sm:text-sm font-extrabold accent-text">${active ? fmtHMS(remSecs) + " left" : "Rest Phase"}</span>
+          </div>
+          ${breakHold ? `
+            <div class="mb-3 p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 flex flex-wrap items-center justify-between gap-2">
+              <div class="text-xs"><strong>Break Held (+${fmtHMS(holdLiveSecs)})</strong> · Will shorten ${esc(breakHold.nextStudySubject || "next study slot")}</div>
+              <button type="button" onclick="releaseBreakHold()" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer">Take Break Now</button>
+            </div>
+          ` : ""}
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <h2 class="text-base sm:text-xl font-extrabold">${active ? esc(active.subject) : "Off-Schedule / Rest"}</h2>
+            <div class="flex items-center gap-2">
+              ${active && isToday && isBreak && !breakHold ? `<button type="button" onclick="holdBreak('${esc(active.id)}')" class="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-700 dark:text-amber-300 text-xs font-extrabold cursor-pointer">Continue Study (Hold Break)</button>` : ""}
+              ${active && isToday && !isBreak ? `<button type="button" onclick="toggleRoutineTimer('${esc(active.id)}')" class="px-3 py-1.5 rounded-xl ${activeRoutineSlotId === active.id && isRoutineRunning ? "bg-amber-600" : "accent-btn"} text-white text-xs font-extrabold cursor-pointer">${activeRoutineSlotId === active.id && isRoutineRunning ? "Stop Routine" : "Start Routine"}</button>` : ""}
+            </div>
+          </div>
+          <div class="text-xs font-mono-tab mt-1 ${active ? "text-[var(--text-muted)]" : "text-slate-400"}">${active ? `${fmt12(active.start)} - ${fmt12(active.end)} (${active.durationLabel})` : "Outside Scheduled Blocks"}${active?.deductedMinutes ? ` · Adjusted -${active.deductedMinutes}m` : ""}</div>
+          <p class="text-xs mt-2.5 p-2.5 rounded-xl border ${active ? "surface-input text-[var(--text-secondary)]" : "bg-slate-800 border-slate-700 text-slate-300"}">${active ? esc(active.focus) : "Use the Manual Study timer beside this box when studying off-schedule."}</p>
+        </div>
+        <div class="mt-3 space-y-2">
+          <div class="w-full h-2 bg-slate-500/20 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:var(--accent-primary)"></div></div>
+          <div class="pt-2 border-t border-slate-500/15 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="truncate"><span class="text-[var(--text-muted)]">Up Next: </span><strong>${next ? `${fmt12(next.start)} · ${esc(next.subject)}` : "—"}</strong></div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="openModal('reminders-modal')" class="px-2.5 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Reminders (${(appState.customReminders || []).filter(r => r.enabled).length})</button>
+              <button type="button" onclick="triggerTestReminder()" class="px-2.5 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Test Alert</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Daily Study Duration + Manual Box
+      const recKey = isToday ? today : currentDateStr;
+      const rec = appState.dailyStudyLogs?.[recKey] || { manualSeconds: 0, routineSecondsBySlot: {}, heldBreakSeconds: 0 };
+      const manualS = rec.manualSeconds || 0;
+      const routineS = Object.values(rec.routineSecondsBySlot || {}).reduce((a, b) => a + (b || 0), 0);
+      const heldS = (rec.heldBreakSeconds || 0) + (isToday ? holdLiveSecs : 0);
+      const totalS = manualS + routineS + heldS;
+      const targetHrs = timeline.filter(s => s.category !== "break").reduce((sum, s) => sum + (s.durationHours || calcHrs(s.start, s.end)), 0);
+      const goalS = Math.max(60, Math.round(targetHrs * 3600));
+      const dailyPct = Math.min(100, Math.round((totalS / goalS) * 100));
+
+      document.getElementById("daily-study-card").innerHTML = `
+        <div>
+          <div class="flex justify-between items-center text-[11px] font-extrabold uppercase accent-text">
+            <span>Daily Study Duration</span>
+            <span class="font-mono-tab text-[var(--text-muted)]">Goal: ${fmtHM(goalS)}</span>
+          </div>
+          <div class="mt-2 flex items-baseline justify-between">
+            <div class="font-mono-tab text-2xl sm:text-3xl font-extrabold">${fmtHMS(totalS)}</div>
+            <span class="font-mono-tab text-sm font-extrabold text-emerald-600 dark:text-emerald-400">${dailyPct}%</span>
+          </div>
+          <div class="w-full h-2 bg-slate-500/20 rounded-full overflow-hidden mt-2"><div class="h-full bg-emerald-500 rounded-full" style="width:${dailyPct}%"></div></div>
+          <div class="mt-2 text-[11px] font-bold text-[var(--text-secondary)] font-mono-tab">Manual: ${fmtHM(manualS)} · Routine: ${fmtHM(routineS)}${heldS > 0 ? ` · Held Break: ${fmtHM(heldS)}` : ""}</div>
+        </div>
+        <div class="p-3 rounded-xl border surface-input space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-extrabold">Manual / Random Study</div>
+              <div class="text-[11px] text-[var(--text-muted)]">Start/Pause anytime outside routine</div>
+            </div>
+            <div class="font-mono-tab text-sm font-extrabold">${fmtHMS(manualS)}</div>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" onclick="toggleManualTimer()" class="flex-1 py-2 px-3 rounded-xl text-white text-xs font-extrabold cursor-pointer ${isManualRunning ? "bg-amber-600" : "bg-emerald-600"}">${isManualRunning ? "Pause Manual Study" : (manualS > 0 ? "Resume Manual Study" : "Start Manual Study")}</button>
+            ${manualS > 0 && !isManualRunning ? `<button type="button" onclick="resetManualTimer()" class="px-2.5 py-2 rounded-xl border surface-input text-xs font-bold cursor-pointer">Reset</button>` : ""}
+          </div>
+        </div>
+      `;
     }
 
-    function setFilter(f) {
-      currentFilter = f;
-      document.querySelectorAll('.filter-btn').forEach(b => { b.classList.remove('accent-btn'); b.classList.add('text-[var(--text-secondary)]'); });
-      const act = document.getElementById(`filter-${f}`);
-      if (act) { act.classList.add('accent-btn'); act.classList.remove('text-[var(--text-secondary)]'); }
-      renderTimetable();
+    function renderStickyNotes() {
+      const notes = [...(appState.stickyNotes || [])].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || (b.updatedAt || 0) - (a.updatedAt || 0));
+      const folded = appState.stickyNotesFolded !== false;
+      const el = document.getElementById("sticky-notes-card");
+      el.innerHTML = `
+        <button type="button" onclick="toggleStickyFold()" class="w-full flex items-center justify-between text-left cursor-pointer">
+          <div class="min-w-0">
+            <div class="text-sm font-extrabold">Quick Sticky Notes <span class="text-xs font-mono-tab text-[var(--text-muted)]">(${notes.length})</span></div>
+            ${folded ? `<div class="text-[11px] text-[var(--text-muted)] truncate">${notes[0] ? esc(notes[0].text) : "Click to unfold notes board"}</div>` : ""}
+          </div>
+          <span class="px-2.5 py-1 rounded-xl border surface-input text-[11px] font-bold">${folded ? "Unfold" : "Fold"}</span>
+        </button>
+        ${!folded ? `
+          <div class="mt-3 pt-3 border-t border-slate-500/15 space-y-2.5">
+            <form onsubmit="addStickyNote(event)" class="flex gap-2">
+              <input type="text" id="sn-draft" placeholder="Jot quick sticky note..." class="flex-1 rounded-xl border surface-input px-3 py-1.5 text-xs" />
+              <button type="submit" class="px-3 py-1.5 rounded-xl bg-amber-500 text-white text-xs font-extrabold cursor-pointer">Add</button>
+            </form>
+            <div class="space-y-2 max-h-60 overflow-y-auto">
+              ${notes.length === 0 ? `<div class="text-xs text-[var(--text-muted)] text-center py-3">No sticky notes yet.</div>` : notes.map(n => `
+                <div class="p-2.5 rounded-xl border border-amber-300/70 bg-amber-100/80 dark:bg-amber-950/40 text-amber-950 dark:text-amber-100 space-y-1.5">
+                  <textarea rows="2" onchange="updateSticky('${esc(n.id)}',this.value)" class="w-full bg-transparent text-xs font-semibold resize-none focus:outline-none">${esc(n.text)}</textarea>
+                  <div class="flex justify-between text-[11px]">
+                    <button type="button" onclick="pinSticky('${esc(n.id)}')" class="font-bold cursor-pointer">${n.pinned ? "Pinned" : "Pin"}</button>
+                    <button type="button" onclick="deleteSticky('${esc(n.id)}')" class="text-rose-600 font-bold cursor-pointer">Delete</button>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        ` : ""}
+      `;
+    }
+    function toggleStickyFold() { appState.stickyNotesFolded = appState.stickyNotesFolded === false; saveState(); renderStickyNotes(); }
+    function addStickyNote(e) { e.preventDefault(); const inp = document.getElementById("sn-draft"); if (!inp.value.trim()) return; appState.stickyNotes.unshift({ id: `sn-${Date.now()}`, text: inp.value.trim(), color: "amber", pinned: false, updatedAt: Date.now() }); saveState(); renderStickyNotes(); }
+    function updateSticky(id, text) { appState.stickyNotes = appState.stickyNotes.map(n => n.id === id ? { ...n, text, updatedAt: Date.now() } : n); saveState(); }
+    function pinSticky(id) { appState.stickyNotes = appState.stickyNotes.map(n => n.id === id ? { ...n, pinned: !n.pinned } : n); saveState(); renderStickyNotes(); }
+    function deleteSticky(id) { appState.stickyNotes = appState.stickyNotes.filter(n => n.id !== id); saveState(); renderStickyNotes(); }
+
+    function renderStats(timeline) {
+      const dayLog = appState.dailyLogs[currentDateStr] || {};
+      let target = 0, done = 0;
+      const cats = { online: [0, 0], gk: [0, 0], reasoning: [0, 0], typing: [0, 0] };
+      timeline.forEach(s => {
+        if (s.category === "break") return;
+        const h = s.durationHours || calcHrs(s.start, s.end);
+        const e = dayLog[s.id];
+        const d = e?.status === "completed" ? h : Math.min(h, e?.loggedHours || 0);
+        target += h; done += d;
+        if (!cats[s.category]) cats[s.category] = [0, 0];
+        cats[s.category][0] += d; cats[s.category][1] += h;
+      });
+      const pct = target > 0 ? Math.round((done / target) * 100) : 0;
+      const grid = document.getElementById("stats-grid");
+      grid.innerHTML = `
+        <div class="col-span-2 md:col-span-1 lg:col-span-2 surface-card rounded-2xl p-4">
+          <div class="text-xs font-bold text-[var(--text-muted)]">Total Study Goal</div>
+          <div class="mt-1 font-mono-tab text-2xl font-extrabold">${done.toFixed(1)} <span class="text-sm text-[var(--text-muted)]">/ ${target.toFixed(1)} Hrs (${pct}%)</span></div>
+          <div class="w-full h-2 bg-slate-500/20 rounded-full mt-2 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:var(--accent-primary)"></div></div>
+        </div>
+        ${Object.entries(cats).slice(0, 4).map(([k, [d, t]]) => `
+          <div class="surface-card rounded-2xl p-4">
+            <div class="text-xs font-bold ${CAT_META[k]?.text || ""}">${CAT_META[k]?.label || k}</div>
+            <div class="mt-1 font-mono-tab text-lg font-extrabold">${k === "typing" ? Math.round(d * 60) + "m" : d.toFixed(1)} <span class="text-xs text-[var(--text-muted)]">/ ${k === "typing" ? Math.round(t * 60) + "m" : t.toFixed(1) + "h"}</span></div>
+          </div>
+        `).join("")}
+      `;
     }
 
-    function renderTimetable() {
-      const box = document.getElementById('timetable-container'), dl = getDayLog(currentDateStr), slots = getActiveProfile().slots, actId = getActiveSlotObj()?.id;
-      document.getElementById('filter-all').textContent = `All (${slots.length})`;
-      const compact = appState.density === 'compact';
-      const filtered = slots.filter(s => {
-        const st = dl[s.id]?.status || 'pending';
-        if (currentFilter === 'study') return s.category !== 'break';
-        if (currentFilter === 'break') return s.category === 'break';
-        if (currentFilter === 'pending') return st !== 'completed';
+    function renderTimelineList() {
+      const timeline = buildTimeline();
+      const dayLog = appState.dailyLogs[currentDateStr] || {};
+      const rec = appState.dailyStudyLogs?.[currentDateStr]?.routineSecondsBySlot || {};
+      const now = new Date();
+      const isToday = currentDateStr === getTodayStr(now);
+      const currM = now.getHours() * 60 + now.getMinutes();
+
+      // View toggle states
+      const isCompact = appState.density === "compact";
+      document.getElementById("view-compact-btn").className = `px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer ${isCompact ? "accent-btn" : "text-[var(--text-secondary)]"}`;
+      document.getElementById("view-cards-btn").className = `px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer ${!isCompact ? "accent-btn" : "text-[var(--text-secondary)]"}`;
+
+      // Profile selector
+      document.getElementById("profile-select").innerHTML = Object.entries(appState.profiles).map(([id, p]) =>
+        `<option value="${esc(id)}" ${id === appState.activeProfileId ? "selected" : ""}>${esc(p.name)}</option>`
+      ).join("");
+
+      // Filters
+      document.getElementById("filter-bar").innerHTML = [
+        ["all", `All (${timeline.length})`], ["study", "Study"], ["break", "Breaks"], ["pending", "Remaining"]
+      ].map(([id, lbl]) => `<button type="button" onclick="currentFilter='${id}';renderTimelineList()" class="px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ${currentFilter === id ? "accent-btn" : "text-[var(--text-secondary)]"}">${lbl}</button>`).join("");
+
+      const filtered = timeline.filter(s => {
+        const st = dayLog[s.id]?.status || "pending";
+        if (currentFilter === "study") return s.category !== "break";
+        if (currentFilter === "break") return s.category === "break";
+        if (currentFilter === "pending") return !s.isGapBreak && st !== "completed";
         return true;
       });
-      if (!filtered.length) { box.innerHTML = `<div class="surface-panel rounded-2xl p-8 text-center text-sm font-bold">No slots match this filter.</div>`; return; }
-      box.innerHTML = filtered.map(slot => {
-        const idx = slots.findIndex(x => x.id === slot.id), ent = dl[slot.id] || { status: 'pending', note: '', subtasks: [] };
-        const done = ent.status === 'completed', skipped = ent.status === 'skipped', isAct = slot.id === actId, meta = getCategoryMeta(slot.category);
-        const subs = (ent.subtasks || []).map(st => `<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border surface-input text-[11px]"><button onclick="toggleSubtask('${slot.id}','${st.id}')">${st.done ? '✅' : '⬜'}</button><span class="${st.done ? 'line-through opacity-60' : ''}">${escapeHTML(st.text)}</span><button onclick="deleteSubtask('${slot.id}','${st.id}')" class="text-rose-500">✕</button></div>`).join('');
+
+      const container = document.getElementById("slots-container");
+      container.className = isCompact ? "space-y-1.5" : "space-y-3";
+      container.innerHTML = filtered.map(s => {
+        const meta = CAT_META[s.category] || CAT_META.other_study;
+        const isBreak = s.category === "break";
+        const isDone = (dayLog[s.id]?.status || "pending") === "completed";
+        const isLive = isToday && isInSlot(currM, s.start, s.end);
+        const rSecs = rec[s.id] || 0;
+        const rRunning = activeRoutineSlotId === s.id && isRoutineRunning;
+        const renaming = renamingBreakId === s.id;
+
+        if (isCompact) {
+          return `
+            <div class="surface-card rounded-xl px-3 py-2 border-l-4 ${meta.border} ${isLive ? "active-slot-ring" : ""} flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0 flex-1">
+                ${!s.isGapBreak ? `<input type="checkbox" ${isDone ? "checked" : ""} onchange="toggleComplete('${esc(s.id)}')" class="w-4 h-4 cursor-pointer" />` : `<span class="text-xs font-bold text-amber-600">GAP</span>`}
+                <span class="text-[11px] font-mono-tab text-[var(--text-muted)] whitespace-nowrap">${fmt12(s.start)}–${fmt12(s.end)}</span>
+                ${renaming ? `<input id="rename-break-${esc(s.id)}" value="${esc(s.subject)}" class="rounded border surface-input px-2 py-0.5 text-xs font-bold" /><button type="button" onclick="saveBreakRename('${esc(s.id)}',${Boolean(s.isGapBreak)},'${esc(s.gapId || "")}')" class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-bold">Save</button>` : `<span class="text-xs font-extrabold truncate ${isDone ? "line-through opacity-60" : ""}">${esc(s.subject)}</span>`}
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                ${isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${esc(s.id)}';renderTimelineList()" class="px-2 py-1 rounded border surface-input text-[10px] font-bold cursor-pointer">Rename</button>` : ""}
+                ${!isBreak ? `<button type="button" onclick="toggleRoutineTimer('${esc(s.id)}')" class="px-2 py-1 rounded text-[11px] font-bold text-white cursor-pointer ${rRunning ? "bg-amber-600" : "bg-emerald-600"}">${rRunning ? "Stop" : (rSecs > 0 ? fmtHMS(rSecs) : "Track")}</button>` : ""}
+                ${isEditMode && !s.isGapBreak ? `<button type="button" onclick="openSlotModal('${esc(s.id)}')" class="px-2 py-1 rounded bg-amber-500/20 text-xs font-bold cursor-pointer">Edit</button><button type="button" onclick="deleteSlot('${esc(s.id)}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-xs font-bold cursor-pointer">Del</button>` : ""}
+              </div>
+            </div>
+          `;
+        }
+
         return `
-          <div class="surface-card rounded-2xl ${compact ? 'p-3' : 'p-4'} border-l-4 ${meta.border} ${isAct ? 'active-slot-ring' : ''} ${done ? 'opacity-85' : ''}">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="flex items-start gap-3 min-w-0">
-                <button onclick="toggleSlotComplete('${slot.id}')" class="mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 font-bold text-xs ${done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-400/60'}">${done ? '✓' : ''}</button>
-                <div class="min-w-0 space-y-1">
-                  <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="font-mono-tabular text-xs font-bold px-2 py-0.5 rounded-md border surface-input">${formatTime12(slot.start)} - ${formatTime12(slot.end)}</span>
-                    <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-800 text-white">${escapeHTML(slot.durationLabel)}</span>
-                    <span class="px-2 py-0.5 rounded-md text-[11px] font-bold ${meta.badge}">${escapeHTML(meta.label)}</span>
-                    ${isAct ? '<span class="px-2 py-0.5 rounded-md text-[11px] font-bold accent-btn">● Live Now</span>' : ''}
-                  </div>
-                  <h3 class="text-sm sm:text-base font-extrabold ${done ? 'line-through opacity-60' : ''}">${slot.emoji || '📖'} ${escapeHTML(slot.subject)}</h3>
-                  <p class="text-xs text-[var(--text-secondary)]">${escapeHTML(slot.focus)}</p>
+          <div class="surface-card rounded-2xl p-4 border-l-4 ${meta.border} ${isLive ? "active-slot-ring" : ""} space-y-2">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                ${!s.isGapBreak ? `<input type="checkbox" ${isDone ? "checked" : ""} onchange="toggleComplete('${esc(s.id)}')" class="mt-1 w-4 h-4 cursor-pointer" />` : `<span class="mt-0.5 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 text-[10px] font-extrabold">GAP</span>`}
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs font-mono-tab text-[var(--text-muted)]">${fmt12(s.start)} - ${fmt12(s.end)} · <strong>${esc(s.durationLabel)}</strong> ${s.deductedMinutes ? `<span class="text-amber-600 font-bold">(-${s.deductedMinutes}m break hold)</span>` : ""} ${rSecs > 0 ? `<span class="text-emerald-600 font-bold">· Tracked ${fmtHMS(rSecs)}</span>` : ""}</div>
+                  ${renaming ? `<div class="flex gap-1.5 mt-1"><input id="rename-break-${esc(s.id)}" value="${esc(s.subject)}" class="rounded-lg border surface-input px-2.5 py-1 text-xs font-bold" /><button type="button" onclick="saveBreakRename('${esc(s.id)}',${Boolean(s.isGapBreak)},'${esc(s.gapId || "")}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer">Save</button></div>` : `<h3 class="text-base font-extrabold ${isDone ? "line-through opacity-60" : ""}">${esc(s.subject)}</h3>`}
+                  <p class="text-xs text-[var(--text-secondary)] mt-0.5">${esc(s.focus)}</p>
                 </div>
               </div>
-              <div class="no-print flex flex-wrap items-center justify-end gap-1.5 shrink-0">
-                ${!isEditMode ? `
-                  <input type="number" step="0.5" min="0" max="${slot.durationHours}" value="${ent.loggedHours || ''}" onchange="updateLoggedHours('${slot.id}', this.value)" placeholder="Hrs" title="Partial hrs" class="w-14 rounded-lg border surface-input px-1.5 py-1 text-[11px] font-mono-tabular" />
-                  <button onclick="startSlotTimer('${slot.id}')" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold">⏱️</button>
-                  <button onclick="flagRevision('${slot.id}')" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold" title="Add to 1d/3d/7d revision">🔁</button>
-                  <button onclick="toggleSlotSkip('${slot.id}')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${skipped ? 'bg-rose-500/20 text-rose-600' : 'bg-slate-500/10 text-[var(--text-muted)]'}">${skipped ? 'Unskip' : 'Skip'}</button>
-                ` : `
-                  <button onclick="moveSlot(${idx},-1)" class="w-8 h-8 rounded-xl border surface-input text-xs font-bold">↑</button>
-                  <button onclick="moveSlot(${idx},1)" class="w-8 h-8 rounded-xl border surface-input text-xs font-bold">↓</button>
-                  <button onclick="openSlotModal('${slot.id}')" class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-600 text-xs font-bold">✏️</button>
-                  <button onclick="deleteSlot('${slot.id}')" class="w-8 h-8 rounded-xl bg-rose-500/15 text-rose-600 text-xs font-bold">🗑️</button>
-                `}
+              <div class="flex flex-wrap gap-1.5 shrink-0">
+                ${isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${esc(s.id)}';renderTimelineList()" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Name Break</button>` : ""}
+                ${!isBreak && !isEditMode ? `<button type="button" onclick="toggleRoutineTimer('${esc(s.id)}')" class="px-3 py-1.5 rounded-xl text-white text-xs font-extrabold cursor-pointer ${rRunning ? "bg-amber-600" : "bg-emerald-600"}">${rRunning ? "Stop Routine" : (rSecs > 0 ? "Resume" : "Start")}</button><button type="button" onclick="startShiftCountdown('${esc(s.id)}')" class="px-2.5 py-1.5 rounded-xl accent-soft text-xs font-bold cursor-pointer">Countdown</button>` : ""}
+                ${isEditMode && !s.isGapBreak ? `<button type="button" onclick="openSlotModal('${esc(s.id)}')" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-xs font-bold cursor-pointer">Edit</button><button type="button" onclick="deleteSlot('${esc(s.id)}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 text-rose-600 text-xs font-bold cursor-pointer">Delete</button>` : ""}
               </div>
             </div>
-            <div class="mt-2.5 sm:pl-9 space-y-2">
-              <div class="flex flex-wrap items-center gap-1.5">${subs}<form onsubmit="addSubtask(event,'${slot.id}')" class="inline-flex gap-1 flex-1 sm:flex-none min-w-0"><input type="text" placeholder="+ Sub-task..." class="flex-1 sm:w-36 min-w-0 rounded-lg border surface-input px-2 py-0.5 text-[11px]" /><button class="px-2 py-0.5 rounded-lg border surface-input text-[11px] font-bold">+</button></form></div>
-              <input type="text" value="${escapeHTML(ent.note || '')}" onchange="updateSlotNote('${slot.id}', this.value)" placeholder="📝 Progress note..." class="w-full surface-input text-xs rounded-xl px-3 py-1.5 border" />
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    function playChime(notes = [440, 587.33, 880]) {
-      if (!isSoundEnabled) return;
-      try {
-        const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return;
-        const ctx = new Ctx();
-        notes.forEach((f, i) => {
-          const osc = ctx.createOscillator(), g = ctx.createGain();
-          osc.type = 'triangle'; osc.frequency.setValueAtTime(f, ctx.currentTime + i * 0.14);
-          g.gain.setValueAtTime(0.001, ctx.currentTime + i * 0.14);
-          g.gain.exponentialRampToValueAtTime(0.16, ctx.currentTime + i * 0.14 + 0.03);
-          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + i * 0.14 + 0.4);
-          osc.connect(g); g.connect(ctx.destination); osc.start(ctx.currentTime + i * 0.14); osc.stop(ctx.currentTime + i * 0.14 + 0.45);
-        });
-      } catch {}
-    }
-
-    async function sendDeviceNotification(title, body) {
-      try {
-        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-        if (swReg && 'showNotification' in swReg) {
-          await swReg.showNotification(title, { body, tag: 'study-shift-alert', vibrate: [180, 80, 180] });
-          return;
-        }
-        new Notification(title, { body, tag: 'study-shift-alert' });
-      } catch {}
-    }
-
-    function showShiftReminder(subject, timeRange, focus, slot = null) {
-      reminderSlot = slot;
-      document.getElementById('shift-reminder-subject').textContent = subject;
-      document.getElementById('shift-reminder-time').textContent = timeRange;
-      document.getElementById('shift-reminder-focus').textContent = focus;
-      document.getElementById('shift-reminder-start-btn').classList.toggle('hidden', !slot);
-      document.getElementById('shift-reminder-banner').classList.remove('hidden');
-      playChime();
-      if (notificationsEnabled) void sendDeviceNotification(`Study Shift: ${subject}`, `${timeRange} · ${focus}`);
-    }
-    function startReminderSlotTimer() { if (reminderSlot) { startSlotTimer(reminderSlot.id); startTimer(); } dismissShiftReminder(); }
-    function dismissShiftReminder() { document.getElementById('shift-reminder-banner').classList.add('hidden'); }
-    function toggleShiftAlerts(c) { appState.shiftAlertsEnabled = c; saveState(); }
-
-    async function toggleNotifications() {
-      if (typeof Notification === 'undefined') { showToast('OS notifications unsupported here; on-screen shift alerts remain active.', 'info'); return; }
-      if (notificationsEnabled) { notificationsEnabled = false; updateNotifyButtonUI(); showToast('Device notifications paused.', 'info'); return; }
-      const perm = await Notification.requestPermission();
-      notificationsEnabled = perm === 'granted';
-      updateNotifyButtonUI();
-      if (notificationsEnabled) {
-        await initServiceWorkerForNotifications();
-        void sendDeviceNotification('Study Alerts Active', 'Mobile & desktop alerts will fire whenever your study shift changes.');
-        showToast('Mobile & desktop alerts enabled!', 'success');
-      } else showToast('Notification permission denied.', 'error');
-    }
-    function updateNotifyButtonUI() { document.getElementById('btn-notify-toggle').textContent = notificationsEnabled ? '🔔 Alerts On' : '🔕 Alerts'; }
-    async function triggerTestAlert() {
-      if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
-        notificationsEnabled = (await Notification.requestPermission()) === 'granted';
-        updateNotifyButtonUI();
-      }
-      const act = getActiveSlotObj() || getActiveProfile().slots[0];
-      showShiftReminder(act ? act.subject : 'Study Session', act ? `${formatTime12(act.start)} - ${formatTime12(act.end)}` : 'Preview', act ? act.focus : 'Shift reminder active.', act);
-      showToast('Shift reminder preview triggered!', 'success');
-    }
-
-    function updateClockAndLiveSlot() {
-      const now = new Date();
-      document.getElementById('live-clock').textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-      const mins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60, slots = getActiveProfile().slots, act = getActiveSlotObj(), actId = act ? act.id : null;
-      if (!slotMonitorMounted) { slotMonitorMounted = true; lastActiveSlotId = actId; }
-      else if (actId !== lastActiveSlotId) {
-        if (appState.shiftAlertsEnabled !== false) {
-          if (act) showShiftReminder(act.subject, `${formatTime12(act.start)} - ${formatTime12(act.end)}`, act.focus, act);
-          else if (lastActiveSlotId) showShiftReminder('Shift Complete · Rest & Recharge', 'Between Scheduled Shifts', 'Step away for water & stretch before your next block.');
-        }
-        lastActiveSlotId = actId;
-        renderTimetable();
-      }
-      const next = slots.find(s => timeToMinutes(s.start) > Math.floor(mins)) || slots[0];
-      if (act) {
-        const sm = timeToMinutes(act.start), em = timeToMinutes(act.end), dur = em > sm ? em - sm : 1440 - sm + em, elap = mins >= sm ? mins - sm : 1440 - sm + mins;
-        const left = Math.max(0, Math.ceil(dur - elap)), pct = Math.min(100, Math.max(0, Math.round((elap / dur) * 100)));
-        document.getElementById('live-slot-title').textContent = `${act.emoji || ''} ${act.subject}`;
-        document.getElementById('live-slot-time').textContent = `${formatTime12(act.start)} - ${formatTime12(act.end)}`;
-        document.getElementById('live-slot-focus').textContent = act.focus;
-        document.getElementById('live-slot-remaining').textContent = `${left}m left`;
-        document.getElementById('live-slot-pct').textContent = `${pct}%`;
-        document.getElementById('live-slot-progress').style.width = `${pct}%`;
-        document.getElementById('zen-subject').textContent = act.subject;
-      } else {
-        document.getElementById('live-slot-title').textContent = '🌙 Off-Schedule / Rest';
-        document.getElementById('live-slot-time').textContent = 'Outside Active Study Slots';
-        document.getElementById('live-slot-focus').textContent = 'Recharge for your next study shift.';
-        document.getElementById('live-slot-remaining').textContent = 'Rest';
-        document.getElementById('live-slot-pct').textContent = '100%';
-        document.getElementById('live-slot-progress').style.width = '100%';
-        document.getElementById('zen-subject').textContent = 'Deep Study Focus';
-      }
-      document.getElementById('next-slot-label').textContent = next ? `${formatTime12(next.start)} • ${next.subject}` : '--';
-    }
-
-    // Multiple Exam Goals
-    function daysUntil(td) { const [y, m, d] = td.split('-').map(Number), t = new Date(y, m - 1, d), n = new Date(), today = new Date(n.getFullYear(), n.getMonth(), n.getDate()); return Math.ceil((t - today) / 86400000); }
-    function renderExamGoalsHeader() {
-      const gs = appState.examGoals || [], el = document.getElementById('exam-goals-label');
-      if (!gs.length) { el.textContent = 'Exam Goals'; return; }
-      const p = gs.find(g => g.pinned) || [...gs].sort((a, b) => a.targetDate.localeCompare(b.targetDate))[0], d = daysUntil(p.targetDate);
-      el.textContent = `${p.title}: ${d > 0 ? d + 'd left' : d === 0 ? 'Today!' : Math.abs(d) + 'd ago'}${gs.length > 1 ? ` (+${gs.length - 1})` : ''}`;
-    }
-    function openExamGoalsModal() { renderExamGoalsList(); openModal('exam-goals-modal'); }
-    function addExamGoal(e) {
-      e.preventDefault();
-      const title = document.getElementById('goal-title-input').value.trim(), targetDate = document.getElementById('goal-date-input').value;
-      appState.examGoals.push({ id: 'goal-' + Date.now(), title, targetDate, pinned: appState.examGoals.length === 0 });
-      saveState(); document.getElementById('goal-title-input').value = ''; document.getElementById('goal-date-input').value = '';
-      renderExamGoalsList(); renderExamGoalsHeader(); showToast(`Added "${title}"!`, 'success');
-    }
-    function togglePinGoal(id) { appState.examGoals = appState.examGoals.map(g => ({ ...g, pinned: g.id === id ? !g.pinned : false })); saveState(); renderExamGoalsList(); renderExamGoalsHeader(); }
-    function deleteExamGoal(id) { appState.examGoals = appState.examGoals.filter(g => g.id !== id); saveState(); renderExamGoalsList(); renderExamGoalsHeader(); }
-    function renderExamGoalsList() {
-      const box = document.getElementById('exam-goals-list'), gs = [...(appState.examGoals || [])].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || a.targetDate.localeCompare(b.targetDate));
-      box.innerHTML = gs.length ? gs.map(g => {
-        const d = daysUntil(g.targetDate);
-        return `<div class="p-3 rounded-xl border surface-input flex items-center justify-between gap-2"><div class="min-w-0"><div class="text-xs font-extrabold truncate">${escapeHTML(g.title)} <span class="font-mono-tabular accent-text">(${d > 0 ? d + 'd left' : d === 0 ? 'Today!' : Math.abs(d) + 'd ago'})</span></div><div class="text-[11px] font-mono-tabular text-[var(--text-muted)]">${g.targetDate}</div></div><div class="flex gap-1 shrink-0"><button onclick="togglePinGoal('${g.id}')" class="px-2 py-1 rounded-lg border text-xs ${g.pinned ? 'bg-amber-400 text-slate-900' : ''}">★</button><button onclick="deleteExamGoal('${g.id}')" class="px-2 py-1 rounded-lg bg-rose-500/15 text-rose-600 text-xs">🗑️</button></div></div>`;
-      }).join('') : '<p class="text-xs text-[var(--text-muted)] text-center py-4">No exam goals added yet.</p>';
-    }
-
-    // Sticky Notes
-    function selectStickyColor(c) {
-      selectedStickyColor = c;
-      document.querySelectorAll('#sticky-color-picker button').forEach(b => {
-        const m = b.dataset.color === c; b.classList.toggle('ring-2', m); b.classList.toggle('ring-slate-900', m); b.classList.toggle('opacity-70', !m);
-      });
-    }
-    function addStickyNote() {
-      const el = document.getElementById('sticky-draft'), text = el.value.trim(); if (!text) return;
-      appState.stickyNotes.unshift({ id: 'sn-' + Date.now(), text, color: selectedStickyColor, pinned: false, updatedAt: Date.now() });
-      el.value = ''; saveState(); renderStickyNotes(); showToast('Sticky note added!', 'success');
-    }
-    function updateStickyNote(id, text) { appState.stickyNotes = appState.stickyNotes.map(n => n.id === id ? { ...n, text, updatedAt: Date.now() } : n); saveState(); }
-    function togglePinStickyNote(id) { appState.stickyNotes = appState.stickyNotes.map(n => n.id === id ? { ...n, pinned: !n.pinned } : n); saveState(); renderStickyNotes(); }
-    function cycleStickyColor(id) {
-      const order = ['amber', 'sky', 'emerald', 'rose', 'violet'];
-      appState.stickyNotes = appState.stickyNotes.map(n => n.id === id ? { ...n, color: order[(order.indexOf(n.color) + 1) % order.length] } : n);
-      saveState(); renderStickyNotes();
-    }
-    function deleteStickyNote(id) { appState.stickyNotes = appState.stickyNotes.filter(n => n.id !== id); saveState(); renderStickyNotes(); }
-    function renderStickyNotes() {
-      const notes = [...(appState.stickyNotes || [])].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.updatedAt - a.updatedAt);
-      document.getElementById('sticky-count').textContent = `${notes.length} note${notes.length === 1 ? '' : 's'}`;
-      document.getElementById('sticky-notes-list').innerHTML = notes.length ? notes.map(n => `
-        <div class="p-2.5 rounded-xl border ${STICKY_COLORS[n.color] || STICKY_COLORS.amber} space-y-1.5">
-          <div class="flex justify-between items-center gap-1">
-            <button onclick="cycleStickyColor('${n.id}')" class="text-[10px] px-1.5 py-0.5 rounded bg-white/60 dark:bg-black/25 font-bold">🎨</button>
-            <div class="flex gap-1"><button onclick="togglePinStickyNote('${n.id}')" class="text-xs px-1.5 py-0.5 rounded ${n.pinned ? 'bg-slate-900 text-white' : 'bg-white/60 dark:bg-black/25'}">📌</button><button onclick="deleteStickyNote('${n.id}')" class="text-xs px-1.5 py-0.5 rounded bg-white/60 dark:bg-black/25 text-rose-700 dark:text-rose-300">✕</button></div>
+            ${!s.isGapBreak ? `<input type="text" value="${esc(dayLog[s.id]?.note || "")}" onchange="saveNote('${esc(s.id)}', this.value)" placeholder="Progress note..." class="w-full rounded-xl border surface-input px-3 py-1.5 text-xs" />` : ""}
           </div>
-          <textarea rows="2" onchange="updateStickyNote('${n.id}', this.value)" class="w-full bg-transparent text-xs font-semibold resize-none focus:outline-none">${escapeHTML(n.text)}</textarea>
-        </div>`).join('') : '<p class="text-[11px] text-[var(--text-muted)] text-center py-3 border border-dashed rounded-xl">No sticky notes yet.</p>';
+        `;
+      }).join("");
     }
 
-    // Slot Log Actions, Backlog, Revision, Ambient Audio
-    function switchProfile(id) { if (appState.profiles[id]) { appState.activeProfileId = id; saveState(); renderAll(); } }
-    function toggleDensity() { appState.density = appState.density === 'compact' ? 'comfortable' : 'compact'; saveState(); renderAll(); }
-    function toggleSlotComplete(id) { const dl = getDayLog(currentDateStr); dl[id] = { ...dl[id], status: dl[id]?.status === 'completed' ? 'pending' : 'completed' }; saveState(); if (appState.autoArchive !== false) archiveDate(currentDateStr, true); renderStats(); renderTimetable(); }
-    function toggleSlotSkip(id) { const dl = getDayLog(currentDateStr); dl[id] = { ...dl[id], status: dl[id]?.status === 'skipped' ? 'pending' : 'skipped' }; saveState(); renderStats(); renderTimetable(); }
-    function updateLoggedHours(id, v) { const dl = getDayLog(currentDateStr); dl[id] = { ...dl[id], status: dl[id]?.status || 'pending', loggedHours: Math.max(0, parseFloat(v) || 0) }; saveState(); if (appState.autoArchive !== false) archiveDate(currentDateStr, true); renderStats(); }
-    function updateSlotNote(id, n) { const dl = getDayLog(currentDateStr); dl[id] = { ...dl[id], status: dl[id]?.status || 'pending', note: n }; saveState(); }
-    function addSubtask(e, slotId) { e.preventDefault(); const inp = e.target.querySelector('input'), txt = inp.value.trim(); if (!txt) return; const dl = getDayLog(currentDateStr), ent = dl[slotId] || { status: 'pending' }; ent.subtasks = [...(ent.subtasks || []), { id: 'st-' + Date.now(), text: txt, done: false }]; dl[slotId] = ent; inp.value = ''; saveState(); renderTimetable(); }
-    function toggleSubtask(slotId, stId) { const dl = getDayLog(currentDateStr), ent = dl[slotId]; if (!ent) return; ent.subtasks = (ent.subtasks || []).map(s => s.id === stId ? { ...s, done: !s.done } : s); saveState(); renderTimetable(); }
-    function deleteSubtask(slotId, stId) { const dl = getDayLog(currentDateStr), ent = dl[slotId]; if (!ent) return; ent.subtasks = (ent.subtasks || []).filter(s => s.id !== stId); saveState(); renderTimetable(); }
-    function saveDailyReflection(t) { appState.reflections[currentDateStr] = t; saveState(); }
-    function carryUnfinishedToTomorrow() {
-      const dl = getDayLog(currentDateStr), unfin = getActiveProfile().slots.filter(s => s.category !== 'break' && dl[s.id]?.status !== 'completed');
-      if (!unfin.length) { showToast('All study slots completed!', 'success'); return; }
-      const tStr = shiftDateStr(currentDateStr, 1);
-      appState.carriedTasks[tStr] = [...(appState.carriedTasks[tStr] || []), ...unfin.map((u, i) => ({ id: `ct-${Date.now()}-${i}`, subject: u.subject, fromDate: currentDateStr, done: false }))];
-      saveState(); showToast(`Carried ${unfin.length} slot(s) to ${tStr}!`, 'success');
+    function toggleComplete(id) {
+      appState.dailyLogs[currentDateStr] = appState.dailyLogs[currentDateStr] || {};
+      const curr = appState.dailyLogs[currentDateStr][id]?.status || "pending";
+      appState.dailyLogs[currentDateStr][id] = { ...(appState.dailyLogs[currentDateStr][id] || {}), status: curr === "completed" ? "pending" : "completed" };
+      if (appState.autoArchive !== false) archiveDay(currentDateStr, true);
+      saveState(); renderAll();
     }
-    function toggleCarried(id) { appState.carriedTasks[currentDateStr] = (appState.carriedTasks[currentDateStr] || []).map(t => t.id === id ? { ...t, done: !t.done } : t); saveState(); renderYesterdayAndCarried(); }
-    function dismissCarried(id) { appState.carriedTasks[currentDateStr] = (appState.carriedTasks[currentDateStr] || []).filter(t => t.id !== id); saveState(); renderYesterdayAndCarried(); }
+    function saveNote(id, note) {
+      appState.dailyLogs[currentDateStr] = appState.dailyLogs[currentDateStr] || {};
+      appState.dailyLogs[currentDateStr][id] = { ...(appState.dailyLogs[currentDateStr][id] || { status: "pending" }), note };
+      saveState();
+    }
+    function saveReflection(text) { appState.reflections[currentDateStr] = text; saveState(); }
+    function switchProfile(id) { appState.activeProfileId = id; saveState(); renderAll(); }
 
-    function addBacklogItem() { const s = document.getElementById('bk-subj').value.trim(), t = parseInt(document.getElementById('bk-total').value, 10) || 10; if (!s) return; appState.backlogItems.push({ id: 'bk-' + Date.now(), subject: s, completed: 0, total: t }); document.getElementById('bk-subj').value = ''; saveState(); renderBacklog(); }
-    function stepBacklog(id, d) { appState.backlogItems = appState.backlogItems.map(b => b.id === id ? { ...b, completed: Math.min(b.total, Math.max(0, b.completed + d)) } : b); saveState(); renderBacklog(); }
-    function delBacklog(id) { appState.backlogItems = appState.backlogItems.filter(b => b.id !== id); saveState(); renderBacklog(); }
-    function renderBacklog() {
-      document.getElementById('backlog-list').innerHTML = (appState.backlogItems || []).map(b => `<div class="p-2 rounded-xl border surface-input text-xs flex items-center justify-between gap-2"><span class="font-bold truncate">${escapeHTML(b.subject)} (${b.completed}/${b.total})</span><div class="flex gap-1 shrink-0"><button onclick="stepBacklog('${b.id}',-1)" class="px-1.5 rounded border">-</button><button onclick="stepBacklog('${b.id}',1)" class="px-1.5 rounded accent-btn">+</button><button onclick="delBacklog('${b.id}')" class="px-1.5 text-rose-500">✕</button></div></div>`).join('');
-    }
-
-    function flagRevision(slotId) {
-      const s = getActiveProfile().slots.find(x => x.id === slotId); if (!s) return;
-      appState.revisionQueue.unshift({ id: 'rev-' + Date.now(), topic: s.subject, createdDate: currentDateStr, intervalDays: 1, nextDueDate: shiftDateStr(currentDateStr, 1), completedCount: 0, done: false });
-      saveState(); renderRevision(); showToast(`Added "${s.subject}" to 1d/3d/7d revision!`, 'success');
-    }
-    function advanceRevision(id) {
-      const today = getTodayDateString();
-      appState.revisionQueue = appState.revisionQueue.map(r => r.id !== id ? r : r.intervalDays === 1 ? { ...r, intervalDays: 3, nextDueDate: shiftDateStr(today, 3), completedCount: r.completedCount + 1 } : r.intervalDays === 3 ? { ...r, intervalDays: 7, nextDueDate: shiftDateStr(today, 7), completedCount: r.completedCount + 1 } : { ...r, done: true, completedCount: r.completedCount + 1 });
-      saveState(); renderRevision();
-    }
-    function deleteRevision(id) { appState.revisionQueue = appState.revisionQueue.filter(r => r.id !== id); saveState(); renderRevision(); }
-    function renderRevision() {
-      const active = (appState.revisionQueue || []).filter(r => !r.done), due = active.filter(r => r.nextDueDate <= getTodayDateString()).length;
-      document.getElementById('rev-count').textContent = `${due} due`;
-      document.getElementById('revision-list').innerHTML = active.length ? active.map(r => `<div class="p-2 rounded-xl border surface-input text-xs flex items-center justify-between gap-2"><div class="min-w-0"><div class="font-bold truncate">${escapeHTML(r.topic)}</div><div class="text-[10px] text-[var(--text-muted)]">${r.intervalDays}d cycle · Due ${r.nextDueDate}</div></div><div class="flex gap-1 shrink-0"><button onclick="advanceRevision('${r.id}')" class="px-2 py-0.5 rounded accent-btn text-[11px] font-bold">Done</button><button onclick="deleteRevision('${r.id}')" class="text-rose-500">✕</button></div></div>`).join('') : '<p class="text-[11px] text-[var(--text-muted)]">Flag any slot with 🔁 to schedule spaced revision.</p>';
+    function archiveDay(dateStr, silent = false) {
+      const timeline = buildTimeline();
+      const dayLog = appState.dailyLogs[dateStr] || {};
+      const study = appState.dailyStudyLogs?.[dateStr];
+      let target = 0, done = 0, totalSlots = 0, doneSlots = 0;
+      timeline.forEach(s => {
+        if (s.category === "break") return;
+        const h = s.durationHours || calcHrs(s.start, s.end);
+        target += h; totalSlots++;
+        if (dayLog[s.id]?.status === "completed") { done += h; doneSlots++; }
+        else if (dayLog[s.id]?.loggedHours) done += Math.min(h, dayLog[s.id].loggedHours);
+      });
+      const tracked = (study?.manualSeconds || 0) + Object.values(study?.routineSecondsBySlot || {}).reduce((a, b) => a + (b || 0), 0) + (study?.heldBreakSeconds || 0);
+      appState.archives[dateStr] = {
+        date: dateStr, completedHours: Number(done.toFixed(1)), targetHours: Number(target.toFixed(1)),
+        percentage: target > 0 ? Math.round((done / target) * 100) : 0,
+        completedSlots: doneSlots, totalSlots, savedAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        trackedStudySeconds: tracked
+      };
+      if (!silent) { saveState(); renderAll(); showToast(`Archived ${dateStr}!`, "success"); }
     }
 
-    function setAmbientMode(mode) {
-      try { ambientSource?.stop(); ambientCtx?.close(); } catch {}
-      ambientSource = null; ambientCtx = null;
-      if (mode === 'off') return;
-      try {
-        const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return;
-        const ctx = new Ctx(), buf = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate), out = buf.getChannelData(0);
-        let last = 0;
-        for (let i = 0; i < out.length; i++) { const w = Math.random() * 2 - 1; out[i] = mode === 'rain' ? w * 0.35 : ((last + 0.02 * w) / 1.02) * 2.5; last = out[i]; }
-        const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
-        const flt = ctx.createBiquadFilter(); flt.type = mode === 'rain' ? 'bandpass' : 'lowpass'; flt.frequency.value = mode === 'rain' ? 1100 : 350;
-        const g = ctx.createGain(); g.gain.value = 0.12;
-        src.connect(flt); flt.connect(g); g.connect(ctx.destination); src.start();
-        ambientCtx = ctx; ambientSource = src;
-      } catch {}
+    function renderHeaderAndWidgets() {
+      const prof = getActiveProfile();
+      const timeline = buildTimeline();
+      const totalHrs = timeline.filter(s => s.category !== "break").reduce((sum, s) => sum + (s.durationHours || calcHrs(s.start, s.end)), 0);
+      document.getElementById("hdr-title").textContent = prof.title;
+      document.getElementById("hdr-subtitle").textContent = prof.subtitle;
+      document.getElementById("hdr-hours").textContent = `· ${totalHrs.toFixed(1)} Hrs Study`;
+
+      const goal = (appState.examGoals || [])[0];
+      document.getElementById("hdr-goal-btn").textContent = goal ? `${goal.title} (${goal.targetDate})` : "+ Exam Goals";
+
+      document.getElementById("date-input").value = currentDateStr;
+      document.getElementById("today-btn").classList.toggle("hidden", currentDateStr === getTodayStr());
+      document.getElementById("edit-banner").classList.toggle("hidden", !isEditMode);
+      document.getElementById("edit-mode-btn").textContent = isEditMode ? "Done Editing" : "Edit Mode";
+      document.getElementById("reflection-input").value = appState.reflections[currentDateStr] || "";
+
+      // Countdown display
+      document.getElementById("timer-display").textContent = fmtHMS(timerRemSecs);
+      document.getElementById("timer-label").textContent = timerLabel;
+      document.getElementById("timer-status").textContent = isTimerRunning ? "Remaining" : "Ready";
+      document.getElementById("timer-toggle-btn").textContent = isTimerRunning ? "Pause" : "Start";
+      document.getElementById("mob-timer-val").textContent = fmtHMS(timerRemSecs);
+      document.getElementById("mob-timer-btn").textContent = isTimerRunning ? "Pause" : "Start";
+      document.getElementById("mob-slot-label").textContent = timerLabel;
+
+      // Heatmap
+      const hm = document.getElementById("heatmap-grid");
+      const now = new Date();
+      hm.innerHTML = Array.from({ length: 14 }, (_, i) => {
+        const d = new Date(now); d.setDate(d.getDate() - (13 - i));
+        const key = getTodayStr(d);
+        const pct = appState.archives[key]?.percentage || 0;
+        const bg = pct >= 85 ? "bg-emerald-500 text-white" : pct >= 40 ? "bg-emerald-400/60" : "bg-slate-400/20";
+        return `<button type="button" onclick="currentDateStr='${key}';renderAll()" class="h-7 rounded-md ${bg} text-[11px] font-bold font-mono-tab cursor-pointer">${d.getDate()}</button>`;
+      }).join("");
     }
 
-    function calculateBacklogTime() { const h = +document.getElementById('calc-hrs').value || 0, m = +document.getElementById('calc-mins').value || 0, sp = +document.getElementById('calc-speed').value || 1.25, tot = h * 60 + m, act = Math.round(tot / sp), sav = Math.max(0, tot - act), fmt = x => `${Math.floor(x / 60)}h ${x % 60}m`; document.getElementById('calc-result-time').textContent = fmt(act); document.getElementById('calc-saved-time').textContent = `${fmt(sav)} saved`; }
-    function logTypingScore() { const lang = document.getElementById('wpm-lang').value, wpm = parseInt(document.getElementById('wpm-speed').value, 10), acc = parseInt(document.getElementById('wpm-acc').value, 10) || 100; if (!wpm || wpm <= 0) { showToast('Enter valid WPM.', 'error'); return; } appState.typingLogs.unshift({ date: currentDateStr, lang, wpm, acc }); saveState(); document.getElementById('wpm-speed').value = ''; document.getElementById('wpm-acc').value = ''; updateLatestWpmBadge(); showToast(`Logged ${lang}: ${wpm} WPM`, 'success'); }
-    function updateLatestWpmBadge() { document.getElementById('latest-wpm-badge').textContent = appState.typingLogs.length ? `${appState.typingLogs[0].lang} ${appState.typingLogs[0].wpm} WPM` : 'No log yet'; }
-
-    function archiveCurrentDay() { archiveDate(currentDateStr, false); }
-    function archiveDate(dateStr, silent = false) {
-      const dl = getDayLog(dateStr), slots = getActiveProfile().slots; let tH = 0, cH = 0, tS = 0, cS = 0;
-      slots.forEach(s => { if (s.category !== 'break') { const h = s.durationHours || calculateHoursBetween(s.start, s.end); tH += h; tS++; if (dl[s.id]?.status === 'completed') { cH += h; cS++; } else if (dl[s.id]?.loggedHours > 0) cH += Math.min(h, dl[s.id].loggedHours); } });
-      const pct = tH > 0 ? Math.round((cH / tH) * 100) : 0;
-      appState.archives[dateStr] = { date: dateStr, completedHours: +cH.toFixed(1), targetHours: +tH.toFixed(1), percentage: pct, completedSlots: cS, totalSlots: tS, savedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-      saveState(); renderMiniHeatmap(); updateStreakBadge(); if (!silent) showToast(`Archived ${dateStr} (${pct}%)`, 'success');
-    }
-    function calculateStreak() { const t = getTodayDateString(), yStr = shiftDateStr(t, -1); if (!appState.archives[t] && !appState.archives[yStr]) return 0; let st = 0, cur = appState.archives[t] ? t : yStr; while (appState.archives[cur]?.percentage > 0) { st++; cur = shiftDateStr(cur, -1); } return st; }
-    function updateStreakBadge() { const s = calculateStreak(); document.getElementById('streak-badge').textContent = `🔥 ${s}d`; document.getElementById('heatmap-streak-label').textContent = `${s}d streak`; }
-    function renderMiniHeatmap() {
-      const out = []; for (let i = 13; i >= 0; i--) { const k = shiftDateStr(getTodayDateString(), -i), p = appState.archives[k]?.percentage || 0, c = p >= 85 ? 'bg-emerald-500 text-white' : p >= 50 ? 'bg-emerald-400/75' : p > 0 ? 'bg-emerald-400/40' : 'bg-slate-400/20'; out.push(`<button onclick="currentDateStr='${k}';document.getElementById('date-selector').value='${k}';renderAll();" class="h-6 rounded-md text-[9px] font-bold ${c} ${k === currentDateStr ? 'ring-2 ring-indigo-500' : ''}">${k.slice(-2)}</button>`); }
-      document.getElementById('mini-heatmap-grid').innerHTML = out.join('');
+    function renderAll() {
+      const timeline = buildTimeline();
+      renderHeaderAndWidgets();
+      renderLiveAndDailyCards();
+      renderStats(timeline);
+      renderTimelineList();
+      renderStickyNotes();
+      renderReminders();
     }
 
-    function openHistoryModal() {
-      const keys = Object.keys(appState.archives).sort().reverse(), s = calculateStreak();
-      document.getElementById('modal-streak-count').textContent = `${s} Days`; document.getElementById('modal-archive-count').textContent = keys.length;
-      let sum = 0;
-      const mocks = (appState.mockTests || []).map(m => `<div class="p-2 rounded-xl border surface-input text-xs flex justify-between"><span>📝 <strong>${escapeHTML(m.name)}</strong> (${m.score}/${m.maxScore})</span><button onclick="appState.mockTests=appState.mockTests.filter(x=>x.id!=='${m.id}');saveState();openHistoryModal();" class="text-rose-500">✕</button></div>`).join('');
-      const archs = keys.map(k => { const a = appState.archives[k]; sum += a.percentage; return `<div class="p-3 rounded-xl border surface-input flex justify-between items-center text-xs"><div><strong>${a.date}</strong> · ${a.percentage}% (${a.completedHours}/${a.targetHours}h)</div><button onclick="currentDateStr='${a.date}';document.getElementById('date-selector').value='${a.date}';closeModal('history-modal');renderAll();" class="px-2.5 py-1 rounded-lg accent-bg-soft font-bold">View</button></div>`; }).join('');
-      document.getElementById('history-list').innerHTML = (mocks ? `<div class="space-y-1.5 pb-2">${mocks}</div>` : '') + (archs || '<p class="text-xs text-[var(--text-muted)] text-center py-6">No archived days yet.</p>');
-      document.getElementById('modal-avg-pct').textContent = keys.length ? `${Math.round(sum / keys.length)}%` : '0%';
-      openModal('history-modal');
+    // Study Plans, Reminders, Exam Goals, Slots, History Modals
+    function openModal(id) {
+      document.getElementById(id).classList.remove("hidden");
+      if (id === "plans-modal") renderPlansModal();
+      if (id === "reminders-modal") renderRemindersModal();
+      if (id === "exam-modal") renderExamModal();
+      if (id === "history-modal") renderHistoryModal();
     }
-    function addMockTest(e) { e.preventDefault(); appState.mockTests.unshift({ id: 'mk-' + Date.now(), date: currentDateStr, name: document.getElementById('mock-name').value.trim(), score: +document.getElementById('mock-score').value, maxScore: +document.getElementById('mock-max').value }); document.getElementById('mock-name').value = ''; saveState(); openHistoryModal(); }
+    function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
 
-    function requestEditModeToggle() {
-      if (!isEditMode && appState.adminPin) { pinActionMode = 'unlock'; document.getElementById('pin-modal-title').textContent = 'Enter Admin PIN'; document.getElementById('btn-remove-pin').classList.add('hidden'); document.getElementById('pin-input').value = ''; openModal('pin-modal'); return; }
-      isEditMode = !isEditMode; document.getElementById('edit-mode-banner').classList.toggle('hidden', !isEditMode); document.getElementById('edit-mode-label').textContent = isEditMode ? 'Done' : 'Edit Mode'; renderAll();
+    function renderPlansModal() {
+      const entries = Object.entries(appState.profiles);
+      document.getElementById("plans-list").innerHTML = entries.map(([id, p]) => `
+        <div class="p-3 rounded-2xl border surface-input flex items-center justify-between gap-2">
+          <div class="min-w-0"><div class="text-sm font-extrabold truncate">${esc(p.name)}</div><div class="text-[11px] text-[var(--text-muted)]">${p.slots.length} slots</div></div>
+          <div class="flex gap-1.5">
+            ${id !== appState.activeProfileId ? `<button type="button" onclick="switchProfile('${esc(id)}');renderPlansModal()" class="px-2 py-1 rounded accent-btn text-[11px] font-bold cursor-pointer">Use</button>` : ""}
+            <button type="button" onclick="editPlan('${esc(id)}')" class="px-2 py-1 rounded border surface-input text-[11px] font-bold cursor-pointer">Edit</button>
+            ${entries.length > 1 ? `<button type="button" onclick="deletePlan('${esc(id)}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-[11px] font-bold cursor-pointer">Del</button>` : ""}
+          </div>
+        </div>
+      `).join("");
+      document.getElementById("pm-copy-from").innerHTML = `<option value="">Empty Plan</option>` + entries.map(([id, p]) => `<option value="${esc(id)}">Copy from: ${esc(p.name)}</option>`).join("");
     }
-    function openPinModal() { pinActionMode = 'set'; document.getElementById('pin-modal-title').textContent = 'Set 4-Digit Admin PIN'; document.getElementById('btn-remove-pin').classList.toggle('hidden', !appState.adminPin); document.getElementById('pin-input').value = ''; openModal('pin-modal'); }
-    function handlePinSubmit(e) { e.preventDefault(); const v = document.getElementById('pin-input').value.trim(); if (!/^\d{4}$/.test(v)) return showToast('Enter 4 digits.', 'error'); if (pinActionMode === 'unlock') { if (v === appState.adminPin) { closeModal('pin-modal'); isEditMode = true; document.getElementById('edit-mode-banner').classList.remove('hidden'); document.getElementById('edit-mode-label').textContent = 'Done'; renderAll(); } else showToast('Wrong PIN.', 'error'); } else { appState.adminPin = v; saveState(); closeModal('pin-modal'); renderAll(); } }
-    function removeAdminPin() { appState.adminPin = null; saveState(); closeModal('pin-modal'); renderAll(); }
+    function editPlan(id) {
+      const p = appState.profiles[id]; if (!p) return;
+      document.getElementById("pm-edit-id").value = id;
+      document.getElementById("pm-name").value = p.name;
+      document.getElementById("pm-title").value = p.title;
+      document.getElementById("pm-subtitle").value = p.subtitle;
+      document.getElementById("pm-form-heading").textContent = "Edit Study Plan";
+    }
+    function deletePlan(id) {
+      if (Object.keys(appState.profiles).length <= 1) return;
+      delete appState.profiles[id];
+      if (appState.activeProfileId === id) appState.activeProfileId = Object.keys(appState.profiles)[0];
+      saveState(); renderPlansModal(); renderAll();
+    }
+    function savePlanForm(e) {
+      e.preventDefault();
+      const editId = document.getElementById("pm-edit-id").value;
+      const name = document.getElementById("pm-name").value.trim();
+      const title = document.getElementById("pm-title").value.trim() || name.toUpperCase();
+      const subtitle = document.getElementById("pm-subtitle").value.trim() || "Custom Study Plan";
+      const copyId = document.getElementById("pm-copy-from").value;
+      if (!name) return;
+      if (editId && appState.profiles[editId]) {
+        appState.profiles[editId] = { ...appState.profiles[editId], name, title, subtitle };
+      } else {
+        const newId = `plan-${Date.now()}`;
+        const slots = copyId && appState.profiles[copyId] ? JSON.parse(JSON.stringify(appState.profiles[copyId].slots)) : [];
+        appState.profiles[newId] = { name, title, subtitle, slots };
+        appState.activeProfileId = newId;
+      }
+      document.getElementById("pm-edit-id").value = "";
+      document.getElementById("pm-name").value = "";
+      document.getElementById("pm-form-heading").textContent = "Create New Study Plan";
+      saveState(); renderPlansModal(); renderAll();
+    }
 
-    function openSlotModal(id = null) {
-      const catSel = document.getElementById('slot-category'), allCats = { ...BUILT_IN_CATEGORIES, ...(appState.customCategories || {}) };
-      catSel.innerHTML = Object.entries(allCats).map(([k, v]) => `<option value="${k}">${escapeHTML(v.label)}</option>`).join('');
-      const s = id ? getActiveProfile().slots.find(x => x.id === id) : null;
-      document.getElementById('slot-modal-title').textContent = s ? 'Edit Time Slot' : 'Add Time Slot';
-      document.getElementById('slot-id').value = s ? s.id : ''; document.getElementById('slot-start').value = s ? s.start : '06:00'; document.getElementById('slot-end').value = s ? s.end : '07:00';
-      catSel.value = s ? s.category : 'other_study'; document.getElementById('slot-duration-label').value = s ? s.durationLabel : '1 hr'; document.getElementById('slot-subject').value = s ? s.subject : ''; document.getElementById('slot-focus').value = s ? s.focus : '';
-      openModal('slot-modal');
+    function openSlotModal(slotId) {
+      const prof = getActiveProfile();
+      const slot = slotId ? prof.slots.find(s => s.id === slotId) : null;
+      document.getElementById("sm-id").value = slot ? slot.id : "";
+      document.getElementById("sm-start").value = slot ? slot.start : "06:00";
+      document.getElementById("sm-end").value = slot ? slot.end : "07:00";
+      document.getElementById("sm-cat").value = slot ? slot.category : "other_study";
+      document.getElementById("sm-subject").value = slot ? slot.subject : "";
+      document.getElementById("sm-focus").value = slot ? slot.focus : "";
+      openModal("slot-modal");
     }
     function saveSlotForm(e) {
       e.preventDefault();
-      const id = document.getElementById('slot-id').value, start = document.getElementById('slot-start').value, end = document.getElementById('slot-end').value, category = document.getElementById('slot-category').value, durationLabel = document.getElementById('slot-duration-label').value.trim(), subject = document.getElementById('slot-subject').value.trim(), focus = document.getElementById('slot-focus').value.trim();
-      const durationHours = calculateHoursBetween(start, end), slots = getActiveProfile().slots;
-      if (id) { const i = slots.findIndex(x => x.id === id); if (i !== -1) slots[i] = { ...slots[i], start, end, category, durationLabel, durationHours, subject, focus }; }
-      else { slots.push({ id: 'slot-' + Date.now(), start, end, category, durationLabel, durationHours, subject, focus, emoji: '📖' }); slots.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start)); }
-      saveState(); closeModal('slot-modal'); renderAll();
+      const prof = getActiveProfile();
+      const id = document.getElementById("sm-id").value;
+      const start = document.getElementById("sm-start").value;
+      const end = document.getElementById("sm-end").value;
+      const hrs = calcHrs(start, end);
+      const data = {
+        id: id || `slot-${Date.now()}`, start, end,
+        durationHours: hrs, durationLabel: fmtDurLabel(hrs),
+        category: document.getElementById("sm-cat").value,
+        subject: document.getElementById("sm-subject").value.trim(),
+        focus: document.getElementById("sm-focus").value.trim()
+      };
+      if (id) prof.slots = prof.slots.map(s => s.id === id ? data : s);
+      else prof.slots.push(data);
+      saveState(); closeModal("slot-modal"); renderAll();
     }
-    function moveSlot(i, dir) { const s = getActiveProfile().slots, n = i + dir; if (n < 0 || n >= s.length) return; [s[i], s[n]] = [s[n], s[i]]; saveState(); renderTimetable(); }
-    function deleteSlot(id) { openConfirm('Delete Slot?', 'Remove this time slot?', () => { getActiveProfile().slots = getActiveProfile().slots.filter(s => s.id !== id); saveState(); renderAll(); }); }
-    function openTitleEditModal() { const p = getActiveProfile(); document.getElementById('input-main-title').value = p.title; document.getElementById('input-subtitle').value = p.subtitle; openModal('title-modal'); }
-    function saveHeaderTitles(e) { e.preventDefault(); const p = getActiveProfile(); p.title = document.getElementById('input-main-title').value.trim(); p.subtitle = document.getElementById('input-subtitle').value.trim(); saveState(); closeModal('title-modal'); renderAll(); }
-    function openSaveTemplateModal() { document.getElementById('input-template-name').value = ''; openModal('template-modal'); }
-    function saveNewTemplate(e) { e.preventDefault(); const name = document.getElementById('input-template-name').value.trim(), p = getActiveProfile(), nid = 'tpl-' + Date.now(); appState.profiles[nid] = { name, title: p.title, subtitle: p.subtitle, slots: JSON.parse(JSON.stringify(p.slots)) }; appState.activeProfileId = nid; saveState(); closeModal('template-modal'); renderAll(); }
-    function deleteCustomTemplate() { const id = appState.activeProfileId; openConfirm('Delete Template?', `Delete "${getActiveProfile().name}"?`, () => { delete appState.profiles[id]; appState.activeProfileId = 'default-10hr'; saveState(); renderAll(); }); }
-    function openCategoriesModal() { renderCategoriesList(); openModal('categories-modal'); }
-    function addCustomCategory(e) { e.preventDefault(); const lbl = document.getElementById('cat-label-input').value.trim(); appState.customCategories['cat-' + Date.now()] = { label: lbl, color: document.getElementById('cat-color-input').value }; document.getElementById('cat-label-input').value = ''; saveState(); renderCategoriesList(); renderAll(); }
-    function renderCategoriesList() { document.getElementById('custom-categories-list').innerHTML = Object.entries(appState.customCategories || {}).map(([id, c]) => `<div class="p-2 rounded-xl border surface-input text-xs flex justify-between"><strong>${escapeHTML(c.label)}</strong><button onclick="delete appState.customCategories['${id}'];saveState();renderCategoriesList();renderAll();" class="text-rose-500">✕</button></div>`).join('') || '<p class="text-xs text-[var(--text-muted)] text-center py-4">No custom categories yet.</p>'; }
-    function openWeekdayModal() {
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      document.getElementById('weekday-rules-list').innerHTML = days.map((d, i) => `<div class="flex items-center justify-between gap-2 text-xs"><span class="font-bold">${d}</span><select onchange="appState.weekdayRules[${i}]=this.value;saveState();" class="rounded-lg border surface-input px-2 py-1 font-bold"><option value="">Manual</option>${Object.entries(appState.profiles).map(([id, p]) => `<option value="${id}" ${appState.weekdayRules?.[i] === id ? 'selected' : ''}>${escapeHTML(p.name)}</option>`).join('')}</select></div>`).join('');
-      openModal('weekday-modal');
+    function deleteSlot(id) {
+      const prof = getActiveProfile();
+      prof.slots = prof.slots.filter(s => s.id !== id);
+      saveState(); renderAll();
     }
-    function confirmResetDefault() { openConfirm('Reset Default Plan?', 'Restore original 10-slot timetable?', () => { appState.activeProfileId = 'default-10hr'; appState.profiles['default-10hr'] = { name: '10-Hr Backlog Plan', title: 'DAILY STUDY TIMETABLE', subtitle: 'Backlog Focus + Typing + Reasoning + GK/GS', slots: JSON.parse(JSON.stringify(DEFAULT_TIMETABLE)) }; saveState(); renderAll(); }); }
 
-    function openZenModal() { openModal('zen-modal'); }
-    function startSlotTimer(slotId) { const s = getActiveProfile().slots.find(x => x.id === slotId); if (!s) return; const mins = Math.min(50, Math.max(10, Math.round((s.durationHours || 0.5) * 60))); setTimerPreset(mins, `${s.subject} (${mins}m)`); }
-    function setTimerPreset(m, lbl) { pauseTimer(); timerTotalSeconds = m * 60; timerRemainingSeconds = timerTotalSeconds; document.getElementById('timer-mode-label').textContent = lbl; document.getElementById('mini-timer-title').textContent = lbl; updateTimerUI(); }
-    function toggleTimer() { isTimerRunning ? pauseTimer() : startTimer(); }
-    function startTimer() {
-      if (timerRemainingSeconds <= 0) timerRemainingSeconds = timerTotalSeconds;
-      isTimerRunning = true;
-      ['btn-timer-start', 'mini-timer-btn', 'zen-timer-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '⏸ Pause'; });
-      timerInterval = setInterval(() => {
-        timerRemainingSeconds--; updateTimerUI();
-        if (timerRemainingSeconds <= 0) { pauseTimer(); playChime([523.25, 659.25, 783.99, 1046.5]); if (notificationsEnabled) void sendDeviceNotification('Timer Complete!', 'Focus session finished.'); showToast('Time is up!', 'success'); }
-      }, 1000);
+    function renderRemindersModal() {
+      const list = appState.customReminders || [];
+      document.getElementById("custom-reminders-list").innerHTML = list.length ? list.map(r => `
+        <div class="p-3 rounded-2xl border surface-input flex items-center justify-between gap-2">
+          <label class="flex items-center gap-2 min-w-0 cursor-pointer">
+            <input type="checkbox" ${r.enabled ? "checked" : ""} onchange="toggleCustomRem('${esc(r.id)}')" />
+            <div class="min-w-0"><div class="text-xs font-extrabold truncate">${esc(r.title)} · ${fmt12(r.time24)}</div><div class="text-[11px] text-[var(--text-muted)] truncate">${esc(r.message)}</div></div>
+          </label>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" onclick="triggerCustomRem('${esc(r.id)}')" class="px-2 py-1 rounded accent-soft text-[11px] font-bold cursor-pointer">Trigger</button>
+            <button type="button" onclick="deleteCustomRem('${esc(r.id)}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-[11px] font-bold cursor-pointer">Del</button>
+          </div>
+        </div>
+      `).join("") : `<div class="text-xs text-[var(--text-muted)] text-center py-4">No custom reminders yet.</div>`;
     }
-    function pauseTimer() { isTimerRunning = false; clearInterval(timerInterval); ['btn-timer-start', 'mini-timer-btn', 'zen-timer-btn'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '▶ Start'; }); }
-    function resetTimer() { pauseTimer(); timerRemainingSeconds = timerTotalSeconds; updateTimerUI(); }
-    function updateTimerUI() {
-      const m = String(Math.floor(timerRemainingSeconds / 60)).padStart(2, '0'), s = String(timerRemainingSeconds % 60).padStart(2, '0');
-      ['timer-display', 'mini-timer-display', 'zen-timer-display'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = `${m}:${s}`; });
-      document.getElementById('timer-bar').style.width = `${timerTotalSeconds > 0 ? (timerRemainingSeconds / timerTotalSeconds) * 100 : 0}%`;
+    function addCustomReminder(e) {
+      e.preventDefault();
+      appState.customReminders.push({ id: `rem-${Date.now()}`, title: document.getElementById("rm-title").value.trim(), time24: document.getElementById("rm-time").value, message: document.getElementById("rm-msg").value.trim() || "Scheduled reminder.", enabled: true });
+      document.getElementById("rm-title").value = ""; document.getElementById("rm-msg").value = "";
+      saveState(); renderRemindersModal(); renderLiveAndDailyCards();
     }
-    function toggleSound() { isSoundEnabled = !isSoundEnabled; document.getElementById('btn-sound-toggle').textContent = isSoundEnabled ? '🔊' : '🔇'; }
+    function toggleCustomRem(id) { appState.customReminders = appState.customReminders.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r); saveState(); renderLiveAndDailyCards(); }
+    function deleteCustomRem(id) { appState.customReminders = appState.customReminders.filter(r => r.id !== id); saveState(); renderRemindersModal(); renderLiveAndDailyCards(); }
+    function triggerCustomRem(id) {
+      const r = appState.customReminders.find(x => x.id === id);
+      if (r) pushReminder({ id: `man-${r.id}-${Date.now()}`, title: "Custom Reminder", subject: r.title, timeRange: fmt12(r.time24), message: r.message }, r.title, r.message);
+    }
+    function triggerTestReminder() {
+      const s = buildTimeline()[0];
+      pushReminder({ id: `test-${Date.now()}`, title: "Reminder Preview", subject: s ? s.subject : "Study Session", timeRange: s ? `${fmt12(s.start)} - ${fmt12(s.end)}` : "Live", message: s ? s.focus : "Multi-reminder preview", slotId: s?.id, breakId: s?.category === "break" ? s.id : undefined, isBreakPrompt: s?.category === "break" }, "Study Reminder", s ? s.subject : "Shift alert preview");
+    }
 
-    function exportJSON() { const b = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' }), u = URL.createObjectURL(b), a = document.createElement('a'); a.href = u; a.download = `study-timetable-backup-${getTodayDateString()}.json`; a.click(); URL.revokeObjectURL(u); }
-    function importJSON(e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = ev => { try { const imp = JSON.parse(ev.target.result); if (imp?.profiles) { appState = { ...appState, ...imp }; saveState(); applyThemeAccent(); renderAll(); showToast('Backup restored!', 'success'); } } catch { showToast('Invalid JSON.', 'error'); } }; r.readAsText(f); e.target.value = ''; }
+    function renderExamModal() {
+      document.getElementById("exam-goals-list").innerHTML = (appState.examGoals || []).map(g => `
+        <div class="p-3 rounded-2xl border surface-input flex justify-between items-center">
+          <div><div class="text-xs font-extrabold">${esc(g.title)}</div><div class="text-[11px] font-mono-tab text-[var(--text-muted)]">${esc(g.targetDate)}</div></div>
+          <button type="button" onclick="appState.examGoals=appState.examGoals.filter(x=>x.id!=='${esc(g.id)}');saveState();renderExamModal();renderAll()" class="text-rose-600 text-xs font-bold cursor-pointer">Delete</button>
+        </div>
+      `).join("");
+    }
+    function addExamGoal(e) {
+      e.preventDefault();
+      appState.examGoals.push({ id: `g-${Date.now()}`, title: document.getElementById("eg-title").value.trim(), targetDate: document.getElementById("eg-date").value });
+      document.getElementById("eg-title").value = ""; saveState(); renderExamModal(); renderAll();
+    }
+
+    function renderHistoryModal() {
+      const keys = Array.from(new Set([...Object.keys(appState.archives), ...Object.keys(appState.dailyStudyLogs || {})])).sort().reverse();
+      document.getElementById("history-list").innerHTML = keys.length ? keys.map(k => {
+        const a = appState.archives[k];
+        const rec = appState.dailyStudyLogs?.[k];
+        const tot = (rec?.manualSeconds || 0) + Object.values(rec?.routineSecondsBySlot || {}).reduce((x, y) => x + (y || 0), 0) + (rec?.heldBreakSeconds || 0);
+        return `
+          <div class="p-3 rounded-2xl border surface-input flex justify-between items-center gap-2">
+            <div>
+              <div class="text-xs font-extrabold font-mono-tab">${k} ${a ? `· ${a.percentage}%` : ""} ${tot > 0 ? `· Timer Total: ${fmtHM(tot)}` : ""}</div>
+              <div class="text-[11px] text-[var(--text-muted)]">${a ? `${a.completedHours}/${a.targetHours} Hrs` : "Tracked via Study Timer"}</div>
+            </div>
+            <button type="button" onclick="currentDateStr='${k}';closeModal('history-modal');renderAll()" class="px-2.5 py-1 rounded-lg accent-soft text-xs font-bold cursor-pointer">Open</button>
+          </div>
+        `;
+      }).join("") : `<div class="text-xs text-[var(--text-muted)] text-center py-4">No study history yet.</div>`;
+    }
+
+    function shiftDate(off) { currentDateStr = shiftDateStr(currentDateStr, off); renderAll(); }
+    function jumpToday() { currentDateStr = getTodayStr(); renderAll(); }
+    function toggleEditMode() {
+      if (!isEditMode && appState.adminPin) { pinMode = "unlock"; openModal("pin-modal"); return; }
+      isEditMode = !isEditMode; renderAll();
+    }
+    function submitPin(e) {
+      e.preventDefault();
+      const val = document.getElementById("pin-input").value.trim();
+      if (!/^\d{4}$/.test(val)) return showToast("Enter a 4-digit PIN.", "error");
+      if (pinMode === "unlock") {
+        if (val === appState.adminPin) { isEditMode = true; closeModal("pin-modal"); renderAll(); }
+        else showToast("Incorrect PIN.", "error");
+      } else { appState.adminPin = val; saveState(); closeModal("pin-modal"); renderAll(); }
+    }
+    function removePin() { appState.adminPin = null; saveState(); closeModal("pin-modal"); }
+
+    function setPresetTimer(m, lbl) { isTimerRunning = false; timerTotalSecs = m * 60; timerRemSecs = m * 60; timerLabel = lbl; renderHeaderAndWidgets(); }
+    function toggleCountdownTimer() { if (!isTimerRunning && timerRemSecs <= 0) timerRemSecs = timerTotalSecs; isTimerRunning = !isTimerRunning; renderHeaderAndWidgets(); }
+    function resetCountdownTimer() { isTimerRunning = false; timerRemSecs = timerTotalSecs; renderHeaderAndWidgets(); }
+    function toggleSound() { isSoundEnabled = !isSoundEnabled; document.getElementById("sound-btn").textContent = isSoundEnabled ? "Sound: On" : "Sound: Off"; }
+    async function toggleNotifications() {
+      if (typeof Notification === "undefined") return showToast("Browser notifications unsupported.", "error");
+      const p = await Notification.requestPermission();
+      notificationsEnabled = p === "granted";
+      showToast(notificationsEnabled ? "Notifications enabled!" : "Permission denied.", notificationsEnabled ? "success" : "error");
+    }
+    function logTyping() {
+      const wpm = parseInt(document.getElementById("wpm-speed").value, 10);
+      const acc = parseInt(document.getElementById("wpm-acc").value, 10) || 100;
+      if (!wpm) return;
+      appState.typingLogs.unshift({ date: currentDateStr, lang: document.getElementById("wpm-lang").value, wpm, acc });
+      saveState(); showToast(`Logged ${wpm} WPM`, "success");
+    }
+    function exportJson() {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(appState, null, 2)], { type: "application/json" }));
+      a.download = `study-timetable-backup-${getTodayStr()}.json`; a.click();
+    }
+    function importJson(inp) {
+      const f = inp.files?.[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = e => {
+        try { appState = { ...createInitialState(), ...JSON.parse(e.target.result) }; saveState(); renderAll(); showToast("Backup restored!", "success"); }
+        catch { showToast("Invalid JSON.", "error"); }
+      };
+      r.readAsText(f); inp.value = "";
+    }
+
+    // Main 1-second loop: clock, countdown, manual/routine study tracking, 10m pre-shift, break prompts, auto-pause
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById("live-clock").textContent = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
+      const today = getTodayStr(now);
+      const timeline = buildTimeline();
+      const currM = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+
+      if (isTimerRunning) {
+        timerRemSecs--;
+        if (timerRemSecs <= 0) {
+          timerRemSecs = 0; isTimerRunning = false; playChime();
+          sendDeviceNotif("Timer Complete!", `${timerLabel} finished.`, `cd-${Date.now()}`);
+          showToast("Countdown complete!", "success");
+        }
+      }
+
+      if (isManualRunning || (isRoutineRunning && activeRoutineSlotId)) {
+        appState.dailyStudyLogs[today] = appState.dailyStudyLogs[today] || { manualSeconds: 0, routineSecondsBySlot: {}, heldBreakSeconds: 0 };
+        if (isManualRunning) appState.dailyStudyLogs[today].manualSeconds++;
+        if (isRoutineRunning && activeRoutineSlotId) {
+          appState.dailyStudyLogs[today].routineSecondsBySlot[activeRoutineSlotId] = (appState.dailyStudyLogs[today].routineSecondsBySlot[activeRoutineSlotId] || 0) + 1;
+        }
+        tickCounter++;
+        saveState(tickCounter % 15 !== 0);
+      }
+
+      // Check Routine auto-pause on scheduled end
+      if (isRoutineRunning && activeRoutineSlotId) {
+        const rs = timeline.find(s => s.id === activeRoutineSlotId);
+        const autoKey = `${today}:${activeRoutineSlotId}`;
+        if (rs && !autoPausedKeys.has(autoKey)) {
+          const curS = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+          if (curS >= toMins(rs.end) * 60 && toMins(rs.end) > toMins(rs.start)) {
+            autoPausedKeys.add(autoKey);
+            isRoutineRunning = false;
+            evaluateRoutineTolerance(rs, appState.dailyStudyLogs[today]?.routineSecondsBySlot?.[rs.id] || 0);
+            pushReminder({
+              id: `rend-${rs.id}-${today}`, title: "Schedule Finished · Auto-Paused", subject: rs.subject,
+              timeRange: `${fmt12(rs.start)} - ${fmt12(rs.end)}`,
+              message: "Scheduled block ended & timer auto-paused. Tap Resume Timer to continue.",
+              slotId: rs.id, canResumeRoutine: true
+            }, `Finished: ${rs.subject}`, "Tap Resume Timer if you want to continue studying.");
+          }
+        }
+      }
+
+      // 10-min Pre-Shift + Break Entry + Shift Change + Custom Reminders
+      const hhmm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      (appState.customReminders || []).forEach(r => {
+        const ck = `${today}:${r.id}`;
+        if (r.enabled && r.time24 === hhmm && !firedCustomKeys.has(ck)) {
+          firedCustomKeys.add(ck);
+          pushReminder({ id: `cust-${r.id}-${today}`, title: "Custom Reminder", subject: r.title, timeRange: fmt12(r.time24), message: r.message }, r.title, r.message);
+        }
+      });
+
+      if (appState.shiftAlertsEnabled !== false) {
+        timeline.forEach(s => {
+          if (s.category === "break") return;
+          const diff = toMins(s.start) - currM;
+          const pk = `${today}:pre10:${s.id}`;
+          if (diff > 0 && diff <= 10 && !firedPreShiftKeys.has(pk)) {
+            firedPreShiftKeys.add(pk);
+            const mins = Math.max(1, Math.ceil(diff));
+            pushReminder({ id: `pre-${s.id}-${today}`, title: `Upcoming in ${mins} min`, subject: s.subject, timeRange: `${fmt12(s.start)} - ${fmt12(s.end)}`, message: `Starts in ${mins} min: ${s.focus}`, slotId: s.id }, `Upcoming in ${mins}m: ${s.subject}`, s.focus);
+          }
+        });
+
+        const live = timeline.find(s => isInSlot(currM, s.start, s.end)) || null;
+        if (!mountedNotif) { mountedNotif = true; prevLiveSlotId = live?.id || null; }
+        else if (live && live.id !== prevLiveSlotId) {
+          prevLiveSlotId = live.id;
+          if (live.category === "break") {
+            pushReminder({ id: `brk-${live.id}-${Date.now()}`, title: live.isGapBreak ? "Schedule Gap · Break" : "Break Started", subject: live.subject, timeRange: `${fmt12(live.start)} - ${fmt12(live.end)}`, message: "Take a break or hold break to continue studying.", breakId: live.id, isBreakPrompt: true }, `Break: ${live.subject}`, "Take break or continue studying.");
+          } else {
+            pushReminder({ id: `sh-${live.id}-${Date.now()}`, title: "Study Shift Started", subject: live.subject, timeRange: `${fmt12(live.start)} - ${fmt12(live.end)}`, message: live.focus, slotId: live.id }, `Shift Started: ${live.subject}`, live.focus);
+          }
+        }
+      }
+
+      renderHeaderAndWidgets();
+      renderLiveAndDailyCards();
+    }, 1000);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      applyThemeAccent();
+      document.getElementById("date-input").addEventListener("change", e => { if (e.target.value) { currentDateStr = e.target.value; renderAll(); } });
+      renderAll();
+      pullCloud();
+    });
   </script>
 </body>
 </html>
