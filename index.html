@@ -2632,7 +2632,7 @@
                 ${renaming ? `<input id="rename-break-${esc(s.id)}" value="${esc(s.subject)}" onkeydown="if(event.key==='Enter'){event.preventDefault();saveBreakRename('${safeId}',${Boolean(s.isGapBreak)},'${safeGapId}');}else if(event.key==='Escape'){renamingBreakId=null;renderTimelineList();}" class="rounded border surface-input px-2 py-0.5 text-xs font-bold" /><button type="button" onclick="saveBreakRename('${safeId}',${Boolean(s.isGapBreak)},'${safeGapId}')" class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-bold cursor-pointer">Save</button>` : `<span class="text-xs font-extrabold truncate ${isDone ? "line-through opacity-60" : ""}">${esc(s.subject)}</span>`}
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
-                ${isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${safeId}';renderTimelineList()" class="px-2 py-1 rounded border surface-input text-[10px] font-bold cursor-pointer">Rename</button>` : ""}
+                ${isEditMode && isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${safeId}';renderTimelineList()" class="px-2 py-1 rounded border surface-input text-[10px] font-bold cursor-pointer">Rename</button>` : ""}
                 ${!isBreak && isToday && !isEditMode ? `<button type="button" onclick="toggleRoutineTimer('${safeId}')" class="px-2.5 py-1 rounded text-[11px] font-bold text-white cursor-pointer ${rRunning ? "bg-amber-600" : "bg-emerald-600"}">${startBtnLabel}</button>` : ""}
                 ${isEditMode && !s.isGapBreak ? `<button type="button" onclick="openSlotModal('${safeId}')" class="px-2 py-1 rounded bg-amber-500/20 text-xs font-bold cursor-pointer">Edit</button><button type="button" onclick="deleteSlot('${safeId}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-xs font-bold cursor-pointer">Del</button>` : ""}
               </div>
@@ -2652,7 +2652,7 @@
                 </div>
               </div>
               <div class="flex flex-wrap gap-1.5 shrink-0">
-                ${isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${safeId}';renderTimelineList()" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Name Break</button>` : ""}
+                ${isEditMode && isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${safeId}';renderTimelineList()" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Name Break</button>` : ""}
                 ${!isBreak && isToday && !isEditMode ? `<button type="button" onclick="toggleRoutineTimer('${safeId}')" class="px-3.5 py-1.5 rounded-xl text-white text-xs font-extrabold cursor-pointer ${rRunning ? "bg-amber-600" : "bg-emerald-600"}">${rRunning ? "Pause Study" : (rSecs > 0 ? "Resume Study" : "Start Study & Countdown")}</button>` : ""}
                 ${isEditMode && !s.isGapBreak ? `<button type="button" onclick="openSlotModal('${safeId}')" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-xs font-bold cursor-pointer">Edit</button><button type="button" onclick="deleteSlot('${safeId}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 text-rose-600 text-xs font-bold cursor-pointer">Delete</button>` : ""}
               </div>
@@ -3504,7 +3504,9 @@
     function jumpToday() { currentDateStr = getTodayStr(); renderAll(); }
     function toggleEditMode() {
       if (!isEditMode && appState.adminPin) { openPinModal("unlock"); return; }
-      isEditMode = !isEditMode; renderAll();
+      isEditMode = !isEditMode;
+      if (!isEditMode) renamingBreakId = null;
+      renderAll();
     }
 
     function openPinModal(mode = "manage") {
