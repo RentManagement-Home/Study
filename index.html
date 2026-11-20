@@ -100,6 +100,9 @@
     }
     .font-mono-tab { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
     .surface-panel { background: var(--surface-panel); backdrop-filter: blur(16px); border: 1px solid var(--border-panel); box-shadow: 0 8px 28px rgba(15,23,42,0.06); }
+    header.surface-panel { background: rgba(255, 255, 255, 0.5); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+    [data-theme="dark"] header.surface-panel { background: rgba(17, 24, 39, 0.5); }
+    [data-theme="paper"] header.surface-panel { background: rgba(253, 249, 241, 0.5); }
     .surface-card { background: var(--surface-card); border: 1px solid var(--border-panel); transition: transform 0.16s ease, box-shadow 0.16s ease; }
     .surface-input { background: var(--surface-input); color: var(--text-primary); border-color: var(--border-panel); }
     .accent-btn { background: var(--accent-primary); color: #fff; }
@@ -130,21 +133,6 @@
             <button type="button" onclick="openModal('exam-modal')" id="hdr-goal-btn" class="text-[11px] font-bold accent-text hover:underline cursor-pointer"></button>
           </div>
         </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <!-- Emoji-style Theme Switcher -->
-          <div class="flex items-center gap-1 p-1 rounded-xl border surface-input" role="group" aria-label="Color Mode">
-            <button type="button" onclick="setTheme('light')" data-theme-opt="light" title="Light Mode" aria-label="Light Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">☀️</button>
-            <button type="button" onclick="setTheme('dark')" data-theme-opt="dark" title="Midnight Mode" aria-label="Midnight Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">🌙</button>
-            <button type="button" onclick="setTheme('paper')" data-theme-opt="paper" title="Paper Mode" aria-label="Paper Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">📜</button>
-          </div>
-          <div class="flex items-center gap-1 px-2 py-1.5 rounded-xl border surface-input">
-            <button type="button" onclick="setAccent('indigo')" class="w-3.5 h-3.5 rounded-full bg-indigo-600 cursor-pointer" title="Indigo"></button>
-            <button type="button" onclick="setAccent('emerald')" class="w-3.5 h-3.5 rounded-full bg-emerald-600 cursor-pointer" title="Emerald"></button>
-            <button type="button" onclick="setAccent('teal')" class="w-3.5 h-3.5 rounded-full bg-teal-600 cursor-pointer" title="Teal"></button>
-            <button type="button" onclick="setAccent('amber')" class="w-3.5 h-3.5 rounded-full bg-amber-500 cursor-pointer" title="Amber"></button>
-            <button type="button" onclick="setAccent('rose')" class="w-3.5 h-3.5 rounded-full bg-rose-600 cursor-pointer" title="Rose"></button>
-          </div>
-        </div>
       </div>
 
       <!-- Scrollable Toolbar -->
@@ -157,10 +145,12 @@
           <span id="today-indicator-pill" class="ml-1 px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold uppercase">Today</span>
           <button type="button" id="today-btn" onclick="jumpToday()" class="hidden ml-1 px-2 py-1 rounded-lg accent-soft text-[11px] font-extrabold cursor-pointer">Go to Today</button>
         </div>
-        <button type="button" onclick="openModal('plans-modal')" class="shrink-0 px-3 py-1.5 rounded-xl accent-soft text-xs font-bold whitespace-nowrap cursor-pointer">Routine &amp; Plans</button>
         <button type="button" onclick="openModal('history-modal')" id="history-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">History</button>
         <button type="button" onclick="toggleEditMode()" id="edit-mode-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">Edit Mode</button>
-        <button type="button" onclick="openModal('code-modal')" class="shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold whitespace-nowrap cursor-pointer">Updated Code &amp; GAS</button>
+        <button type="button" onclick="openProfileModal()" id="hdr-profile-btn" title="Profile" class="shrink-0 flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer hover:opacity-90 transition">
+          <span id="hdr-profile-avatar" class="w-6 h-6 rounded-full accent-btn flex items-center justify-center text-[10px] font-extrabold overflow-hidden shrink-0">S</span>
+          <span id="hdr-profile-name" class="max-w-[96px] truncate">Profile</span>
+        </button>
       </div>
     </div>
   </header>
@@ -199,10 +189,7 @@
       <div class="flex flex-wrap gap-2">
         <button type="button" onclick="openSlotModal(null)" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold cursor-pointer">+ Add Slot</button>
         <button type="button" onclick="openModal('plans-modal')" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-bold cursor-pointer">Routine &amp; Plans</button>
-        <button type="button" onclick="exportJson()" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Export JSON</button>
-        <label class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">
-          Import JSON <input type="file" accept=".json" class="hidden" onchange="importJson(this)" />
-        </label>
+        <button type="button" onclick="openTitleModal()" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Edit Title &amp; Subtitle</button>
         <button type="button" onclick="openPinModal('manage')" id="pin-btn" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Set PIN</button>
       </div>
     </div>
@@ -220,7 +207,6 @@
         <div class="surface-panel rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5">
           <div id="filter-bar" class="flex items-center gap-1.5 flex-wrap"></div>
           <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-            <button type="button" onclick="openModal('plans-modal')" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Routine &amp; Plans</button>
             <div class="flex items-center p-0.5 rounded-xl border surface-input" role="group" aria-label="View type">
               <button type="button" id="view-compact-btn" onclick="setDensity('compact')" class="px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer">Compact</button>
               <button type="button" id="view-cards-btn" onclick="setDensity('comfortable')" class="px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer">Cards</button>
@@ -467,6 +453,82 @@
     </div>
   </div>
 
+  <!-- EDIT TITLE & SUBTITLE MODAL -->
+  <div id="title-modal" data-modal-backdrop="title-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-3">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-extrabold">Edit Title &amp; Subtitle</h3>
+        <button type="button" onclick="closeModal('title-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button>
+      </div>
+      <form onsubmit="saveTitleForm(event)" class="space-y-3">
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-[var(--text-muted)]">Apply To</label>
+          <select id="tm-scope" class="w-full rounded-xl border surface-input px-2.5 py-2 text-xs font-bold"></select>
+        </div>
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-[var(--text-muted)]">Header Title</label>
+          <input type="text" id="tm-title" required placeholder="e.g., DAILY STUDY TIMETABLE" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
+        </div>
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-[var(--text-muted)]">Subtitle</label>
+          <input type="text" id="tm-subtitle" placeholder="e.g., Backlog Focus + Typing + Reasoning + GK/GS" class="w-full rounded-xl border surface-input px-3 py-2 text-xs" />
+        </div>
+        <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Save Title &amp; Subtitle</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- USER PROFILE MODAL -->
+  <div id="profile-modal" data-modal-backdrop="profile-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-extrabold">My Study Profile</h3>
+        <button type="button" onclick="closeModal('profile-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button>
+      </div>
+      <div class="p-3.5 rounded-2xl border surface-input flex items-center gap-3.5">
+        <div id="prof-preview-avatar" class="w-14 h-14 rounded-full accent-btn flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 shadow-sm">S</div>
+        <div class="min-w-0 flex-1">
+          <div id="prof-preview-name" class="text-sm font-extrabold truncate">Student</div>
+          <div id="prof-preview-target" class="text-[11px] text-[var(--text-muted)] truncate">Set your target exam or motto</div>
+          <div id="prof-stats-summary" class="text-[11px] font-mono-tab font-bold accent-text mt-1">0d streak · 0.0 Hrs total</div>
+        </div>
+      </div>
+      <form onsubmit="saveProfileForm(event)" class="space-y-3">
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-[var(--text-muted)]">Display Name</label>
+          <input type="text" id="prof-name" required maxlength="36" oninput="updateProfileModalPreview()" placeholder="Your name" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
+        </div>
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-[var(--text-muted)]">Target Exam / Bio</label>
+          <input type="text" id="prof-target" maxlength="80" oninput="updateProfileModalPreview()" placeholder="e.g., SSC CGL 2026 · Focus & Consistency" class="w-full rounded-xl border surface-input px-3 py-2 text-xs" />
+        </div>
+        <div class="flex items-center justify-between gap-2 pt-0.5">
+          <button type="button" id="prof-remove-avatar-btn" onclick="removeProfileAvatar()" class="hidden px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-600 text-xs font-bold cursor-pointer">Remove Photo</button>
+        </div>
+        <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Save Profile</button>
+      </form>
+      <div class="pt-3 border-t border-slate-500/15 space-y-2.5">
+        <div class="text-[11px] font-extrabold uppercase text-[var(--text-muted)]">Appearance</div>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <!-- Emoji-style Theme Switcher -->
+          <div class="flex items-center gap-1 p-1 rounded-xl border surface-input" role="group" aria-label="Color Mode">
+            <button type="button" onclick="setTheme('light')" data-theme-opt="light" title="Light Mode" aria-label="Light Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">☀️</button>
+            <button type="button" onclick="setTheme('dark')" data-theme-opt="dark" title="Midnight Mode" aria-label="Midnight Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">🌙</button>
+            <button type="button" onclick="setTheme('paper')" data-theme-opt="paper" title="Paper Mode" aria-label="Paper Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">📜</button>
+          </div>
+          <!-- Accent Color Picker -->
+          <div class="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border surface-input">
+            <button type="button" onclick="setAccent('indigo')" class="w-4 h-4 rounded-full bg-indigo-600 cursor-pointer" title="Indigo"></button>
+            <button type="button" onclick="setAccent('emerald')" class="w-4 h-4 rounded-full bg-emerald-600 cursor-pointer" title="Emerald"></button>
+            <button type="button" onclick="setAccent('teal')" class="w-4 h-4 rounded-full bg-teal-600 cursor-pointer" title="Teal"></button>
+            <button type="button" onclick="setAccent('amber')" class="w-4 h-4 rounded-full bg-amber-500 cursor-pointer" title="Amber"></button>
+            <button type="button" onclick="setAccent('rose')" class="w-4 h-4 rounded-full bg-rose-600 cursor-pointer" title="Rose"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- GLOBAL DELETE CONFIRMATION MODAL -->
   <div id="confirm-modal" data-modal-backdrop="confirm-modal" class="hidden fixed inset-0 z-[60] bg-slate-950/70 backdrop-blur-sm p-4 flex items-center justify-center">
     <div class="surface-panel rounded-3xl max-w-sm w-full p-5 space-y-3 border-2 border-rose-500/40">
@@ -601,7 +663,8 @@
         typingLogs: [],
         examGoals: [],
         stickyNotes: [],
-        activeBreakHold: null
+        activeBreakHold: null,
+        userProfile: { name: "Student", examTarget: "", avatarDataUrl: "" }
       };
     }
 
@@ -644,7 +707,14 @@
         typingLogs: Array.isArray(s.typingLogs) ? s.typingLogs : [],
         examGoals: Array.isArray(s.examGoals) ? s.examGoals : [],
         stickyNotes: Array.isArray(s.stickyNotes) ? s.stickyNotes : [],
-        activeBreakHold: s.activeBreakHold && typeof s.activeBreakHold === "object" ? s.activeBreakHold : null
+        activeBreakHold: s.activeBreakHold && typeof s.activeBreakHold === "object" ? s.activeBreakHold : null,
+        userProfile: s.userProfile && typeof s.userProfile === "object"
+          ? {
+              name: typeof s.userProfile.name === "string" && s.userProfile.name.trim() ? s.userProfile.name : "Student",
+              examTarget: typeof s.userProfile.examTarget === "string" ? s.userProfile.examTarget : "",
+              avatarDataUrl: typeof s.userProfile.avatarDataUrl === "string" ? s.userProfile.avatarDataUrl : ""
+            }
+          : base.userProfile
       };
     }
 
@@ -2425,6 +2495,7 @@
       document.getElementById("edit-banner").classList.toggle("hidden", !isEditMode);
       document.getElementById("edit-mode-btn").textContent = isEditMode ? "Done Editing" : "Edit Mode";
       document.getElementById("pin-btn").textContent = appState.adminPin ? "Change / Remove PIN" : "Set PIN";
+      renderHeaderProfile();
 
       const showNotifPrompt = typeof Notification !== "undefined" && Notification.permission === "default" && !notifBannerDismissed;
       document.getElementById("notif-permission-banner").classList.toggle("hidden", !showNotifPrompt);
@@ -2470,6 +2541,164 @@
       if (id === "code-modal") switchCodeTab("bugs");
     }
     function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
+
+    function openTitleModal() {
+      const sched = getScheduleForDate(currentDateStr);
+      const today = getTodayStr();
+      document.getElementById("tm-title").value = sched.title || "";
+      document.getElementById("tm-subtitle").value = sched.subtitle || "";
+
+      const scopeSel = document.getElementById("tm-scope");
+      if (sched.isCustomOverride) {
+        scopeSel.innerHTML = `
+          <option value="custom_day">This Custom Date Only (${currentDateStr})</option>
+          <option value="routine">Daily Routine (${currentDateStr >= today ? "from " + currentDateStr + " onward" : "current active routine"})</option>
+        `;
+      } else {
+        scopeSel.innerHTML = `
+          <option value="routine">Active Daily Routine</option>
+          <option value="custom_day">This Date Only (${currentDateStr})</option>
+        `;
+      }
+      openModal("title-modal");
+      setTimeout(() => document.getElementById("tm-title").focus(), 50);
+    }
+
+    function saveTitleForm(e) {
+      e.preventDefault();
+      const title = document.getElementById("tm-title").value.trim();
+      const subtitle = document.getElementById("tm-subtitle").value.trim();
+      const scope = document.getElementById("tm-scope").value;
+      if (!title) return showToast("Title cannot be empty.", "error");
+
+      if (scope === "custom_day") {
+        const ov = ensureCustomOverrideForDate(currentDateStr);
+        ov.title = title;
+        ov.subtitle = subtitle;
+        showToast(`Updated title & subtitle for ${currentDateStr}.`, "success");
+      } else {
+        const hist = appState.routineHistory || [];
+        let histIdx = -1;
+        for (let i = 0; i < hist.length; i++) {
+          if (hist[i].effectiveFrom <= currentDateStr) histIdx = i;
+        }
+        if (histIdx < 0 && hist.length > 0) histIdx = 0;
+
+        if (histIdx >= 0) {
+          hist[histIdx].title = title;
+          hist[histIdx].subtitle = subtitle;
+          const pid = hist[histIdx].profileId;
+          if (pid && appState.profiles[pid]) {
+            appState.profiles[pid].title = title;
+            appState.profiles[pid].subtitle = subtitle;
+          }
+        } else if (appState.profiles[appState.activeProfileId]) {
+          appState.profiles[appState.activeProfileId].title = title;
+          appState.profiles[appState.activeProfileId].subtitle = subtitle;
+        }
+        showToast("Updated header title & subtitle!", "success");
+      }
+      saveState();
+      closeModal("title-modal");
+      renderAll();
+    }
+
+    // ==================== USER PROFILE (Right-Side Toolbar) ====================
+    let draftProfileAvatarUrl = "";
+
+    function getProfileInitials(name) {
+      const parts = String(name || "S").trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 0) return "S";
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function renderAvatarInto(el, name, avatarDataUrl) {
+      if (!el) return;
+      if (avatarDataUrl) {
+        el.innerHTML = `<img src="${esc(avatarDataUrl)}" alt="${esc(name)}" class="w-full h-full object-cover" />`;
+      } else {
+        el.textContent = getProfileInitials(name);
+      }
+    }
+
+    function renderHeaderProfile() {
+      const prof = appState.userProfile || { name: "Student", examTarget: "", avatarDataUrl: "" };
+      const nameEl = document.getElementById("hdr-profile-name");
+      const avEl = document.getElementById("hdr-profile-avatar");
+      if (nameEl) nameEl.textContent = prof.name || "Student";
+      renderAvatarInto(avEl, prof.name || "Student", prof.avatarDataUrl || "");
+    }
+
+    function getAllTimeStudyHours() {
+      let totalSecs = 0;
+      Object.keys(appState.dailyStudyLogs || {}).forEach(dayKey => {
+        totalSecs += getDayTotalStudySeconds(dayKey, dayKey === getTodayStr()).totalS;
+      });
+      return totalSecs / 3600;
+    }
+
+    function updateProfileModalPreview() {
+      const name = document.getElementById("prof-name").value.trim() || "Student";
+      const target = document.getElementById("prof-target").value.trim();
+      document.getElementById("prof-preview-name").textContent = name;
+      document.getElementById("prof-preview-target").textContent = target || "Set your target exam or motto";
+      renderAvatarInto(document.getElementById("prof-preview-avatar"), name, draftProfileAvatarUrl);
+      document.getElementById("prof-remove-avatar-btn").classList.toggle("hidden", !draftProfileAvatarUrl);
+    }
+
+    function openProfileModal() {
+      const prof = appState.userProfile || { name: "Student", examTarget: "", avatarDataUrl: "" };
+      draftProfileAvatarUrl = prof.avatarDataUrl || "";
+      document.getElementById("prof-name").value = prof.name || "Student";
+      document.getElementById("prof-target").value = prof.examTarget || "";
+      const streak = computeStreak();
+      const totalHrs = getAllTimeStudyHours();
+      document.getElementById("prof-stats-summary").textContent = `${streak}d streak · ${totalHrs.toFixed(1)} Hrs total studied`;
+      updateProfileModalPreview();
+      openModal("profile-modal");
+    }
+
+    function handleProfileAvatarUpload(inp) {
+      const file = inp.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          const size = 128;
+          const canvas = document.createElement("canvas");
+          canvas.width = size;
+          canvas.height = size;
+          const ctx = canvas.getContext("2d");
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+          draftProfileAvatarUrl = canvas.toDataURL("image/jpeg", 0.78);
+          updateProfileModalPreview();
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+      inp.value = "";
+    }
+
+    function removeProfileAvatar() {
+      draftProfileAvatarUrl = "";
+      updateProfileModalPreview();
+    }
+
+    function saveProfileForm(e) {
+      e.preventDefault();
+      const name = document.getElementById("prof-name").value.trim() || "Student";
+      const examTarget = document.getElementById("prof-target").value.trim();
+      appState.userProfile = { name, examTarget, avatarDataUrl: draftProfileAvatarUrl || "" };
+      saveState();
+      renderHeaderProfile();
+      closeModal("profile-modal");
+      showToast("Profile updated!", "success");
+    }
 
     // ==================== UPDATED CODE & GAS VIEWER MODAL ====================
     let activeCodeTab = "bugs";
