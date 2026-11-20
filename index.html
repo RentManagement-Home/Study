@@ -312,15 +312,9 @@
           </div>
 
           <div class="space-y-1">
-            <label for="signup-userid" class="block text-xs font-extrabold text-[var(--text-secondary)]">Create Your Own User ID</label>
-            <input type="text" id="signup-userid" required minlength="3" maxlength="24" pattern="[A-Za-z0-9._-]{3,24}" autocomplete="off" placeholder="e.g., abhi01, study_99, id-2026" class="w-full rounded-2xl border surface-input px-3.5 py-2.5 text-sm font-semibold font-mono-tab focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]" />
-            <p class="text-[11px] font-semibold text-[var(--text-muted)]">3–24 chars (letters, numbers, . _ - · no spaces). Permanent &amp; unique.</p>
-          </div>
-
-          <div class="space-y-1">
             <label for="signup-username" class="block text-xs font-extrabold text-[var(--text-secondary)]">Username</label>
             <input type="text" id="signup-username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" autocomplete="username" placeholder="Choose a unique username (min 3 chars)" class="w-full rounded-2xl border surface-input px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]" />
-            <p class="text-[11px] font-semibold text-[var(--text-muted)]">One username can only be linked to one User ID.</p>
+            <p class="text-[11px] font-semibold text-[var(--text-muted)]">One username creates one automatic User ID in Google Apps Script.</p>
           </div>
 
           <div class="space-y-1">
@@ -4070,13 +4064,13 @@
       if (loginForm) loginForm.classList.toggle("hidden", isSignup);
       if (signupForm) signupForm.classList.toggle("hidden", !isSignup);
       if (titleEl) titleEl.textContent = isSignup ? "Create Account" : "Daily Study Timetable";
-      if (subEl) subEl.textContent = isSignup ? "Create your own unique User ID & username" : "Sign in with your username or User ID to continue";
+      if (subEl) subEl.textContent = isSignup ? "One unique username creates one automatic ID" : "Sign in with your username or User ID to continue";
       if (promptEl) promptEl.textContent = isSignup ? "Already have an account?" : "Don't have an account?";
       if (switchLbl) switchLbl.textContent = isSignup ? "Back to Sign In" : "Create Account";
       if (createIcon) createIcon.classList.toggle("hidden", isSignup);
 
       setTimeout(() => {
-        const focusEl = document.getElementById(isSignup ? "signup-userid" : "login-username");
+        const focusEl = document.getElementById(isSignup ? "signup-name" : "login-username");
         if (focusEl) focusEl.focus();
       }, 40);
     }
@@ -4140,8 +4134,7 @@
               .registerUser(
                 actionPayload.username,
                 actionPayload.password,
-                actionPayload.displayName || "",
-                actionPayload.userId || ""
+                actionPayload.displayName || ""
               );
           } else if (actionPayload.action === "changeCredentials") {
             google.script.run
@@ -4214,17 +4207,12 @@
     async function handleSignupSubmit(e) {
       e.preventDefault();
       const displayName = (document.getElementById("signup-name")?.value || "").trim();
-      const customUserId = (document.getElementById("signup-userid")?.value || "").trim();
       const username = (document.getElementById("signup-username")?.value || "").trim();
       const password = document.getElementById("signup-password")?.value || "";
       const confirmPassword = document.getElementById("signup-confirm-password")?.value || "";
       const btn = document.getElementById("signup-submit-btn");
       const lbl = document.getElementById("signup-submit-label");
 
-      if (!USER_ID_REGEX.test(customUserId)) {
-        setSignupError("User ID must be 3–24 characters using only letters, numbers, dots (.), underscores (_), or hyphens (-) with no spaces.");
-        return;
-      }
       if (!USERNAME_REGEX.test(username)) {
         setSignupError("Username must be 3–32 characters using only letters, numbers, dots (.), underscores (_), or hyphens (-) with no spaces.");
         return;
@@ -4240,12 +4228,11 @@
 
       setSignupError("");
       if (btn) btn.disabled = true;
-      if (lbl) lbl.textContent = "Creating your User ID...";
+      if (lbl) lbl.textContent = "Creating account...";
 
       try {
         const res = await callGasAuthAction({
           action: "register",
-          userId: customUserId,
           username,
           password,
           displayName
@@ -4253,13 +4240,13 @@
         if (res && res.status === "success" && res.authenticated === true) {
           const createdUser = res.username || username;
           const hasServerId = Boolean(res.userId);
-          const createdId = res.userId || customUserId;
+          const createdId = res.userId || "";
           completeLoginSuccess(
             createdUser,
             res.token || "",
             true,
             null,
-            `Account created with ID ${createdId}! Welcome, ${createdUser}!`,
+            `Account created${createdId ? ` (${createdId})` : ""}! Welcome, ${createdUser}!`,
             createdId,
             res.displayName || displayName || createdUser,
             true,
