@@ -313,7 +313,8 @@
 
           <div class="space-y-1">
             <label for="signup-username" class="block text-xs font-extrabold text-[var(--text-secondary)]">Username</label>
-            <input type="text" id="signup-username" required minlength="3" maxlength="32" autocomplete="username" placeholder="Choose a username (min 3 chars)" class="w-full rounded-2xl border surface-input px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]" />
+            <input type="text" id="signup-username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" autocomplete="username" placeholder="Choose a unique username (min 3 chars)" class="w-full rounded-2xl border surface-input px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]" />
+            <p class="text-[11px] font-semibold text-[var(--text-muted)]">One username creates one personal ID (letters, numbers, . _ - · no spaces).</p>
           </div>
 
           <div class="space-y-1">
@@ -762,7 +763,7 @@
           <div class="text-[11px] font-extrabold accent-text">Change Username</div>
           <div class="space-y-1">
             <label class="text-[11px] font-bold text-[var(--text-muted)]">New Username</label>
-            <input type="text" id="user-new-name" required minlength="3" autocomplete="username" placeholder="Enter new username (min 3 chars)" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+            <input type="text" id="user-new-name" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" autocomplete="username" placeholder="Enter new username (no spaces)" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
           </div>
           <div class="space-y-1">
             <label class="text-[11px] font-bold text-[var(--text-muted)]">Current Password</label>
@@ -1445,9 +1446,46 @@
     }
 
     // ==================== PERSISTENCE & CLOUD SYNC ====================
+    const USERNAME_REGEX = /^[a-zA-Z0-9._-]{3,32}$/;
+
+    function getActiveUserId() {
+      const auth = getAuthSession();
+      return auth && typeof auth.userId === "string" && auth.userId.trim() ? auth.userId.trim() : "";
+    }
+
+    function getUserStorageKey(userIdOverride) {
+      const uid = userIdOverride !== undefined ? String(userIdOverride || "").trim() : getActiveUserId();
+      return uid ? `${STORAGE_KEY}__${uid}` : STORAGE_KEY;
+    }
+
+    function getUserTimerKey(userIdOverride) {
+      const uid = userIdOverride !== undefined ? String(userIdOverride || "").trim() : getActiveUserId();
+      return uid ? `${TIMER_RUNTIME_KEY}__${uid}` : TIMER_RUNTIME_KEY;
+    }
+
+    function resetRuntimeTimers() {
+      timerTotalSecs = 25 * 60;
+      timerRemSecs = 25 * 60;
+      timerEndAtMs = null;
+      timerLabel = "Pomodoro Focus (25m)";
+      isTimerRunning = false;
+      timerLinkedRoutineSlotId = null;
+      focusLastTickMs = null;
+      isManualRunning = false;
+      manualLastTickMs = null;
+      activeRoutineSlotId = null;
+      isRoutineRunning = false;
+      routineLastTickMs = null;
+      routineStartedBeforeEnd = false;
+      routineSchedEndMs = null;
+      routineMode = "live";
+      routineSessionStartMs = null;
+      routineSessionElapsedBase = 0;
+    }
+
     function saveTimerRuntime() {
       try {
-        localStorage.setItem(TIMER_RUNTIME_KEY, JSON.stringify({
+        localStorage.setItem(getUserTimerKey(), JSON.stringify({
           savedDate: getTodayStr(),
           timerTotalSecs,
           timerRemSecs,
@@ -1471,8 +1509,13 @@
     }
 
     function loadTimerRuntime() {
+      resetRuntimeTimers();
       try {
-        const raw = localStorage.getItem(TIMER_RUNTIME_KEY);
+        const uid = getActiveUserId();
+        let raw = localStorage.getItem(getUserTimerKey(uid));
+        if (!raw && uid === "ID-1001") {
+          raw = localStorage.getItem(TIMER_RUNTIME_KEY);
+        }
         if (!raw) return;
         const rt = JSON.parse(raw);
         if (!rt || typeof rt !== "object") return;
@@ -1497,8 +1540,17 @@
     }
 
     function loadState() {
+      appState = createInitialState();
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const uid = getActiveUserId();
+        const key = getUserStorageKey(uid);
+        let saved = localStorage.getItem(key);
+        if (!saved && uid === "ID-1001") {
+          saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            try { localStorage.setItem(key, saved); } catch {}
+          }
+        }
         if (saved) appState = normalizeState(JSON.parse(saved));
       } catch {}
       isSoundEnabled = appState.soundEnabled !== false;
@@ -1510,8 +1562,8 @@
     function saveState(skipCloud = false) {
       appState.updatedAt = Date.now();
       appState.activeBreakHold = breakHold;
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
-      if (!skipCloud) {
+      try { localStorage.setItem(getUserStorageKey(), JSON.stringify(appState)); } catch {}
+      if (!skipCloud && isUserAuthenticated()) {
         clearTimeout(syncTimeout);
         syncTimeout = setTimeout(() => pushCloud(), 1500);
       }
@@ -1521,16 +1573,41 @@
       return (typeof google !== "undefined" && google.script && google.script.run) || Boolean(GAS_WEB_APP_URL);
     }
 
+    function handleExpiredAuthSession() {
+      if (!isUserAuthenticated()) return;
+      clearAuthSession();
+      appState = createInitialState();
+      resetRuntimeTimers();
+      breakHold = null;
+      closeModal("profile-modal");
+      showLoginScreen();
+      showToast("Please sign in again to sync your personal ID.", "info");
+    }
+
     async function pullCloud() {
       if (!hasGas()) return;
+      const auth = getAuthSession();
+      if (!auth) return;
       try {
         if (typeof google !== "undefined" && google.script && google.script.run) {
           google.script.run.withSuccessHandler(raw => {
             if (raw) applyRemoteState(JSON.parse(raw));
-          }).loadTimetableState();
+          }).loadTimetableState(auth.userId || "", auth.token || "");
         } else {
-          const res = await fetch(`${GAS_WEB_APP_URL}${GAS_WEB_APP_URL.includes("?") ? "&" : "?"}action=getState&t=${Date.now()}`);
+          const res = await fetch(GAS_WEB_APP_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              action: "getState",
+              userId: auth.userId || "",
+              token: auth.token || ""
+            })
+          });
           const data = await res.json();
+          if (data?.authExpired) {
+            handleExpiredAuthSession();
+            return;
+          }
           if (data?.status === "success" && data.state) applyRemoteState(data.state);
         }
       } catch {}
@@ -1570,7 +1647,7 @@
         });
         isSoundEnabled = appState.soundEnabled !== false;
         breakHold = appState.activeBreakHold || null;
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
+        try { localStorage.setItem(getUserStorageKey(), JSON.stringify(appState)); } catch {}
         applyThemeAccent();
         renderAll();
       } else if (remote.updatedAt && Number(remote.updatedAt) < Number(appState.updatedAt)) {
@@ -1580,21 +1657,37 @@
 
     async function pushCloud(opts = {}) {
       if (!hasGas()) return;
+      const auth = getAuthSession();
+      if (!auth) return;
       try {
         if (typeof google !== "undefined" && google.script && google.script.run) {
           google.script.run.withSuccessHandler(res => {
+            if (res && res.authExpired) {
+              handleExpiredAuthSession();
+              return;
+            }
             if (res && res.skippedStale && res.existingState) applyRemoteState(res.existingState);
-          }).saveTimetableState(JSON.stringify(appState), Boolean(opts.force));
+          }).saveTimetableState(JSON.stringify(appState), Boolean(opts.force), auth.userId || "", auth.token || "");
         } else {
           const res = await fetch(GAS_WEB_APP_URL, {
             method: "POST",
             keepalive: Boolean(opts.keepalive),
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "saveState", state: appState, force: Boolean(opts.force) })
+            body: JSON.stringify({
+              action: "saveState",
+              userId: auth.userId || "",
+              token: auth.token || "",
+              state: appState,
+              force: Boolean(opts.force)
+            })
           });
           if (res.ok && !opts.keepalive) {
             try {
               const data = await res.json();
+              if (data?.authExpired) {
+                handleExpiredAuthSession();
+                return;
+              }
               if (data?.skippedStale && data?.remoteState) applyRemoteState(data.remoteState);
             } catch {}
           }
@@ -2993,7 +3086,7 @@
       const totalHrs = getAllTimeStudyHours();
       document.getElementById("prof-stats-summary").textContent = `${streak}d streak · ${totalHrs.toFixed(1)} Hrs total studied`;
       const auth = getAuthSession();
-      const authLabel = auth?.username ? "@" + auth.username : "—";
+      const authLabel = formatAccountIdentityLabel(auth);
       const authUserEl = document.getElementById("prof-auth-username");
       if (authUserEl) authUserEl.textContent = authLabel;
       const formUserEl = document.getElementById("prof-form-username");
@@ -3800,12 +3893,18 @@
       return null;
     }
 
+    function formatAccountIdentityLabel(auth) {
+      if (!auth || !auth.username) return "—";
+      return auth.userId ? `@${auth.username} · ${auth.userId}` : `@${auth.username}`;
+    }
+
     function isUserAuthenticated() {
       return Boolean(getAuthSession());
     }
 
-    function saveAuthSession(username, token, remember) {
+    function saveAuthSession(username, token, remember, userId) {
       const payload = JSON.stringify({
+        userId: String(userId || "").trim(),
         username: String(username).trim(),
         token: token || "",
         loggedInAt: Date.now()
@@ -3869,7 +3968,7 @@
       if (loginForm) loginForm.classList.toggle("hidden", isSignup);
       if (signupForm) signupForm.classList.toggle("hidden", !isSignup);
       if (titleEl) titleEl.textContent = isSignup ? "Create Account" : "Daily Study Timetable";
-      if (subEl) subEl.textContent = isSignup ? "Register a new username & password in Google Apps Script" : "Sign in with your username & password to continue";
+      if (subEl) subEl.textContent = isSignup ? "One unique username creates one personal ID" : "Sign in with your username & password to continue";
       if (promptEl) promptEl.textContent = isSignup ? "Already have an account?" : "Don't have an account?";
       if (switchLbl) switchLbl.textContent = isSignup ? "Back to Sign In" : "Create Account";
       if (createIcon) createIcon.classList.toggle("hidden", isSignup);
@@ -3967,18 +4066,24 @@
       });
     }
 
-    function completeLoginSuccess(username, token, remember, remoteState, customWelcome) {
-      saveAuthSession(username, token, remember);
+    function completeLoginSuccess(username, token, remember, remoteState, customWelcome, userId, initialDisplayName) {
+      saveAuthSession(username, token, remember, userId);
+      loadState();
       if (remoteState && remoteState.profiles) {
         applyRemoteState(remoteState);
+      }
+      if (initialDisplayName) {
+        appState.userProfile = { ...(appState.userProfile || {}), name: initialDisplayName };
+        saveState();
       }
       const pwInp = document.getElementById("login-password");
       if (pwInp) pwInp.value = "";
       document.getElementById("signup-form")?.reset();
       hideLoginScreen();
+      applyThemeAccent();
       renderAll();
-      pullCloud();
-      showToast(customWelcome || `Welcome back, ${username}!`, "success");
+      if (!initialDisplayName) pullCloud();
+      showToast(customWelcome || `Welcome back, ${username}${userId ? ` (${userId})` : ""}!`, "success");
     }
 
     async function handleSignupSubmit(e) {
@@ -3990,8 +4095,8 @@
       const btn = document.getElementById("signup-submit-btn");
       const lbl = document.getElementById("signup-submit-label");
 
-      if (username.length < 3) {
-        setSignupError("Username must be at least 3 characters.");
+      if (!USERNAME_REGEX.test(username)) {
+        setSignupError("Username must be 3–32 characters using only letters, numbers, dots (.), underscores (_), or hyphens (-) with no spaces.");
         return;
       }
       if (password.length < 4) {
@@ -4005,7 +4110,7 @@
 
       setSignupError("");
       if (btn) btn.disabled = true;
-      if (lbl) lbl.textContent = "Creating account...";
+      if (lbl) lbl.textContent = "Creating unique ID...";
 
       try {
         const res = await callGasAuthAction({
@@ -4015,16 +4120,16 @@
           displayName
         });
         if (res && res.status === "success" && res.authenticated === true) {
-          if (displayName) {
-            appState.userProfile = { ...(appState.userProfile || {}), name: displayName };
-            saveState();
-          }
+          const createdUser = res.username || username;
+          const createdId = res.userId || "";
           completeLoginSuccess(
-            res.username || username,
+            createdUser,
             res.token || "",
             true,
             res.state || null,
-            `Account created! Welcome, ${res.username || username}!`
+            `Account created${createdId ? ` (${createdId})` : ""}! Welcome, ${createdUser}!`,
+            createdId,
+            displayName || createdUser
           );
           return;
         }
@@ -4065,7 +4170,14 @@
       try {
         const res = await callGasAuthAction({ action: "login", username, password });
         if (res && res.status === "success" && res.authenticated === true) {
-          completeLoginSuccess(res.username || username, res.token || "", remember, res.state || null);
+          completeLoginSuccess(
+            res.username || username,
+            res.token || "",
+            remember,
+            res.state || null,
+            null,
+            res.userId || ""
+          );
           return;
         }
         if (res && res.status === "success" && res.authenticated === false) {
@@ -4086,11 +4198,30 @@
     }
 
     function logoutUser() {
+      const prevAuth = getAuthSession();
       flushTimersToNow(new Date());
       saveTimerRuntime();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
+      try { localStorage.setItem(getUserStorageKey(prevAuth?.userId), JSON.stringify(appState)); } catch {}
       pushCloud({ keepalive: true });
+      if (prevAuth?.userId && prevAuth?.token && hasGas()) {
+        try {
+          if (typeof google !== "undefined" && google.script && google.script.run) {
+            google.script.run.logoutUserSession(prevAuth.userId, prevAuth.token);
+          } else {
+            fetch(GAS_WEB_APP_URL, {
+              method: "POST",
+              keepalive: true,
+              headers: { "Content-Type": "text/plain;charset=utf-8" },
+              body: JSON.stringify({ action: "logout", userId: prevAuth.userId, token: prevAuth.token })
+            }).catch(() => {});
+          }
+        } catch {}
+      }
+      clearTimeout(syncTimeout);
       clearAuthSession();
+      appState = createInitialState();
+      resetRuntimeTimers();
+      breakHold = null;
       closeModal("profile-modal");
       const pwInp = document.getElementById("login-password");
       if (pwInp) pwInp.value = "";
@@ -4173,8 +4304,8 @@
         statusEl.className = `text-[11px] font-bold rounded-xl px-2.5 py-2 ${isErr ? "login-error-box" : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"}`;
       };
 
-      if (newUsername.length < 3) {
-        showStatus("New username must be at least 3 characters.", true);
+      if (!USERNAME_REGEX.test(newUsername)) {
+        showStatus("Username must be 3–32 characters using only letters, numbers, dots (.), underscores (_), or hyphens (-) with no spaces.", true);
         return;
       }
       if (!currentPassword) {
@@ -4197,12 +4328,15 @@
         });
         if (res && res.status === "success") {
           const updatedUser = res.username || newUsername;
+          const updatedUserId = res.userId || auth?.userId || "";
+          const updatedToken = res.token || auth?.token || "";
           const remembered = Boolean(localStorage.getItem(AUTH_SESSION_KEY));
-          saveAuthSession(updatedUser, auth?.token || "", remembered);
+          saveAuthSession(updatedUser, updatedToken, remembered, updatedUserId);
+          const updatedLabel = formatAccountIdentityLabel(getAuthSession());
           const authUserEl = document.getElementById("prof-auth-username");
-          if (authUserEl) authUserEl.textContent = "@" + updatedUser;
+          if (authUserEl) authUserEl.textContent = updatedLabel;
           const formUserEl = document.getElementById("prof-form-username");
-          if (formUserEl) formUserEl.textContent = "@" + updatedUser;
+          if (formUserEl) formUserEl.textContent = updatedLabel;
           document.getElementById("prof-change-user-form")?.reset();
           const newUserInp = document.getElementById("user-new-name");
           if (newUserInp) newUserInp.value = updatedUser;
@@ -4266,6 +4400,15 @@
           newPassword
         });
         if (res && res.status === "success") {
+          if (res.token || res.userId) {
+            const remembered = Boolean(localStorage.getItem(AUTH_SESSION_KEY));
+            saveAuthSession(
+              res.username || currentUsername,
+              res.token || auth?.token || "",
+              remembered,
+              res.userId || auth?.userId || ""
+            );
+          }
           document.getElementById("prof-change-pass-form")?.reset();
           showStatus("Password updated in Google Apps Script!", false);
           showToast("Password updated!", "success");
@@ -4289,11 +4432,12 @@
     }, 45000);
 
     function flushAndSyncOnHide() {
+      if (!isUserAuthenticated()) return;
       flushTimersToNow(new Date());
       saveTimerRuntime();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
+      try { localStorage.setItem(getUserStorageKey(), JSON.stringify(appState)); } catch {}
       clearTimeout(syncTimeout);
-      if (isUserAuthenticated()) pushCloud({ keepalive: true });
+      pushCloud({ keepalive: true });
     }
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden") flushAndSyncOnHide();
