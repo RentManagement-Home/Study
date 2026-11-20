@@ -687,7 +687,7 @@
         <div class="flex items-center justify-between gap-2">
           <div>
             <div class="text-[11px] font-extrabold uppercase text-[var(--text-muted)]">Account &amp; Security</div>
-            <div class="text-xs font-bold mt-0.5">Signed in as <span id="prof-auth-username" class="accent-text font-mono-tab">@admin</span></div>
+            <div class="text-xs font-bold mt-0.5">Signed in as <span id="prof-auth-username" class="accent-text font-mono-tab">—</span></div>
           </div>
           <button type="button" onclick="logoutUser()" class="logout-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer shrink-0">Log Out</button>
         </div>
@@ -2872,7 +2872,7 @@
       document.getElementById("prof-stats-summary").textContent = `${streak}d streak · ${totalHrs.toFixed(1)} Hrs total studied`;
       const auth = getAuthSession();
       const authUserEl = document.getElementById("prof-auth-username");
-      if (authUserEl) authUserEl.textContent = "@" + (auth?.username || FALLBACK_DEFAULT_USER);
+      if (authUserEl) authUserEl.textContent = auth?.username ? "@" + auth.username : "—";
       const credForm = document.getElementById("prof-change-cred-form");
       if (credForm) {
         credForm.classList.add("hidden");
@@ -3671,8 +3671,6 @@
 
     // ==================== GOOGLE APPS SCRIPT AUTHENTICATION ====================
     const AUTH_SESSION_KEY = "daily_study_auth_session_v1";
-    const FALLBACK_DEFAULT_USER = "admin";
-    const FALLBACK_DEFAULT_PASS = "password123";
 
     function getAuthSession() {
       try {
@@ -3835,31 +3833,13 @@
           setLoginError(res.message || "Invalid username or password.");
           return;
         }
-        // Graceful fallback only if the old Code.gs without login routing is still deployed
         if (res && res.status === "error" && /Missing state payload/i.test(res.message || "")) {
-          if (
-            username.toLowerCase() === FALLBACK_DEFAULT_USER.toLowerCase() &&
-            password === FALLBACK_DEFAULT_PASS
-          ) {
-            completeLoginSuccess(FALLBACK_DEFAULT_USER, "local-fallback", remember, null);
-            showToast("Deploy updated Code.gs in Google Apps Script to activate server-side login.", "info");
-            return;
-          }
-          setLoginError("Invalid username or password.");
+          setLoginError("Google Apps Script needs the updated Code.gs deployed (New Version) to handle login.");
           return;
         }
         setLoginError(res?.message || "Unable to sign in. Please try again.");
       } catch {
-        // Offline / unreachable fallback against initial defaults
-        if (
-          username.toLowerCase() === FALLBACK_DEFAULT_USER.toLowerCase() &&
-          password === FALLBACK_DEFAULT_PASS
-        ) {
-          completeLoginSuccess(FALLBACK_DEFAULT_USER, "offline-fallback", remember, null);
-          showToast("Signed in (offline fallback). Check your Google Apps Script deployment.", "info");
-        } else {
-          setLoginError("Could not reach Google Apps Script or invalid credentials.");
-        }
+        setLoginError("Could not connect to Google Apps Script. Please check your internet or Web App deployment.");
       } finally {
         if (btn) btn.disabled = false;
         if (lbl) lbl.textContent = "Sign In";
@@ -3896,7 +3876,11 @@
     async function handleChangeCredentials(e) {
       e.preventDefault();
       const auth = getAuthSession();
-      const currentUsername = auth?.username || FALLBACK_DEFAULT_USER;
+      const currentUsername = auth?.username || "";
+      if (!currentUsername) {
+        logoutUser();
+        return;
+      }
       const currentPassword = document.getElementById("cred-current-pass")?.value || "";
       const newUsername = (document.getElementById("cred-new-user")?.value || "").trim();
       const newPassword = document.getElementById("cred-new-pass")?.value || "";
