@@ -268,12 +268,12 @@
 
         <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
           <div class="space-y-1.5">
-            <label for="login-username" class="block text-xs font-extrabold text-[var(--text-secondary)]">Username</label>
+            <label for="login-username" class="block text-xs font-extrabold text-[var(--text-secondary)]">Username or User ID</label>
             <div class="relative">
               <span class="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-[var(--text-muted)]">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               </span>
-              <input type="text" id="login-username" name="username" required autocomplete="username" placeholder="Enter your username" class="w-full rounded-2xl border surface-input pl-10 pr-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]" />
+              <input type="text" id="login-username" name="username" required autocomplete="username" placeholder="Enter your username or User ID" class="w-full rounded-2xl border surface-input pl-10 pr-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]" />
             </div>
           </div>
 
@@ -312,9 +312,15 @@
           </div>
 
           <div class="space-y-1">
+            <label for="signup-userid" class="block text-xs font-extrabold text-[var(--text-secondary)]">Create Your Own User ID</label>
+            <input type="text" id="signup-userid" required minlength="3" maxlength="24" pattern="[A-Za-z0-9._-]{3,24}" autocomplete="off" placeholder="e.g., abhi01, study_99, id-2026" class="w-full rounded-2xl border surface-input px-3.5 py-2.5 text-sm font-semibold font-mono-tab focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]" />
+            <p class="text-[11px] font-semibold text-[var(--text-muted)]">3–24 chars (letters, numbers, . _ - · no spaces). Permanent &amp; unique.</p>
+          </div>
+
+          <div class="space-y-1">
             <label for="signup-username" class="block text-xs font-extrabold text-[var(--text-secondary)]">Username</label>
             <input type="text" id="signup-username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" autocomplete="username" placeholder="Choose a unique username (min 3 chars)" class="w-full rounded-2xl border surface-input px-3.5 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent-primary)]" />
-            <p class="text-[11px] font-semibold text-[var(--text-muted)]">One username creates one personal ID (letters, numbers, . _ - · no spaces).</p>
+            <p class="text-[11px] font-semibold text-[var(--text-muted)]">One username can only be linked to one User ID.</p>
           </div>
 
           <div class="space-y-1">
@@ -716,7 +722,10 @@
       <div class="p-3.5 rounded-2xl border surface-input flex items-center gap-3.5">
         <div id="prof-preview-avatar" class="w-14 h-14 rounded-full accent-btn flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 shadow-sm">S</div>
         <div class="min-w-0 flex-1">
-          <div id="prof-preview-name" class="text-sm font-extrabold truncate">Student</div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <div id="prof-preview-name" class="text-sm font-extrabold truncate">Student</div>
+            <span id="prof-preview-userid" class="hidden px-2 py-0.5 rounded-lg accent-soft text-[10px] font-mono-tab font-extrabold"></span>
+          </div>
           <div id="prof-preview-target" class="text-[11px] text-[var(--text-muted)] truncate">Set your target exam or motto</div>
           <div id="prof-stats-summary" class="text-[11px] font-mono-tab font-bold accent-text mt-1">0d streak · 0.0 Hrs total</div>
         </div>
@@ -1453,6 +1462,7 @@
 
     // ==================== PERSISTENCE & CLOUD SYNC ====================
     const USERNAME_REGEX = /^[a-zA-Z0-9._-]{3,32}$/;
+    const USER_ID_REGEX = /^[a-zA-Z0-9._-]{3,24}$/;
 
     function getActiveUserId() {
       const auth = getAuthSession();
@@ -1462,9 +1472,9 @@
     function getAccountScopeKey(authOverride) {
       const auth = authOverride !== undefined ? authOverride : getAuthSession();
       if (!auth) return "";
-      if (typeof auth === "string") return auth.trim();
+      if (typeof auth === "string") return auth.trim().toLowerCase();
       const uid = typeof auth.userId === "string" ? auth.userId.trim() : "";
-      if (uid) return uid;
+      if (uid) return uid.toLowerCase();
       const uname = typeof auth.username === "string" ? auth.username.trim().toLowerCase() : "";
       return uname ? `user_${uname}` : "";
     }
@@ -1482,11 +1492,11 @@
     function isStateOwnedByAuth(stateObj, auth) {
       if (!stateObj || typeof stateObj !== "object" || !auth) return false;
       const owner = stateObj.accountOwner;
-      const authUid = String(auth.userId || "").trim();
+      const authUid = String(auth.userId || "").trim().toLowerCase();
       const authUser = String(auth.username || "").trim().toLowerCase();
 
       if (owner && typeof owner === "object") {
-        const ownerUid = String(owner.userId || "").trim();
+        const ownerUid = String(owner.userId || "").trim().toLowerCase();
         const ownerUser = String(owner.username || "").trim().toLowerCase();
         if (authUid && ownerUid) return authUid === ownerUid;
         if (authUser && ownerUser) return authUser === ownerUser;
@@ -1494,7 +1504,7 @@
       }
 
       // Un-stamped legacy state belongs ONLY to primary account ID-1001
-      return authUid === "ID-1001";
+      return authUid === "id-1001";
     }
 
     function stampCurrentOwner(stateObj, authOverride) {
@@ -1599,10 +1609,11 @@
       try {
         const key = getUserStorageKey(auth);
         let saved = key ? localStorage.getItem(key) : null;
-        if (!saved && auth.userId && auth.username) {
-          const legacyByUser = localStorage.getItem(`${STORAGE_KEY}__user_${auth.username.toLowerCase()}`);
-          const legacyGlobal = auth.userId === "ID-1001" ? localStorage.getItem(STORAGE_KEY) : null;
-          saved = legacyByUser || legacyGlobal;
+        if (!saved && auth.userId) {
+          const legacyExactId = localStorage.getItem(`${STORAGE_KEY}__${auth.userId}`);
+          const legacyByUser = auth.username ? localStorage.getItem(`${STORAGE_KEY}__user_${auth.username.toLowerCase()}`) : null;
+          const legacyGlobal = auth.userId.toUpperCase() === "ID-1001" ? localStorage.getItem(STORAGE_KEY) : null;
+          saved = legacyExactId || legacyByUser || legacyGlobal;
           if (saved && key) {
             try { localStorage.setItem(key, saved); } catch {}
           }
@@ -1632,7 +1643,7 @@
       if (key) {
         try { localStorage.setItem(key, JSON.stringify(appState)); } catch {}
       }
-      if (!skipCloud && auth.userId && auth.token) {
+      if (!skipCloud && auth.serverSynced !== false && auth.userId && auth.token) {
         clearTimeout(syncTimeout);
         syncTimeout = setTimeout(() => pushCloud(), 1500);
       }
@@ -1658,7 +1669,7 @@
       if (!hasGas()) return;
       const auth = getAuthSession();
       // Only pull from cloud when the deployed Code.gs has issued a verified User_ID
-      if (!auth || !auth.userId || !auth.token) return;
+      if (!auth || auth.serverSynced === false || !auth.userId || !auth.token) return;
       try {
         if (typeof google !== "undefined" && google.script && google.script.run) {
           google.script.run.withSuccessHandler(raw => {
@@ -1738,7 +1749,7 @@
       if (!hasGas()) return;
       const auth = getAuthSession();
       // Only push to cloud when the deployed Code.gs has issued a verified User_ID so legacy shared sheet is never corrupted
-      if (!auth || !auth.userId || !auth.token) return;
+      if (!auth || auth.serverSynced === false || !auth.userId || !auth.token) return;
       try {
         if (typeof google !== "undefined" && google.script && google.script.run) {
           google.script.run.withSuccessHandler(res => {
@@ -3171,6 +3182,16 @@
       if (authUserEl) authUserEl.textContent = authLabel;
       const formUserEl = document.getElementById("prof-form-username");
       if (formUserEl) formUserEl.textContent = authLabel;
+      const idBadgeEl = document.getElementById("prof-preview-userid");
+      if (idBadgeEl) {
+        if (auth?.userId) {
+          idBadgeEl.textContent = `ID: ${auth.userId}`;
+          idBadgeEl.classList.remove("hidden");
+        } else {
+          idBadgeEl.textContent = "";
+          idBadgeEl.classList.add("hidden");
+        }
+      }
       resetCredPanels();
       updateProfileModalPreview();
       openModal("profile-modal");
@@ -3982,11 +4003,12 @@
       return Boolean(getAuthSession());
     }
 
-    function saveAuthSession(username, token, remember, userId) {
+    function saveAuthSession(username, token, remember, userId, serverSynced = true) {
       const payload = JSON.stringify({
         userId: String(userId || "").trim(),
         username: String(username).trim(),
         token: token || "",
+        serverSynced: Boolean(serverSynced),
         loggedInAt: Date.now()
       });
       try {
@@ -4048,13 +4070,13 @@
       if (loginForm) loginForm.classList.toggle("hidden", isSignup);
       if (signupForm) signupForm.classList.toggle("hidden", !isSignup);
       if (titleEl) titleEl.textContent = isSignup ? "Create Account" : "Daily Study Timetable";
-      if (subEl) subEl.textContent = isSignup ? "One unique username creates one personal ID" : "Sign in with your username & password to continue";
+      if (subEl) subEl.textContent = isSignup ? "Create your own unique User ID & username" : "Sign in with your username or User ID to continue";
       if (promptEl) promptEl.textContent = isSignup ? "Already have an account?" : "Don't have an account?";
       if (switchLbl) switchLbl.textContent = isSignup ? "Back to Sign In" : "Create Account";
       if (createIcon) createIcon.classList.toggle("hidden", isSignup);
 
       setTimeout(() => {
-        const focusEl = document.getElementById(isSignup ? "signup-name" : "login-username");
+        const focusEl = document.getElementById(isSignup ? "signup-userid" : "login-username");
         if (focusEl) focusEl.focus();
       }, 40);
     }
@@ -4115,7 +4137,12 @@
             google.script.run
               .withSuccessHandler(res => resolve(res))
               .withFailureHandler(err => reject(err))
-              .registerUser(actionPayload.username, actionPayload.password, actionPayload.displayName || "");
+              .registerUser(
+                actionPayload.username,
+                actionPayload.password,
+                actionPayload.displayName || "",
+                actionPayload.userId || ""
+              );
           } else if (actionPayload.action === "changeCredentials") {
             google.script.run
               .withSuccessHandler(res => resolve(res))
@@ -4146,12 +4173,12 @@
       });
     }
 
-    function completeLoginSuccess(username, token, remember, remoteState, customWelcome, userId, initialDisplayName, isNewSignup = false) {
-      saveAuthSession(username, token, remember, userId);
+    function completeLoginSuccess(username, token, remember, remoteState, customWelcome, userId, initialDisplayName, isNewSignup = false, serverSynced = true) {
+      saveAuthSession(username, token, remember, userId, serverSynced);
       draftProfileAvatarUrl = "";
       loadState();
       // Never apply legacy/shared remoteState to a newly created account, and enforce owner check on login
-      if (!isNewSignup && remoteState && remoteState.profiles) {
+      if (!isNewSignup && serverSynced && remoteState && remoteState.profiles) {
         applyRemoteState(remoteState);
       }
       const preferredName = String(initialDisplayName || "").trim();
@@ -4176,9 +4203,9 @@
       hideLoginScreen();
       applyThemeAccent();
       renderAll();
-      if (!isNewSignup && userId) pullCloud();
-      if (!userId) {
-        showToast(`Signed in as @${username}. Deploy updated Code.gs (New Version) for separate cloud sync per ID.`, "info");
+      if (!isNewSignup && serverSynced && userId) pullCloud();
+      if (!serverSynced) {
+        showToast(`Signed in locally (${userId || "@" + username}). Deploy updated Code.gs (New Version) for cloud sync per ID.`, "info");
       } else {
         showToast(customWelcome || `Welcome back, ${username} (${userId})!`, "success");
       }
@@ -4187,12 +4214,17 @@
     async function handleSignupSubmit(e) {
       e.preventDefault();
       const displayName = (document.getElementById("signup-name")?.value || "").trim();
+      const customUserId = (document.getElementById("signup-userid")?.value || "").trim();
       const username = (document.getElementById("signup-username")?.value || "").trim();
       const password = document.getElementById("signup-password")?.value || "";
       const confirmPassword = document.getElementById("signup-confirm-password")?.value || "";
       const btn = document.getElementById("signup-submit-btn");
       const lbl = document.getElementById("signup-submit-label");
 
+      if (!USER_ID_REGEX.test(customUserId)) {
+        setSignupError("User ID must be 3–24 characters using only letters, numbers, dots (.), underscores (_), or hyphens (-) with no spaces.");
+        return;
+      }
       if (!USERNAME_REGEX.test(username)) {
         setSignupError("Username must be 3–32 characters using only letters, numbers, dots (.), underscores (_), or hyphens (-) with no spaces.");
         return;
@@ -4208,27 +4240,30 @@
 
       setSignupError("");
       if (btn) btn.disabled = true;
-      if (lbl) lbl.textContent = "Creating unique ID...";
+      if (lbl) lbl.textContent = "Creating your User ID...";
 
       try {
         const res = await callGasAuthAction({
           action: "register",
+          userId: customUserId,
           username,
           password,
           displayName
         });
         if (res && res.status === "success" && res.authenticated === true) {
           const createdUser = res.username || username;
-          const createdId = res.userId || "";
+          const hasServerId = Boolean(res.userId);
+          const createdId = res.userId || customUserId;
           completeLoginSuccess(
             createdUser,
             res.token || "",
             true,
             null,
-            `Account created${createdId ? ` (${createdId})` : ""}! Welcome, ${createdUser}!`,
+            `Account created with ID ${createdId}! Welcome, ${createdUser}!`,
             createdId,
             res.displayName || displayName || createdUser,
-            true
+            true,
+            hasServerId
           );
           return;
         }
@@ -4258,7 +4293,7 @@
       const remember = Boolean(remInp?.checked);
 
       if (!username || !password) {
-        setLoginError("Please enter both username and password.");
+        setLoginError("Please enter both username/User ID and password.");
         return;
       }
 
@@ -4269,15 +4304,17 @@
       try {
         const res = await callGasAuthAction({ action: "login", username, password });
         if (res && res.status === "success" && res.authenticated === true) {
+          const hasServerId = Boolean(res.userId);
           completeLoginSuccess(
             res.username || username,
             res.token || "",
             remember,
-            res.userId ? (res.state || null) : null,
+            hasServerId ? (res.state || null) : null,
             null,
             res.userId || "",
             res.displayName || "",
-            false
+            false,
+            hasServerId
           );
           return;
         }
