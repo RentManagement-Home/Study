@@ -3990,7 +3990,7 @@
 
     function formatAccountIdentityLabel(auth) {
       if (!auth || !auth.username) return "—";
-      return auth.userId ? `@${auth.username} · ${auth.userId}` : `@${auth.username}`;
+      return `@${auth.username}`;
     }
 
     function isUserAuthenticated() {
