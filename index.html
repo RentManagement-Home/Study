@@ -29,9 +29,9 @@
   <style>
     :root, [data-theme="light"] {
       --bg-gradient: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 38%, #e0f2fe 74%, #f0fdf4 100%);
-      --surface-panel: rgba(255, 255, 255, 0.88);
-      --surface-card: rgba(255, 255, 255, 0.96);
-      --surface-input: rgba(255, 255, 255, 0.92);
+      --surface-panel: rgba(255, 255, 255, 0.94);
+      --surface-card: rgba(255, 255, 255, 0.97);
+      --surface-input: rgba(255, 255, 255, 0.94);
       --border-panel: rgba(203, 213, 225, 0.78);
       --text-primary: #0f172a;
       --text-secondary: #334155;
@@ -44,9 +44,9 @@
     }
     [data-theme="dark"] {
       --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #0f172a 100%);
-      --surface-panel: rgba(17, 24, 39, 0.9);
-      --surface-card: rgba(30, 41, 59, 0.9);
-      --surface-input: rgba(15, 23, 42, 0.88);
+      --surface-panel: rgba(17, 24, 39, 0.93);
+      --surface-card: rgba(30, 41, 59, 0.94);
+      --surface-input: rgba(15, 23, 42, 0.92);
       --border-panel: rgba(51, 65, 85, 0.85);
       --text-primary: #f8fafc;
       --text-secondary: #cbd5e1;
@@ -55,7 +55,7 @@
     }
     [data-theme="paper"] {
       --bg-gradient: linear-gradient(135deg, #f8f3e8 0%, #f1e8d6 50%, #eae0cc 100%);
-      --surface-panel: rgba(253, 249, 241, 0.94);
+      --surface-panel: rgba(253, 249, 241, 0.96);
       --surface-card: rgba(255, 253, 247, 0.98);
       --surface-input: rgba(250, 245, 235, 0.96);
       --border-panel: rgba(196, 181, 158, 0.85);
@@ -85,6 +85,9 @@
       height: 0 !important;
       background: transparent !important;
     }
+    html {
+      scroll-behavior: smooth;
+    }
     html, body {
       max-width: 100%;
       overflow-x: clip;
@@ -93,17 +96,26 @@
     }
     body {
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      background: var(--bg-gradient);
-      background-attachment: fixed;
+      background: transparent;
       color: var(--text-primary);
       min-height: 100dvh;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: var(--bg-gradient);
+      transform: translateZ(0);
     }
     .font-mono-tab { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
-    .surface-panel { background: var(--surface-panel); backdrop-filter: blur(16px); border: 1px solid var(--border-panel); box-shadow: 0 8px 28px rgba(15,23,42,0.06); }
-    header.surface-panel { background: rgba(255, 255, 255, 0.5); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+    .surface-panel { background: var(--surface-panel); border: 1px solid var(--border-panel); box-shadow: 0 6px 22px rgba(15,23,42,0.06); contain: layout style; }
+    header.surface-panel { background: rgba(255, 255, 255, 0.5); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transform: translateZ(0); will-change: transform; contain: layout style; }
     [data-theme="dark"] header.surface-panel { background: rgba(17, 24, 39, 0.5); }
     [data-theme="paper"] header.surface-panel { background: rgba(253, 249, 241, 0.5); }
-    .surface-card { background: var(--surface-card); border: 1px solid var(--border-panel); transition: transform 0.16s ease, box-shadow 0.16s ease; }
+    .surface-card { background: var(--surface-card); border: 1px solid var(--border-panel); transition: transform 0.16s ease, box-shadow 0.16s ease; contain: layout style; }
     .surface-input { background: var(--surface-input); color: var(--text-primary); border-color: var(--border-panel); }
     .accent-btn { background: var(--accent-primary); color: #fff; }
     .accent-btn:hover { background: var(--accent-hover); }
@@ -159,7 +171,6 @@
     }
     .login-backdrop {
       background: var(--bg-gradient);
-      background-attachment: fixed;
     }
     .login-backdrop::before {
       content: "";
@@ -651,6 +662,13 @@
         </div>
       </div>
       <form onsubmit="saveProfileForm(event)" class="space-y-3">
+        <button type="button" onclick="toggleCredPanel('username')" class="w-full px-3 py-2 rounded-xl border surface-input flex items-center justify-between gap-2 text-xs font-bold cursor-pointer hover:opacity-90 transition">
+          <span class="flex items-center gap-1.5 text-[var(--text-muted)]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Username</span>
+          </span>
+          <span id="prof-form-username" class="accent-text font-mono-tab font-extrabold truncate">—</span>
+        </button>
         <div class="space-y-1">
           <label class="text-[11px] font-bold text-[var(--text-muted)]">Display Name</label>
           <input type="text" id="prof-name" required maxlength="36" oninput="updateProfileModalPreview()" placeholder="Your name" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
@@ -663,15 +681,9 @@
           <button type="button" id="prof-remove-avatar-btn" onclick="removeProfileAvatar()" class="hidden px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-600 text-xs font-bold cursor-pointer">Remove Photo</button>
         </div>
         <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Save Profile</button>
+        <button type="button" onclick="logoutUser()" class="logout-btn w-full py-2 rounded-xl text-xs font-extrabold cursor-pointer">Log Out</button>
       </form>
       <div class="pt-3 border-t border-slate-500/15 space-y-3">
-        <div class="flex items-center justify-between gap-2">
-          <div>
-            <div class="text-[11px] font-extrabold uppercase text-[var(--text-muted)]">Account &amp; Security</div>
-            <div class="text-xs font-bold mt-0.5">Signed in as <span id="prof-auth-username" class="accent-text font-mono-tab">—</span></div>
-          </div>
-          <button type="button" onclick="logoutUser()" class="logout-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer shrink-0">Log Out</button>
-        </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <button type="button" id="prof-toggle-user-btn" onclick="toggleCredPanel('username')" class="py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1755,10 +1767,13 @@
 
       if (changed) {
         tickCounter++;
-        if (appState.autoArchive !== false && tickCounter % 10 === 0) {
+        if (appState.autoArchive !== false && tickCounter % 15 === 0) {
           archiveDay(today, true);
         }
-        saveState(tickCounter % 15 !== 0);
+        // Throttle full JSON serialization to localStorage (every 5s) & cloud push (every 15s) for smooth 60fps UI
+        if (tickCounter % 5 === 0) {
+          saveState(tickCounter % 15 !== 0);
+        }
         saveTimerRuntime();
       }
     }
@@ -1905,6 +1920,13 @@
       }
     }
 
+    function setElText(el, val) {
+      if (el && el.textContent !== val) el.textContent = val;
+    }
+    function setElClass(el, cls) {
+      if (el && el.className !== cls) el.className = cls;
+    }
+
     function renderFloatingBar() {
       const now = new Date();
       const today = getTodayStr(now);
@@ -1916,7 +1938,10 @@
       const btnEl = document.getElementById("float-timer-btn");
 
       const anyRunning = isRoutineRunning || isManualRunning || isTimerRunning;
-      bar.classList.toggle("lg:hidden", !anyRunning);
+      const shouldHideLg = !anyRunning;
+      if (bar.classList.contains("lg:hidden") !== shouldHideLg) {
+        bar.classList.toggle("lg:hidden", shouldHideLg);
+      }
 
       if (isRoutineRunning && activeRoutineSlotId) {
         const slot = buildTimeline(today).find(s => s.id === activeRoutineSlotId);
@@ -1927,53 +1952,53 @@
 
         if (isLiveNow) {
           const rem = remSecsToEnd(now, slot.end, slot.start);
-          badgeEl.textContent = "LIVE LEFT";
-          badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-700 dark:text-emerald-300";
-          labelEl.textContent = slot.subject;
-          valEl.textContent = fmtHMS(rem);
-          subEl.textContent = `Studied ${fmtHMS(tracked)}`;
+          setElText(badgeEl, "LIVE LEFT");
+          setElClass(badgeEl, "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-700 dark:text-emerald-300");
+          setElText(labelEl, slot.subject);
+          setElText(valEl, fmtHMS(rem));
+          setElText(subEl, `Studied ${fmtHMS(tracked)}`);
         } else if (isPastNow || routineMode === "past") {
-          badgeEl.textContent = "PAST · ELAPSED";
-          badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-700 dark:text-amber-300";
-          labelEl.textContent = slot ? slot.subject : "Past Schedule";
-          valEl.textContent = fmtHMS(tracked);
+          setElText(badgeEl, "PAST · ELAPSED");
+          setElClass(badgeEl, "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-700 dark:text-amber-300");
+          setElText(labelEl, slot ? slot.subject : "Past Schedule");
+          setElText(valEl, fmtHMS(tracked));
           const fullSecs = slot ? Math.max(60, Math.round((slot.durationHours || calcHrs(slot.start, slot.end)) * 3600)) : 0;
           const remLeft = Math.max(0, fullSecs - tracked);
-          subEl.textContent = remLeft > 0 ? `Target left ${fmtHMS(remLeft)}` : "Target reached!";
+          setElText(subEl, remLeft > 0 ? `Target left ${fmtHMS(remLeft)}` : "Target reached!");
         } else {
-          badgeEl.textContent = "SCHEDULE";
-          badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft";
-          labelEl.textContent = slot ? slot.subject : "Study Slot";
-          valEl.textContent = timerRemSecs > 0 ? fmtHMS(timerRemSecs) : fmtHMS(tracked);
-          subEl.textContent = `Studied ${fmtHMS(tracked)}`;
+          setElText(badgeEl, "SCHEDULE");
+          setElClass(badgeEl, "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft");
+          setElText(labelEl, slot ? slot.subject : "Study Slot");
+          setElText(valEl, timerRemSecs > 0 ? fmtHMS(timerRemSecs) : fmtHMS(tracked));
+          setElText(subEl, `Studied ${fmtHMS(tracked)}`);
         }
-        btnEl.textContent = "Pause";
-        btnEl.className = "shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer";
+        setElText(btnEl, "Pause");
+        setElClass(btnEl, "shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer");
       } else if (isManualRunning) {
         const manualS = appState.dailyStudyLogs?.[today]?.manualSeconds || 0;
-        badgeEl.textContent = "RANDOM STUDY";
-        badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-700 dark:text-emerald-300";
-        labelEl.textContent = "Manual / Random Study";
-        valEl.textContent = fmtHMS(manualS);
-        subEl.textContent = "Counting to Daily Study";
-        btnEl.textContent = "Pause";
-        btnEl.className = "shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer";
+        setElText(badgeEl, "RANDOM STUDY");
+        setElClass(badgeEl, "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-700 dark:text-emerald-300");
+        setElText(labelEl, "Manual / Random Study");
+        setElText(valEl, fmtHMS(manualS));
+        setElText(subEl, "Counting to Daily Study");
+        setElText(btnEl, "Pause");
+        setElClass(btnEl, "shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer");
       } else if (isTimerRunning) {
-        badgeEl.textContent = "FOCUS";
-        badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft";
-        labelEl.textContent = timerLabel;
-        valEl.textContent = fmtHMS(timerRemSecs);
-        subEl.textContent = "Counting to Daily Study";
-        btnEl.textContent = "Pause";
-        btnEl.className = "shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer";
+        setElText(badgeEl, "FOCUS");
+        setElClass(badgeEl, "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft");
+        setElText(labelEl, timerLabel);
+        setElText(valEl, fmtHMS(timerRemSecs));
+        setElText(subEl, "Counting to Daily Study");
+        setElText(btnEl, "Pause");
+        setElClass(btnEl, "shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer");
       } else {
-        badgeEl.textContent = "FOCUS";
-        badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft";
-        labelEl.textContent = timerLabel;
-        valEl.textContent = fmtHMS(timerRemSecs);
-        subEl.textContent = "Ready";
-        btnEl.textContent = "Start";
-        btnEl.className = "shrink-0 px-4 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer";
+        setElText(badgeEl, "FOCUS");
+        setElClass(badgeEl, "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft");
+        setElText(labelEl, timerLabel);
+        setElText(valEl, fmtHMS(timerRemSecs));
+        setElText(subEl, "Ready");
+        setElText(btnEl, "Start");
+        setElClass(btnEl, "shrink-0 px-4 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer");
       }
     }
 
@@ -2097,6 +2122,7 @@
     }
 
     // ==================== TOP SECTION: LIVE SESSION & RANDOM STUDY ====================
+    let lastOtherBannerKey = "";
     function renderLiveAndDailyCards(forceRebuild = false) {
       const now = new Date();
       const today = getTodayStr(now);
@@ -2106,13 +2132,16 @@
       const otherBanner = document.getElementById("other-day-banner");
 
       if (!isToday) {
-        liveSec.classList.add("hidden");
-        otherBanner.classList.remove("hidden");
+        if (!liveSec.classList.contains("hidden")) liveSec.classList.add("hidden");
+        if (otherBanner.classList.contains("hidden")) otherBanner.classList.remove("hidden");
         const isPast = currentDateStr < today;
         const timeline = buildTimeline(currentDateStr);
         const sched = getScheduleForDate(currentDateStr);
         const targetHrs = timeline.filter(s => s.category !== "break").reduce((sum, s) => sum + (s.durationHours || calcHrs(s.start, s.end)), 0);
         const { manualS, routineS, focusS, heldS, totalS } = getDayTotalStudySeconds(currentDateStr, false);
+        const otherKey = `${currentDateStr}|${isPast ? 1 : 0}|${sched.isCustomOverride ? 1 : 0}|${targetHrs.toFixed(2)}|${totalS}|${manualS}|${routineS}|${focusS}|${heldS}`;
+        if (!forceRebuild && otherKey === lastOtherBannerKey) return;
+        lastOtherBannerKey = otherKey;
 
         otherBanner.innerHTML = `
           <div class="space-y-1">
@@ -2904,8 +2933,11 @@
       const totalHrs = getAllTimeStudyHours();
       document.getElementById("prof-stats-summary").textContent = `${streak}d streak · ${totalHrs.toFixed(1)} Hrs total studied`;
       const auth = getAuthSession();
+      const authLabel = auth?.username ? "@" + auth.username : "—";
       const authUserEl = document.getElementById("prof-auth-username");
-      if (authUserEl) authUserEl.textContent = auth?.username ? "@" + auth.username : "—";
+      if (authUserEl) authUserEl.textContent = authLabel;
+      const formUserEl = document.getElementById("prof-form-username");
+      if (formUserEl) formUserEl.textContent = authLabel;
       resetCredPanels();
       updateProfileModalPreview();
       openModal("profile-modal");
@@ -3620,13 +3652,14 @@
 
     // ==================== MAIN 1-SECOND ENGINE ====================
     setInterval(() => {
+      if (!isUserAuthenticated()) return;
       const now = new Date();
-      const liveClockEl = document.getElementById("live-clock");
-      if (liveClockEl) liveClockEl.textContent = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
       const today = getTodayStr(now);
 
       // Flush timers FIRST so any midnight rollover splits pre-midnight and post-midnight seconds accurately
       flushTimersToNow(now);
+
+      if (document.visibilityState === "hidden") return;
 
       if (today !== lastKnownToday) {
         const prevDay = lastKnownToday;
@@ -3985,6 +4018,8 @@
           saveAuthSession(updatedUser, auth?.token || "", remembered);
           const authUserEl = document.getElementById("prof-auth-username");
           if (authUserEl) authUserEl.textContent = "@" + updatedUser;
+          const formUserEl = document.getElementById("prof-form-username");
+          if (formUserEl) formUserEl.textContent = "@" + updatedUser;
           document.getElementById("prof-change-user-form")?.reset();
           const newUserInp = document.getElementById("user-new-name");
           if (newUserInp) newUserInp.value = updatedUser;
@@ -4098,13 +4133,11 @@
 
       const tb = document.getElementById("hdr-toolbar");
       let dragDown = false, startX = 0, scrollStart = 0;
-      let tbTargetX = 0, tbRaf = null;
       tb.addEventListener("mousedown", e => {
         if (e.target.closest("button, input, select, a, label")) return;
         dragDown = true; startX = e.pageX - tb.offsetLeft; scrollStart = tb.scrollLeft; tb.classList.add("cursor-grabbing");
-        if (tbRaf) { cancelAnimationFrame(tbRaf); tbRaf = null; }
       });
-      window.addEventListener("mouseup", () => { dragDown = false; tb.classList.remove("cursor-grabbing"); });
+      window.addEventListener("mouseup", () => { if (dragDown) { dragDown = false; tb.classList.remove("cursor-grabbing"); } });
       tb.addEventListener("mousemove", e => {
         if (!dragDown) return;
         e.preventDefault();
@@ -4115,77 +4148,7 @@
         const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
         if (!delta) return;
         e.preventDefault();
-        if (!tbRaf) tbTargetX = tb.scrollLeft;
-        const maxScroll = tb.scrollWidth - tb.clientWidth;
-        tbTargetX = Math.max(0, Math.min(maxScroll, tbTargetX + delta * 1.1));
-        const stepX = () => {
-          const diff = tbTargetX - tb.scrollLeft;
-          if (Math.abs(diff) < 0.5) {
-            tb.scrollLeft = tbTargetX;
-            tbRaf = null;
-            return;
-          }
-          tb.scrollLeft += diff * 0.18;
-          tbRaf = requestAnimationFrame(stepX);
-        };
-        if (!tbRaf) tbRaf = requestAnimationFrame(stepX);
-      }, { passive: false });
-
-      // Smooth mouse-wheel scrolling across the page and all scrollable panels/modals
-      const smoothTargets = new WeakMap();
-      function findVerticalScrollTarget(el) {
-        let node = el;
-        while (node && node !== document.body && node !== document.documentElement) {
-          const style = window.getComputedStyle(node);
-          const overflowY = style.overflowY;
-          if ((overflowY === "auto" || overflowY === "scroll") && node.scrollHeight > node.clientHeight + 1) {
-            return node;
-          }
-          node = node.parentElement;
-        }
-        return document.scrollingElement || document.documentElement;
-      }
-
-      window.addEventListener("wheel", e => {
-        if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey) return;
-        if (Math.abs(e.deltaY) < Math.abs(e.deltaX) || e.deltaY === 0) return;
-        // Let precision trackpads with tiny fractional pixel deltas use native momentum
-        if (e.deltaMode === 0 && Math.abs(e.deltaY) < 25) return;
-
-        const target = findVerticalScrollTarget(e.target);
-        const maxScroll = target.scrollHeight - target.clientHeight;
-        if (maxScroll <= 0) return;
-
-        let deltaPx = e.deltaY;
-        if (e.deltaMode === 1) deltaPx *= 36;
-        else if (e.deltaMode === 2) deltaPx *= target.clientHeight;
-
-        const atTop = target.scrollTop <= 0 && deltaPx < 0;
-        const atBottom = target.scrollTop >= maxScroll - 1 && deltaPx > 0;
-        if (atTop || atBottom) return;
-
-        e.preventDefault();
-        let state = smoothTargets.get(target);
-        if (!state) {
-          state = { targetY: target.scrollTop, raf: null };
-          smoothTargets.set(target, state);
-        }
-        if (!state.raf) state.targetY = target.scrollTop;
-        state.targetY = Math.max(0, Math.min(maxScroll, state.targetY + deltaPx * 1.05));
-
-        if (!state.raf) {
-          const tick = () => {
-            const diff = state.targetY - target.scrollTop;
-            if (Math.abs(diff) < 0.6) {
-              target.scrollTop = state.targetY;
-              state.raf = null;
-              return;
-            }
-            target.scrollTop += diff * 0.16;
-            state.raf = requestAnimationFrame(tick);
-          };
-          state.raf = requestAnimationFrame(tick);
-        }
+        tb.scrollLeft += delta;
       }, { passive: false });
 
       document.querySelectorAll("[data-modal-backdrop]").forEach(overlay => {
