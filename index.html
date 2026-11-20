@@ -1016,6 +1016,12 @@
         examGoals: Array.isArray(s.examGoals) ? s.examGoals : [],
         stickyNotes: Array.isArray(s.stickyNotes) ? s.stickyNotes : [],
         activeBreakHold: s.activeBreakHold && typeof s.activeBreakHold === "object" ? s.activeBreakHold : null,
+        accountOwner: s.accountOwner && typeof s.accountOwner === "object"
+          ? {
+              userId: typeof s.accountOwner.userId === "string" ? s.accountOwner.userId.trim() : "",
+              username: typeof s.accountOwner.username === "string" ? s.accountOwner.username.trim().toLowerCase() : ""
+            }
+          : null,
         userProfile: s.userProfile && typeof s.userProfile === "object"
           ? {
               name: typeof s.userProfile.name === "string" && s.userProfile.name.trim() ? s.userProfile.name : "Student",
@@ -1453,14 +1459,51 @@
       return auth && typeof auth.userId === "string" && auth.userId.trim() ? auth.userId.trim() : "";
     }
 
-    function getUserStorageKey(userIdOverride) {
-      const uid = userIdOverride !== undefined ? String(userIdOverride || "").trim() : getActiveUserId();
-      return uid ? `${STORAGE_KEY}__${uid}` : STORAGE_KEY;
+    function getAccountScopeKey(authOverride) {
+      const auth = authOverride !== undefined ? authOverride : getAuthSession();
+      if (!auth) return "";
+      if (typeof auth === "string") return auth.trim();
+      const uid = typeof auth.userId === "string" ? auth.userId.trim() : "";
+      if (uid) return uid;
+      const uname = typeof auth.username === "string" ? auth.username.trim().toLowerCase() : "";
+      return uname ? `user_${uname}` : "";
     }
 
-    function getUserTimerKey(userIdOverride) {
-      const uid = userIdOverride !== undefined ? String(userIdOverride || "").trim() : getActiveUserId();
-      return uid ? `${TIMER_RUNTIME_KEY}__${uid}` : TIMER_RUNTIME_KEY;
+    function getUserStorageKey(authOverride) {
+      const scope = getAccountScopeKey(authOverride);
+      return scope ? `${STORAGE_KEY}__${scope}` : "";
+    }
+
+    function getUserTimerKey(authOverride) {
+      const scope = getAccountScopeKey(authOverride);
+      return scope ? `${TIMER_RUNTIME_KEY}__${scope}` : "";
+    }
+
+    function isStateOwnedByAuth(stateObj, auth) {
+      if (!stateObj || typeof stateObj !== "object" || !auth) return false;
+      const owner = stateObj.accountOwner;
+      const authUid = String(auth.userId || "").trim();
+      const authUser = String(auth.username || "").trim().toLowerCase();
+
+      if (owner && typeof owner === "object") {
+        const ownerUid = String(owner.userId || "").trim();
+        const ownerUser = String(owner.username || "").trim().toLowerCase();
+        if (authUid && ownerUid) return authUid === ownerUid;
+        if (authUser && ownerUser) return authUser === ownerUser;
+        return false;
+      }
+
+      // Un-stamped legacy state belongs ONLY to primary account ID-1001
+      return authUid === "ID-1001";
+    }
+
+    function stampCurrentOwner(stateObj, authOverride) {
+      const auth = authOverride !== undefined ? authOverride : getAuthSession();
+      if (!stateObj || !auth) return;
+      stateObj.accountOwner = {
+        userId: String(auth.userId || "").trim(),
+        username: String(auth.username || "").trim().toLowerCase()
+      };
     }
 
     function resetRuntimeTimers() {
@@ -1484,8 +1527,10 @@
     }
 
     function saveTimerRuntime() {
+      const timerKey = getUserTimerKey();
+      if (!timerKey) return;
       try {
-        localStorage.setItem(getUserTimerKey(), JSON.stringify({
+        localStorage.setItem(timerKey, JSON.stringify({
           savedDate: getTodayStr(),
           timerTotalSecs,
           timerRemSecs,
@@ -1510,10 +1555,12 @@
 
     function loadTimerRuntime() {
       resetRuntimeTimers();
+      const auth = getAuthSession();
+      const timerKey = getUserTimerKey(auth);
+      if (!auth || !timerKey) return;
       try {
-        const uid = getActiveUserId();
-        let raw = localStorage.getItem(getUserTimerKey(uid));
-        if (!raw && uid === "ID-1001") {
+        let raw = localStorage.getItem(timerKey);
+        if (!raw && auth.userId === "ID-1001") {
           raw = localStorage.getItem(TIMER_RUNTIME_KEY);
         }
         if (!raw) return;
@@ -1541,18 +1588,34 @@
 
     function loadState() {
       appState = createInitialState();
+      draftProfileAvatarUrl = "";
+      const auth = getAuthSession();
+      if (!auth) {
+        isSoundEnabled = true;
+        breakHold = null;
+        resetRuntimeTimers();
+        return;
+      }
       try {
-        const uid = getActiveUserId();
-        const key = getUserStorageKey(uid);
-        let saved = localStorage.getItem(key);
-        if (!saved && uid === "ID-1001") {
-          saved = localStorage.getItem(STORAGE_KEY);
-          if (saved) {
+        const key = getUserStorageKey(auth);
+        let saved = key ? localStorage.getItem(key) : null;
+        if (!saved && auth.userId && auth.username) {
+          const legacyByUser = localStorage.getItem(`${STORAGE_KEY}__user_${auth.username.toLowerCase()}`);
+          const legacyGlobal = auth.userId === "ID-1001" ? localStorage.getItem(STORAGE_KEY) : null;
+          saved = legacyByUser || legacyGlobal;
+          if (saved && key) {
             try { localStorage.setItem(key, saved); } catch {}
           }
         }
-        if (saved) appState = normalizeState(JSON.parse(saved));
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // Reject any stale cached state that was stamped by a different user ID
+          if (!parsed?.accountOwner || isStateOwnedByAuth(parsed, auth)) {
+            appState = normalizeState(parsed);
+          }
+        }
       } catch {}
+      stampCurrentOwner(appState, auth);
       isSoundEnabled = appState.soundEnabled !== false;
       breakHold = appState.activeBreakHold || null;
       loadFiredAlertKeys();
@@ -1560,10 +1623,16 @@
     }
 
     function saveState(skipCloud = false) {
+      const auth = getAuthSession();
+      if (!auth) return;
       appState.updatedAt = Date.now();
       appState.activeBreakHold = breakHold;
-      try { localStorage.setItem(getUserStorageKey(), JSON.stringify(appState)); } catch {}
-      if (!skipCloud && isUserAuthenticated()) {
+      stampCurrentOwner(appState, auth);
+      const key = getUserStorageKey(auth);
+      if (key) {
+        try { localStorage.setItem(key, JSON.stringify(appState)); } catch {}
+      }
+      if (!skipCloud && auth.userId && auth.token) {
         clearTimeout(syncTimeout);
         syncTimeout = setTimeout(() => pushCloud(), 1500);
       }
@@ -1577,6 +1646,7 @@
       if (!isUserAuthenticated()) return;
       clearAuthSession();
       appState = createInitialState();
+      draftProfileAvatarUrl = "";
       resetRuntimeTimers();
       breakHold = null;
       closeModal("profile-modal");
@@ -1587,20 +1657,21 @@
     async function pullCloud() {
       if (!hasGas()) return;
       const auth = getAuthSession();
-      if (!auth) return;
+      // Only pull from cloud when the deployed Code.gs has issued a verified User_ID
+      if (!auth || !auth.userId || !auth.token) return;
       try {
         if (typeof google !== "undefined" && google.script && google.script.run) {
           google.script.run.withSuccessHandler(raw => {
             if (raw) applyRemoteState(JSON.parse(raw));
-          }).loadTimetableState(auth.userId || "", auth.token || "");
+          }).loadTimetableState(auth.userId, auth.token);
         } else {
           const res = await fetch(GAS_WEB_APP_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
               action: "getState",
-              userId: auth.userId || "",
-              token: auth.token || ""
+              userId: auth.userId,
+              token: auth.token
             })
           });
           const data = await res.json();
@@ -1637,7 +1708,11 @@
     }
 
     function applyRemoteState(remote) {
-      if (!remote || !remote.profiles) return;
+      const auth = getAuthSession();
+      if (!auth || !remote || !remote.profiles) return;
+      // Strict per-ID ownership check: never overwrite current user's profile with another user's state
+      if (!isStateOwnedByAuth(remote, auth)) return;
+
       if (!appState.updatedAt || (remote.updatedAt && Number(remote.updatedAt) > Number(appState.updatedAt))) {
         const mergedStudyLogs = mergeStudyLogsFromLocalAndRemote(appState.dailyStudyLogs, remote.dailyStudyLogs);
         appState = normalizeState({
@@ -1645,9 +1720,13 @@
           ...remote,
           dailyStudyLogs: mergedStudyLogs
         });
+        stampCurrentOwner(appState, auth);
         isSoundEnabled = appState.soundEnabled !== false;
         breakHold = appState.activeBreakHold || null;
-        try { localStorage.setItem(getUserStorageKey(), JSON.stringify(appState)); } catch {}
+        const key = getUserStorageKey(auth);
+        if (key) {
+          try { localStorage.setItem(key, JSON.stringify(appState)); } catch {}
+        }
         applyThemeAccent();
         renderAll();
       } else if (remote.updatedAt && Number(remote.updatedAt) < Number(appState.updatedAt)) {
@@ -1658,7 +1737,8 @@
     async function pushCloud(opts = {}) {
       if (!hasGas()) return;
       const auth = getAuthSession();
-      if (!auth) return;
+      // Only push to cloud when the deployed Code.gs has issued a verified User_ID so legacy shared sheet is never corrupted
+      if (!auth || !auth.userId || !auth.token) return;
       try {
         if (typeof google !== "undefined" && google.script && google.script.run) {
           google.script.run.withSuccessHandler(res => {
@@ -1667,7 +1747,7 @@
               return;
             }
             if (res && res.skippedStale && res.existingState) applyRemoteState(res.existingState);
-          }).saveTimetableState(JSON.stringify(appState), Boolean(opts.force), auth.userId || "", auth.token || "");
+          }).saveTimetableState(JSON.stringify(appState), Boolean(opts.force), auth.userId, auth.token);
         } else {
           const res = await fetch(GAS_WEB_APP_URL, {
             method: "POST",
@@ -1675,8 +1755,8 @@
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({
               action: "saveState",
-              userId: auth.userId || "",
-              token: auth.token || "",
+              userId: auth.userId,
+              token: auth.token,
               state: appState,
               force: Boolean(opts.force)
             })
@@ -4066,15 +4146,29 @@
       });
     }
 
-    function completeLoginSuccess(username, token, remember, remoteState, customWelcome, userId, initialDisplayName) {
+    function completeLoginSuccess(username, token, remember, remoteState, customWelcome, userId, initialDisplayName, isNewSignup = false) {
       saveAuthSession(username, token, remember, userId);
+      draftProfileAvatarUrl = "";
       loadState();
-      if (remoteState && remoteState.profiles) {
+      // Never apply legacy/shared remoteState to a newly created account, and enforce owner check on login
+      if (!isNewSignup && remoteState && remoteState.profiles) {
         applyRemoteState(remoteState);
       }
-      if (initialDisplayName) {
-        appState.userProfile = { ...(appState.userProfile || {}), name: initialDisplayName };
+      const preferredName = String(initialDisplayName || "").trim();
+      const currentProfName = String(appState.userProfile?.name || "").trim();
+      if (isNewSignup) {
+        appState.userProfile = {
+          name: preferredName || username,
+          examTarget: "",
+          avatarDataUrl: ""
+        };
         saveState();
+      } else if (!currentProfName || currentProfName === "Student") {
+        appState.userProfile = {
+          ...(appState.userProfile || { examTarget: "", avatarDataUrl: "" }),
+          name: preferredName || username
+        };
+        saveState(true);
       }
       const pwInp = document.getElementById("login-password");
       if (pwInp) pwInp.value = "";
@@ -4082,8 +4176,12 @@
       hideLoginScreen();
       applyThemeAccent();
       renderAll();
-      if (!initialDisplayName) pullCloud();
-      showToast(customWelcome || `Welcome back, ${username}${userId ? ` (${userId})` : ""}!`, "success");
+      if (!isNewSignup && userId) pullCloud();
+      if (!userId) {
+        showToast(`Signed in as @${username}. Deploy updated Code.gs (New Version) for separate cloud sync per ID.`, "info");
+      } else {
+        showToast(customWelcome || `Welcome back, ${username} (${userId})!`, "success");
+      }
     }
 
     async function handleSignupSubmit(e) {
@@ -4126,10 +4224,11 @@
             createdUser,
             res.token || "",
             true,
-            res.state || null,
+            null,
             `Account created${createdId ? ` (${createdId})` : ""}! Welcome, ${createdUser}!`,
             createdId,
-            displayName || createdUser
+            res.displayName || displayName || createdUser,
+            true
           );
           return;
         }
@@ -4174,9 +4273,11 @@
             res.username || username,
             res.token || "",
             remember,
-            res.state || null,
+            res.userId ? (res.state || null) : null,
             null,
-            res.userId || ""
+            res.userId || "",
+            res.displayName || "",
+            false
           );
           return;
         }
@@ -4201,7 +4302,10 @@
       const prevAuth = getAuthSession();
       flushTimersToNow(new Date());
       saveTimerRuntime();
-      try { localStorage.setItem(getUserStorageKey(prevAuth?.userId), JSON.stringify(appState)); } catch {}
+      const prevKey = getUserStorageKey(prevAuth);
+      if (prevKey) {
+        try { localStorage.setItem(prevKey, JSON.stringify(appState)); } catch {}
+      }
       pushCloud({ keepalive: true });
       if (prevAuth?.userId && prevAuth?.token && hasGas()) {
         try {
@@ -4220,11 +4324,13 @@
       clearTimeout(syncTimeout);
       clearAuthSession();
       appState = createInitialState();
+      draftProfileAvatarUrl = "";
       resetRuntimeTimers();
       breakHold = null;
       closeModal("profile-modal");
       const pwInp = document.getElementById("login-password");
       if (pwInp) pwInp.value = "";
+      renderHeaderProfile();
       showLoginScreen();
       showToast("Logged out successfully.", "info");
     }
@@ -4432,10 +4538,14 @@
     }, 45000);
 
     function flushAndSyncOnHide() {
-      if (!isUserAuthenticated()) return;
+      const auth = getAuthSession();
+      if (!auth) return;
       flushTimersToNow(new Date());
       saveTimerRuntime();
-      try { localStorage.setItem(getUserStorageKey(), JSON.stringify(appState)); } catch {}
+      const key = getUserStorageKey(auth);
+      if (key) {
+        try { localStorage.setItem(key, JSON.stringify(appState)); } catch {}
+      }
       clearTimeout(syncTimeout);
       pushCloud({ keepalive: true });
     }
