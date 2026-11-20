@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Daily Study Timetable Tracker — Pro Exam Edition</title>
+  <meta name="description" content="High-performance daily study timetable tracker with effective-dated routines, live session timers, Pomodoro focus countdown, typing speed logs, and Google Apps Script cloud sync." />
+  <meta property="og:title" content="Daily Study Timetable Tracker — Pro Exam Edition" />
+  <meta property="og:description" content="High-performance daily study timetable tracker with effective-dated routines, live session timers, Pomodoro focus countdown, typing speed logs, and Google Apps Script cloud sync." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -70,7 +75,22 @@
     [data-theme="dark"][data-accent="amber"] { --accent-text: #fbbf24; }
     [data-theme="dark"][data-accent="rose"] { --accent-text: #fb7185; }
 
-    html, body { max-width: 100%; overflow-x: clip; -webkit-tap-highlight-color: transparent; }
+    *, *::before, *::after {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      background: transparent !important;
+    }
+    html, body {
+      max-width: 100%;
+      overflow-x: clip;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-overflow-scrolling: touch;
+    }
     body {
       font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       background: var(--bg-gradient);
@@ -87,12 +107,12 @@
     .accent-text { color: var(--accent-text); }
     .accent-soft { background: var(--accent-soft); color: var(--accent-text); }
     .active-slot-ring { border-color: var(--accent-primary) !important; box-shadow: 0 0 0 3px var(--accent-glow) !important; }
-    .thin-scroll { scrollbar-width: thin; }
-    .thin-scroll::-webkit-scrollbar { height: 4px; width: 6px; }
-    .thin-scroll::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.45); border-radius: 9999px; }
+    .thin-scroll { scrollbar-width: none !important; -ms-overflow-style: none !important; }
+    .thin-scroll::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
   </style>
 </head>
 <body data-theme="light" data-accent="indigo" class="pb-28 antialiased selection:bg-indigo-500 selection:text-white">
+  <div id="root" class="hidden"></div>
   <div id="toast-root" class="fixed bottom-24 right-3 sm:right-5 z-[70] flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-1.5rem)]"></div>
 
   <!-- HEADER -->
@@ -140,6 +160,7 @@
         <button type="button" onclick="openModal('plans-modal')" class="shrink-0 px-3 py-1.5 rounded-xl accent-soft text-xs font-bold whitespace-nowrap cursor-pointer">Routine &amp; Plans</button>
         <button type="button" onclick="openModal('history-modal')" id="history-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">History</button>
         <button type="button" onclick="toggleEditMode()" id="edit-mode-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">Edit Mode</button>
+        <button type="button" onclick="openModal('code-modal')" class="shrink-0 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold whitespace-nowrap cursor-pointer">Updated Code &amp; GAS</button>
       </div>
     </div>
   </header>
@@ -166,7 +187,7 @@
       <div id="daily-study-card" class="lg:col-span-5 rounded-2xl p-4 sm:p-5 surface-panel flex flex-col justify-between gap-3"></div>
     </section>
 
-    <!-- NON-TODAY (PAST / UPCOMING DAY): COMPACT SCHEDULE SUMMARY BANNER (No Live Session / No Random Study) -->
+    <!-- NON-TODAY (PAST / UPCOMING DAY): COMPACT SCHEDULE SUMMARY BANNER -->
     <section id="other-day-banner" class="hidden surface-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"></section>
 
     <!-- EDIT MODE TOOLBAR -->
@@ -193,7 +214,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       <!-- TIMETABLE LIST -->
       <div class="lg:col-span-8 space-y-4">
-        <!-- Schedule Context Strip (Today / Custom Day / Daily Routine version) -->
+        <!-- Schedule Context Strip -->
         <div id="schedule-context-strip" class="surface-panel rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs"></div>
 
         <div class="surface-panel rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5">
@@ -227,7 +248,7 @@
         <!-- FOLDABLE STICKY NOTES -->
         <div id="sticky-notes-card" class="surface-panel rounded-2xl p-4 sm:p-5"></div>
 
-        <!-- FOLDABLE FOCUS & POMODORO COUNTDOWN TIMER (With Custom Time & Presets) -->
+        <!-- FOLDABLE FOCUS & POMODORO COUNTDOWN TIMER -->
         <div id="focus-timer-card" class="surface-panel rounded-2xl p-4 sm:p-5"></div>
 
         <!-- HEATMAP -->
@@ -244,7 +265,7 @@
     </div>
   </main>
 
-  <!-- FLOATING STUDY TIMER BAR (Desktop & Mobile — directly connected to active study timer) -->
+  <!-- FLOATING STUDY TIMER BAR -->
   <div id="floating-timer-bar" class="fixed bottom-3 inset-x-3 lg:inset-x-auto lg:right-5 lg:w-[390px] z-40 surface-panel rounded-2xl px-4 py-3 flex items-center justify-between gap-3 shadow-2xl border-2 border-[var(--accent-primary)]/40">
     <div class="min-w-0 flex-1">
       <div class="flex items-center gap-1.5">
@@ -295,7 +316,7 @@
     </div>
   </div>
 
-  <!-- UNIFIED ROUTINE & STUDY PLANS MODAL (Scope: Today Only / Custom Date / From Now On + Plan Selector & Creator) -->
+  <!-- UNIFIED ROUTINE & STUDY PLANS MODAL -->
   <div id="plans-modal" data-modal-backdrop="plans-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
     <div class="surface-panel rounded-3xl max-w-2xl w-full p-5 space-y-4 max-h-[92dvh] overflow-y-auto thin-scroll">
       <div class="flex justify-between items-center">
@@ -309,7 +330,7 @@
       <!-- Current Date Status Banner -->
       <div id="pm-current-status" class="p-3 rounded-2xl border surface-input text-xs"></div>
 
-      <!-- SECTION 1: APPLY A PLAN TO SCOPE (Today / Custom Day / From Now On) -->
+      <!-- SECTION 1: APPLY A PLAN TO SCOPE -->
       <div class="p-4 rounded-2xl border-2 border-[var(--accent-primary)]/35 surface-input space-y-3">
         <div class="text-xs font-extrabold uppercase accent-text">Apply Routine / Plan</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -338,7 +359,7 @@
         <div id="rm-scope-explain" class="text-[11px] text-[var(--text-muted)]"></div>
       </div>
 
-      <!-- SECTION 2: CREATE / EDIT STUDY PLAN (Inside Routine Option) -->
+      <!-- SECTION 2: CREATE / EDIT STUDY PLAN -->
       <form onsubmit="savePlanForm(event)" class="p-4 rounded-2xl border surface-input space-y-2.5">
         <input type="hidden" id="pm-edit-id" />
         <div class="flex items-center justify-between gap-2">
@@ -418,7 +439,7 @@
     </div>
   </div>
 
-  <!-- ADMIN PIN MODAL (Unlock / Set / Change to New PIN / Remove with Confirmation) -->
+  <!-- ADMIN PIN MODAL -->
   <div id="pin-modal" data-modal-backdrop="pin-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
     <div class="surface-panel rounded-3xl max-w-sm w-full p-5 space-y-3">
       <div class="flex justify-between items-center">
@@ -461,11 +482,50 @@
     </div>
   </div>
 
+  <!-- UPDATED CODE & GOOGLE APPS SCRIPT EXPORT MODAL -->
+  <div id="code-modal" data-modal-backdrop="code-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-4xl w-full p-5 space-y-4 max-h-[92dvh] flex flex-col">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 class="text-base font-extrabold">Bug Report + Updated Index.html &amp; Code.gs</h3>
+          <p class="text-[11px] text-[var(--text-muted)]">Copy or download both updated files directly for your Google Apps Script project.</p>
+        </div>
+        <button type="button" onclick="closeModal('code-modal')" class="px-2.5 py-1 text-xs font-bold cursor-pointer">Close</button>
+      </div>
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex gap-1.5">
+          <button type="button" id="tab-code-bugs" onclick="switchCodeTab('bugs')" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">11 Bugs Fixed</button>
+          <button type="button" id="tab-code-html" onclick="switchCodeTab('html')" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-extrabold cursor-pointer">Index.html (Frontend)</button>
+          <button type="button" id="tab-code-gas" onclick="switchCodeTab('gas')" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-extrabold cursor-pointer">Code.gs (Apps Script)</button>
+        </div>
+        <div id="code-action-btns" class="hidden flex gap-1.5">
+          <button type="button" onclick="copyActiveCode()" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Copy Code</button>
+          <button type="button" onclick="downloadActiveCode()" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Download File</button>
+        </div>
+      </div>
+      <div id="code-bugs-panel" class="overflow-y-auto thin-scroll space-y-2 text-xs pr-1">
+        <div class="p-3 rounded-xl border surface-input"><strong>1. Cross-Midnight Schedule Sorting &amp; Gap Break Bug:</strong> Slots crossing midnight or ending after midnight (e.g., 23:00–01:00) broke gap-break calculation and sorting. Fixed timeline sorting and gap detection to handle overnight wraps cleanly.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>2. Midnight Rollover Split-Time Bug in <code>flushTimersToNow</code>:</strong> If a timer was running across 00:00 midnight (or while the tab was backgrounded overnight), all elapsed seconds were credited to the new day instead of splitting at midnight. Fixed so pre-midnight seconds go to yesterday (and auto-archive yesterday) and post-midnight seconds go to today.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>3. Overnight Break Hold Overflow Bug:</strong> If a break hold remained active across midnight, all held seconds were credited to the new day and deducted from the new day's slot. Fixed by auto-releasing break holds at the midnight rollover boundary onto the day they started.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>4. Stale Runtime Timer State Across Days:</strong> <code>loadTimerRuntime()</code> restored <code>activeRoutineSlotId</code>, <code>routineLastTickMs</code>, and <code>manualLastTickMs</code> from previous days without checking if the saved timestamp belonged to an earlier date, causing huge phantom hours on load. Added day-boundary reconciliation on boot.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>5. Routine Auto-Pause Clock Drift &amp; Midnight End Calculation Bug:</strong> In <code>flushTimersToNow</code>, <code>getSlotEndMsForNow(new Date(routineLastTickMs), rs)</code> recomputed remaining seconds from a past timestamp and could miss the auto-pause boundary or add 24 hours. Replaced with an exact wall-clock target timestamp <code>routineSchedEndMs</code> stored when the routine slot starts.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>6. Double-Counting Routine Progress in Stats &amp; Archive:</strong> When a slot was unchecked after accumulating <code>loggedHours</code>, or when slot duration was adjusted via break-hold deduction, <code>loggedHours</code> wasn't synced continuously during live ticks unless paused. Now <code>loggedHours</code> is updated continuously on every flush and auto-archived accurately.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>7. Heatmap &amp; Streak Ignoring Live Unarchived Study Time:</strong> The 14-day Consistency Heatmap only read <code>appState.archives[key]?.percentage</code>, showing 0% for days where the user studied via Manual/Focus/Routine timers without clicking "Archive Day". Fixed heatmap to compute live completion % from both archives and tracked study duration.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>8. <code>applyRemoteState</code> Overwriting Active Local Study Seconds:</strong> When pulling from Google Apps Script every 45 seconds, if another device had a slightly newer <code>updatedAt</code>, local in-progress <code>dailyStudyLogs</code> were overwritten. Added client-side &amp; server-side non-decreasing merge for <code>dailyStudyLogs</code>, <code>dailyLogs</code>, <code>archives</code>, and <code>reflections</code>.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>9. Custom Reminder Re-Firing After Page Reload Within Same Minute:</strong> <code>firedCustomKeys</code> and <code>firedPreShiftKeys</code> lived only in memory, so refreshing the page during the reminder minute or 10-min pre-shift window re-triggered all alerts. Persisted today's fired alert keys in <code>sessionStorage</code>.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>10. Editing Routine Plan Metadata Didn't Update <code>routineHistory</code>:</strong> Editing a saved plan's title/name/subtitle in the Plans Manager updated <code>appState.profiles[id]</code> but left existing <code>routineHistory</code> entries pointing to that <code>profileId</code> with stale titles. Fixed <code>savePlanForm</code> to sync linked <code>routineHistory</code> entries.</div>
+        <div class="p-3 rounded-xl border surface-input"><strong>11. Google Apps Script (<code>Code.gs</code>) File Case &amp; Concurrent Device Merge:</strong> Added fallback for both <code>Index.html</code> and <code>index.html</code> in <code>doGet(?ui=1)</code>, safe handling when <code>payload.state</code> is passed as string or object, text formatting on percentage columns so Sheets doesn't convert <code>85%</code> to <code>0.85</code>, and server-side <code>mergeRemoteAndIncomingStates_</code> so multi-device sync never loses study time.</div>
+      </div>
+      <textarea id="code-viewer-textarea" readonly class="hidden flex-1 w-full rounded-2xl border surface-input p-3.5 font-mono-tab text-[11px] leading-relaxed focus:outline-none resize-none min-h-[360px]"></textarea>
+    </div>
+  </div>
+
   <script>
-    // Private Apps Script Endpoint (embedded directly; never displayed on UI)
+    // Private Apps Script Endpoint
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwHwLCXgeZyiEfuVJT3pO7RAgSTyM5Jx0CFjRB9MMSDxwr2E4aquzs14wuqwjtmtqXs/exec";
     const STORAGE_KEY = "daily_study_timetable_pro_v2";
     const TIMER_RUNTIME_KEY = "daily_study_timer_runtime_v3";
+    const FIRED_ALERTS_SESSION_KEY = "daily_study_fired_alerts_v1";
 
     const DEFAULT_TIMETABLE = [
       { id: "slot-1", start: "07:00", end: "09:30", durationLabel: "2.5 hrs", durationHours: 2.5, category: "online", subject: "Online Classes (Slot 1)", focus: "Recorded backlog classes at 1.25x-1.5x speed + short notes." },
@@ -520,7 +580,6 @@
           "default-10hr": { name: "10-Hr Backlog Plan", title: "DAILY STUDY TIMETABLE", subtitle: "Backlog Focus + Typing + Reasoning + GK/GS", slots: cloneSlots(defSlots) },
           "weekend-mock": { name: "Weekend Mock & Revision", title: "WEEKEND MOCK & REVISION PLAN", subtitle: "Full Mock + Deep Analysis + Weekly CA Revision", slots: cloneSlots(WEEKEND_MOCK_TIMETABLE) }
         },
-        // Effective-dated daily routine history (preserves past schedules, applies forward until next change date)
         routineHistory: [
           {
             effectiveFrom: "2000-01-01",
@@ -531,7 +590,6 @@
             slots: cloneSlots(defSlots)
           }
         ],
-        // Single-day custom schedules that never affect daily routine
         dateOverrides: {},
         dailyLogs: {},
         dailyStudyLogs: {},
@@ -595,7 +653,7 @@
     let lastKnownToday = getTodayStr();
     let currentFilter = "all";
     let isEditMode = false;
-    let pinMode = "manage"; // "unlock" | "manage"
+    let pinMode = "manage";
     let notifBannerDismissed = false;
     let pendingConfirmAction = null;
 
@@ -605,8 +663,8 @@
     let timerEndAtMs = null;
     let timerLabel = "Pomodoro Focus (25m)";
     let isTimerRunning = false;
-    let timerLinkedRoutineSlotId = null; // non-null when Focus Countdown is linked to an active Routine slot
-    let focusLastTickMs = null; // tracks standalone focus seconds into Daily Study Duration (never decreases!)
+    let timerLinkedRoutineSlotId = null;
+    let focusLastTickMs = null;
 
     let isManualRunning = false;
     let manualLastTickMs = null;
@@ -615,6 +673,7 @@
     let isRoutineRunning = false;
     let routineLastTickMs = null;
     let routineStartedBeforeEnd = false;
+    let routineSchedEndMs = null; // Exact wall-clock timestamp when live routine slot ends
     let routineMode = "live"; // "live" | "past" | "upcoming"
     let routineSessionStartMs = null;
     let routineSessionElapsedBase = 0;
@@ -639,6 +698,28 @@
     const firedCustomKeys = new Set();
     const autoPausedKeys = new Set();
 
+    function loadFiredAlertKeys() {
+      try {
+        const raw = sessionStorage.getItem(FIRED_ALERTS_SESSION_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        const today = getTodayStr();
+        (parsed.pre || []).filter(k => String(k).startsWith(today)).forEach(k => firedPreShiftKeys.add(k));
+        (parsed.custom || []).filter(k => String(k).startsWith(today)).forEach(k => firedCustomKeys.add(k));
+        (parsed.paused || []).filter(k => String(k).startsWith(today)).forEach(k => autoPausedKeys.add(k));
+      } catch {}
+    }
+
+    function saveFiredAlertKeys() {
+      try {
+        sessionStorage.setItem(FIRED_ALERTS_SESSION_KEY, JSON.stringify({
+          pre: Array.from(firedPreShiftKeys),
+          custom: Array.from(firedCustomKeys),
+          paused: Array.from(autoPausedKeys)
+        }));
+      } catch {}
+    }
+
     function esc(s) {
       return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     }
@@ -653,6 +734,10 @@
     }
     function getTodayStr(d = new Date()) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+    function getStartOfDayMs(dateStr) {
+      const [y, m, d] = dateStr.split("-").map(Number);
+      return new Date(y, m - 1, d, 0, 0, 0, 0).getTime();
     }
     function formatPrettyDate(dateStr) {
       try {
@@ -715,7 +800,8 @@
     function isPastSlotToday(currM, s24, e24) {
       const s = toMins(s24), e = toMins(e24);
       if (e > s) return currM >= e;
-      return false;
+      // Overnight slot (e.g. 23:00 - 01:00): considered past during daytime after e and before s
+      return currM >= e && currM < s;
     }
     function remSecsToEnd(now, e24, s24) {
       const currS = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
@@ -756,7 +842,6 @@
       };
     }
 
-    // Returns mutable reference to the slots array for a given scope ("custom_day" or "from_now")
     function ensureRoutineEntryForDate(effectiveDate) {
       const existing = appState.routineHistory.find(e => e.effectiveFrom === effectiveDate);
       if (existing) return existing;
@@ -805,7 +890,6 @@
         renderAll();
         showToast(`Applied "${planObj.name}" for ${dateToUse === today ? "Today only" : dateToUse + " only"} (daily routine unchanged).`, "success");
       } else {
-        // from_now: effective from dateToUse onward (until any later routineHistory date), never touches past!
         const effDate = dateToUse < today ? today : dateToUse;
         const idx = appState.routineHistory.findIndex(e => e.effectiveFrom === effDate);
         const entry = {
@@ -822,7 +906,6 @@
         if (planObj.profileId && appState.profiles[planObj.profileId]) {
           appState.activeProfileId = planObj.profileId;
         }
-        // If user had a custom override on effDate and explicitly applies "from now on" starting effDate, remove that override so the new routine shows
         if (appState.dateOverrides[effDate]) delete appState.dateOverrides[effDate];
         if (effDate === today) stopActiveRoutineSilently();
         currentDateStr = effDate;
@@ -850,9 +933,10 @@
         const ded = s.category !== "break" ? Math.max(0, adj[s.id] || 0) : 0;
         const effM = Math.max(5, baseM - ded);
         const effH = Math.round((effM / 60) * 100) / 100;
+        const effEnd = ded > 0 ? minsTo24(toMins(s.start) + effM) : s.end;
         out.push({
           ...s,
-          end: ded > 0 ? minsTo24(toMins(s.start) + effM) : s.end,
+          end: effEnd,
           originalEnd: s.end,
           durationHours: effH,
           durationLabel: fmtDurLabel(effH),
@@ -861,14 +945,17 @@
         });
         if (i < sorted.length - 1) {
           const next = sorted[i + 1];
-          const currEndM = toMins(s.end), nextStartM = toMins(next.start);
-          if (currEndM >= toMins(s.start) && nextStartM > currEndM) {
-            const gapId = `gap-${s.end}-${next.start}`;
+          const startM = toMins(s.start);
+          const currEndM = toMins(effEnd);
+          const nextStartM = toMins(next.start);
+          // Only create an intra-day gap break if the current slot doesn't wrap past midnight and ends before the next slot starts
+          if (currEndM > startM && nextStartM > currEndM) {
+            const gapId = `gap-${effEnd}-${next.start}`;
             const gapH = Math.round(((nextStartM - currEndM) / 60) * 100) / 100;
             const custom = appState.gapBreakNames?.[`${sched.scopeKey}::${gapId}`] || appState.gapBreakNames?.[`${appState.activeProfileId}::${gapId}`];
             out.push({
               id: gapId, gapId, isGapBreak: true,
-              start: s.end, end: next.start,
+              start: effEnd, end: next.start,
               durationHours: gapH, durationLabel: fmtDurLabel(gapH),
               category: "break",
               subject: custom || "Break (Schedule Gap)",
@@ -880,7 +967,7 @@
       return out;
     }
 
-    // ==================== GLOBAL CONFIRMATION MODAL (Req #4) ====================
+    // ==================== GLOBAL CONFIRMATION MODAL ====================
     function requestConfirm(title, message, onConfirm, okLabel = "Yes, Delete") {
       pendingConfirmAction = onConfirm;
       document.getElementById("confirm-title").textContent = title || "Confirm Delete";
@@ -899,7 +986,7 @@
       if (typeof fn === "function") fn();
     }
 
-    // ==================== TOASTS, AUDIO & DEVICE NOTIFICATIONS (Req #5) ====================
+    // ==================== TOASTS, AUDIO & DEVICE NOTIFICATIONS ====================
     function showToast(msg, type = "info") {
       const root = document.getElementById("toast-root");
       const el = document.createElement("div");
@@ -925,6 +1012,7 @@
           o.connect(g); g.connect(ctx.destination);
           o.start(ctx.currentTime + i * 0.13); o.stop(ctx.currentTime + i * 0.13 + 0.45);
         });
+        setTimeout(() => { try { ctx.close(); } catch {} }, 1200);
       } catch {}
     }
 
@@ -981,6 +1069,7 @@
     function saveTimerRuntime() {
       try {
         localStorage.setItem(TIMER_RUNTIME_KEY, JSON.stringify({
+          savedDate: getTodayStr(),
           timerTotalSecs,
           timerRemSecs,
           timerEndAtMs,
@@ -994,6 +1083,7 @@
           isRoutineRunning,
           routineLastTickMs,
           routineStartedBeforeEnd,
+          routineSchedEndMs,
           routineMode,
           routineSessionStartMs,
           routineSessionElapsedBase
@@ -1020,6 +1110,7 @@
         isRoutineRunning = Boolean(rt.isRoutineRunning && activeRoutineSlotId && rt.routineLastTickMs);
         routineLastTickMs = rt.routineLastTickMs ? Number(rt.routineLastTickMs) : null;
         routineStartedBeforeEnd = Boolean(rt.routineStartedBeforeEnd);
+        routineSchedEndMs = rt.routineSchedEndMs ? Number(rt.routineSchedEndMs) : null;
         routineMode = rt.routineMode || "live";
         routineSessionStartMs = rt.routineSessionStartMs ? Number(rt.routineSessionStartMs) : null;
         routineSessionElapsedBase = Number(rt.routineSessionElapsedBase) || 0;
@@ -1033,6 +1124,7 @@
       } catch {}
       isSoundEnabled = appState.soundEnabled !== false;
       breakHold = appState.activeBreakHold || null;
+      loadFiredAlertKeys();
       loadTimerRuntime();
     }
 
@@ -1065,10 +1157,38 @@
       } catch {}
     }
 
+    // Bug Fix #8: Non-destructively merge study duration counters when applying remote state
+    function mergeStudyLogsFromLocalAndRemote(localLogs, remoteLogs) {
+      const out = { ...(remoteLogs || {}) };
+      Object.entries(localLogs || {}).forEach(([dayKey, loc]) => {
+        const rem = out[dayKey];
+        if (!rem) {
+          out[dayKey] = loc;
+        } else if (loc && typeof loc === "object") {
+          const mergedSlots = { ...(rem.routineSecondsBySlot || {}) };
+          Object.entries(loc.routineSecondsBySlot || {}).forEach(([sId, secs]) => {
+            mergedSlots[sId] = Math.max(Number(mergedSlots[sId]) || 0, Number(secs) || 0);
+          });
+          out[dayKey] = {
+            manualSeconds: Math.max(Number(rem.manualSeconds) || 0, Number(loc.manualSeconds) || 0),
+            focusSeconds: Math.max(Number(rem.focusSeconds) || 0, Number(loc.focusSeconds) || 0),
+            heldBreakSeconds: Math.max(Number(rem.heldBreakSeconds) || 0, Number(loc.heldBreakSeconds) || 0),
+            routineSecondsBySlot: mergedSlots
+          };
+        }
+      });
+      return out;
+    }
+
     function applyRemoteState(remote) {
       if (!remote || !remote.profiles) return;
       if (!appState.updatedAt || (remote.updatedAt && Number(remote.updatedAt) > Number(appState.updatedAt))) {
-        appState = normalizeState({ ...appState, ...remote });
+        const mergedStudyLogs = mergeStudyLogsFromLocalAndRemote(appState.dailyStudyLogs, remote.dailyStudyLogs);
+        appState = normalizeState({
+          ...appState,
+          ...remote,
+          dailyStudyLogs: mergedStudyLogs
+        });
         isSoundEnabled = appState.soundEnabled !== false;
         breakHold = appState.activeBreakHold || null;
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
@@ -1103,7 +1223,7 @@
       } catch {}
     }
 
-    // ==================== THEME & ACCENT (Emoji Style Req #10) ====================
+    // ==================== THEME & ACCENT ====================
     function applyThemeAccent() {
       const t = appState.theme || "light", a = appState.accent || "indigo";
       document.body.setAttribute("data-theme", t);
@@ -1138,27 +1258,56 @@
       return { manualS, routineS, focusS, heldS, totalS: manualS + routineS + focusS + heldS };
     }
 
-    // ==================== 20% COMPLETION RULE (Req #15) ====================
-    function evaluateRoutineTolerance(slot, trackedSecs) {
-      const today = getTodayStr();
+    // ==================== 20% COMPLETION RULE ====================
+    function evaluateRoutineTolerance(slot, trackedSecs, targetDay = getTodayStr()) {
       const targetSecs = Math.max(60, Math.round((slot.durationHours || calcHrs(slot.start, slot.end)) * 3600));
-      // Within 20% difference of scheduled duration (>= 80% of slot duration) => Complete!
       const requiredSecs = Math.max(1, Math.round(targetSecs * 0.80));
+      appState.dailyLogs[targetDay] = appState.dailyLogs[targetDay] || {};
+      const prev = appState.dailyLogs[targetDay][slot.id] || { status: "pending" };
+      const updatedLoggedHours = Number((trackedSecs / 3600).toFixed(2));
+
       if (trackedSecs >= requiredSecs) {
-        appState.dailyLogs[today] = appState.dailyLogs[today] || {};
-        const prev = appState.dailyLogs[today][slot.id] || {};
         const wasAlreadyDone = prev.status === "completed";
-        appState.dailyLogs[today][slot.id] = { ...prev, status: "completed", loggedHours: Number((trackedSecs / 3600).toFixed(2)) };
-        if (appState.autoArchive !== false) archiveDay(today, true);
+        appState.dailyLogs[targetDay][slot.id] = { ...prev, status: "completed", loggedHours: updatedLoggedHours };
+        if (appState.autoArchive !== false) archiveDay(targetDay, true);
         if (!wasAlreadyDone) {
           saveState();
           playChime();
-          sendDeviceNotif("Slot Completed!", `"${slot.subject}" reached ≥80% (within 20%) of schedule.`, `done-${slot.id}-${today}`);
+          sendDeviceNotif("Slot Completed!", `"${slot.subject}" reached ≥80% (within 20%) of schedule.`, `done-${slot.id}-${targetDay}`);
           showToast(`"${slot.subject}" marked complete (within 20% of schedule)!`, "success");
-          renderStats(buildTimeline());
+          renderStats(buildTimeline(currentDateStr));
           renderTimelineList();
         }
+      } else {
+        appState.dailyLogs[targetDay][slot.id] = { ...prev, loggedHours: updatedLoggedHours };
+        if (appState.autoArchive !== false) archiveDay(targetDay, true);
       }
+    }
+
+    // Helper: Credits elapsed seconds between [startMs, endMs] splitting accurately across midnight boundaries (Bug Fix #2 & #4)
+    function creditElapsedAcrossDays(startMs, endMs, applyFn) {
+      if (!startMs || endMs <= startMs) return 0;
+      let cursor = startMs;
+      let totalCredited = 0;
+      while (cursor < endMs) {
+        const cursorDate = new Date(cursor);
+        const dayStr = getTodayStr(cursorDate);
+        const nextMidnightMs = new Date(cursorDate.getFullYear(), cursorDate.getMonth(), cursorDate.getDate() + 1, 0, 0, 0, 0).getTime();
+        const segEnd = Math.min(endMs, nextMidnightMs);
+        const secs = Math.floor((segEnd - cursor) / 1000);
+        if (secs > 0) {
+          applyFn(dayStr, secs);
+          totalCredited += secs;
+          cursor += secs * 1000;
+        } else {
+          break;
+        }
+        if (segEnd === nextMidnightMs && endMs >= nextMidnightMs) {
+          if (appState.autoArchive !== false) archiveDay(dayStr, true);
+          cursor = nextMidnightMs;
+        }
+      }
+      return cursor;
     }
 
     // ==================== WALL-CLOCK TIMER FLUSH ====================
@@ -1167,65 +1316,81 @@
       const today = getTodayStr(now);
       let changed = false;
 
-      // 1. Manual / Random Study Timer
-      if (isManualRunning) {
-        if (!manualLastTickMs) manualLastTickMs = nowMs;
-        const elapsed = Math.floor((nowMs - manualLastTickMs) / 1000);
-        if (elapsed > 0) {
-          const rec = ensureDayStudyLog(today);
-          rec.manualSeconds += elapsed;
-          manualLastTickMs += elapsed * 1000;
+      // 0. If a Break Hold crossed midnight, release the pre-midnight portion to the day it started (Bug Fix #3)
+      if (breakHold && breakHold.startedAtMs) {
+        const holdStartDay = getTodayStr(new Date(breakHold.startedAtMs));
+        if (holdStartDay !== today) {
+          const todayStartMs = getStartOfDayMs(today);
+          const preMidnightSecs = Math.max(1, Math.floor((todayStartMs - breakHold.startedAtMs) / 1000));
+          const rec = ensureDayStudyLog(holdStartDay);
+          rec.heldBreakSeconds = (rec.heldBreakSeconds || 0) + preMidnightSecs;
+          if (appState.autoArchive !== false) archiveDay(holdStartDay, true);
+          breakHold.startedAtMs = todayStartMs;
           changed = true;
         }
       }
 
-      // 2. Standalone Focus Countdown Timer -> ALWAYS adds to Daily Study Duration (never decreases on reset!)
+      // 1. Manual / Random Study Timer (Midnight-split safe)
+      if (isManualRunning) {
+        if (!manualLastTickMs) manualLastTickMs = nowMs;
+        const newCursor = creditElapsedAcrossDays(manualLastTickMs, nowMs, (dayStr, secs) => {
+          const rec = ensureDayStudyLog(dayStr);
+          rec.manualSeconds += secs;
+          changed = true;
+        });
+        if (newCursor > manualLastTickMs) manualLastTickMs = newCursor;
+      }
+
+      // 2. Standalone Focus Countdown Timer -> ALWAYS adds to Daily Study Duration
       if (isTimerRunning && !timerLinkedRoutineSlotId && !isRoutineRunning) {
         if (!focusLastTickMs) focusLastTickMs = nowMs;
         const effectiveNow = timerEndAtMs ? Math.min(nowMs, timerEndAtMs) : nowMs;
-        const elapsed = Math.max(0, Math.floor((effectiveNow - focusLastTickMs) / 1000));
-        if (elapsed > 0) {
-          const rec = ensureDayStudyLog(today);
-          rec.focusSeconds += elapsed;
-          focusLastTickMs += elapsed * 1000;
+        const newCursor = creditElapsedAcrossDays(focusLastTickMs, effectiveNow, (dayStr, secs) => {
+          const rec = ensureDayStudyLog(dayStr);
+          rec.focusSeconds += secs;
           changed = true;
-        }
+        });
+        if (newCursor > focusLastTickMs) focusLastTickMs = newCursor;
       }
 
       // 3. Routine Study Timer (+ coupled Countdown)
       if (isRoutineRunning && activeRoutineSlotId) {
         if (!routineLastTickMs) routineLastTickMs = nowMs;
-        const timeline = buildTimeline(today);
-        const rs = timeline.find(s => s.id === activeRoutineSlotId);
-        const autoKey = `${today}:${activeRoutineSlotId}`;
+        const tickStartDay = getTodayStr(new Date(routineLastTickMs));
+        const timeline = buildTimeline(tickStartDay);
+        const rs = timeline.find(s => s.id === activeRoutineSlotId) || buildTimeline(today).find(s => s.id === activeRoutineSlotId);
+        const autoKey = `${tickStartDay}:${activeRoutineSlotId}`;
         const currM = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
 
-        if (rs && routineStartedBeforeEnd && !autoPausedKeys.has(autoKey) && !isInSlot(currM, rs.start, rs.end)) {
-          const startDate = new Date(routineLastTickMs);
-          const schedEndMs = getSlotEndMsForNow(startDate, rs);
-          const cappedElapsed = Math.max(0, Math.floor((Math.min(nowMs, schedEndMs) - routineLastTickMs) / 1000));
-          const rec = ensureDayStudyLog(today);
-          if (cappedElapsed > 0) {
-            rec.routineSecondsBySlot[activeRoutineSlotId] = (rec.routineSecondsBySlot[activeRoutineSlotId] || 0) + cappedElapsed;
-          }
+        // Bug Fix #5: Check exact scheduled end timestamp so live slot auto-pauses reliably
+        const reachedSchedEnd = routineStartedBeforeEnd && routineSchedEndMs && nowMs >= routineSchedEndMs;
+        const leftSlotWindow = rs && routineStartedBeforeEnd && !isInSlot(currM, rs.start, rs.end);
+
+        if (rs && !autoPausedKeys.has(autoKey) && (reachedSchedEnd || leftSlotWindow)) {
+          const capTargetMs = routineSchedEndMs ? Math.min(nowMs, routineSchedEndMs) : nowMs;
+          creditElapsedAcrossDays(routineLastTickMs, capTargetMs, (dayStr, secs) => {
+            const rec = ensureDayStudyLog(dayStr);
+            rec.routineSecondsBySlot[activeRoutineSlotId] = (rec.routineSecondsBySlot[activeRoutineSlotId] || 0) + secs;
+          });
           autoPausedKeys.add(autoKey);
+          saveFiredAlertKeys();
           isRoutineRunning = false;
           routineLastTickMs = null;
           routineStartedBeforeEnd = false;
+          routineSchedEndMs = null;
           if (timerLinkedRoutineSlotId === rs.id) {
             isTimerRunning = false;
             timerEndAtMs = null;
             timerRemSecs = 0;
             timerLinkedRoutineSlotId = null;
           }
+          const rec = ensureDayStudyLog(tickStartDay);
           const totalTracked = rec.routineSecondsBySlot[rs.id] || 0;
-          appState.dailyLogs[today] = appState.dailyLogs[today] || {};
-          appState.dailyLogs[today][rs.id] = { ...(appState.dailyLogs[today][rs.id] || { status: "pending" }), loggedHours: Number((totalTracked / 3600).toFixed(2)) };
-          evaluateRoutineTolerance(rs, totalTracked);
+          evaluateRoutineTolerance(rs, totalTracked, tickStartDay);
           saveState();
           saveTimerRuntime();
           pushReminder({
-            id: `rend-${rs.id}-${today}`,
+            id: `rend-${rs.id}-${tickStartDay}`,
             title: "Schedule Finished · Auto-Paused",
             subject: rs.subject,
             timeRange: `${fmt12(rs.start)} - ${fmt12(rs.end)}`,
@@ -1235,16 +1400,14 @@
           }, `Finished: ${rs.subject}`, "Tap Resume Timer if you want to continue studying.");
           renderTimelineList();
         } else {
-          const elapsed = Math.floor((nowMs - routineLastTickMs) / 1000);
-          if (elapsed > 0) {
-            const rec = ensureDayStudyLog(today);
-            rec.routineSecondsBySlot[activeRoutineSlotId] = (rec.routineSecondsBySlot[activeRoutineSlotId] || 0) + elapsed;
-            routineLastTickMs += elapsed * 1000;
+          const newCursor = creditElapsedAcrossDays(routineLastTickMs, nowMs, (dayStr, secs) => {
+            const rec = ensureDayStudyLog(dayStr);
+            rec.routineSecondsBySlot[activeRoutineSlotId] = (rec.routineSecondsBySlot[activeRoutineSlotId] || 0) + secs;
             changed = true;
-            // Live check for 20% auto-complete rule while studying!
-            if (rs) evaluateRoutineTolerance(rs, rec.routineSecondsBySlot[activeRoutineSlotId]);
-          }
-          // Keep linked countdown perfectly synced with live slot remaining time
+            if (rs) evaluateRoutineTolerance(rs, rec.routineSecondsBySlot[activeRoutineSlotId], dayStr);
+          });
+          if (newCursor > routineLastTickMs) routineLastTickMs = newCursor;
+
           if (rs && timerLinkedRoutineSlotId === rs.id && routineMode === "live" && isInSlot(currM, rs.start, rs.end)) {
             const rem = remSecsToEnd(now, rs.end, rs.start);
             timerRemSecs = rem;
@@ -1262,12 +1425,13 @@
           isTimerRunning = false;
           focusLastTickMs = null;
           const finishedLabel = timerLabel;
-          // If standalone focus finished, chime + notify (daily study duration keeps all earned seconds!)
           if (!timerLinkedRoutineSlotId) {
             playChime();
             sendDeviceNotif("Focus Timer Complete!", `${finishedLabel} finished. Study duration saved!`, `cd-${nowMs}`);
             showToast("Focus countdown complete!", "success");
           }
+          if (appState.autoArchive !== false) archiveDay(today, true);
+          saveState();
           saveTimerRuntime();
           renderFocusTimerCard(true);
         }
@@ -1275,6 +1439,9 @@
 
       if (changed) {
         tickCounter++;
+        if (appState.autoArchive !== false && tickCounter % 10 === 0) {
+          archiveDay(today, true);
+        }
         saveState(tickCounter % 15 !== 0);
         saveTimerRuntime();
       }
@@ -1293,21 +1460,17 @@
       isRoutineRunning = false;
       routineLastTickMs = null;
       routineStartedBeforeEnd = false;
+      routineSchedEndMs = null;
       if (timerLinkedRoutineSlotId === activeRoutineSlotId) {
         isTimerRunning = false;
         timerEndAtMs = null;
       }
       if (prevSlot) {
-        appState.dailyLogs[today] = appState.dailyLogs[today] || {};
-        appState.dailyLogs[today][prevSlot.id] = {
-          ...(appState.dailyLogs[today][prevSlot.id] || { status: "pending" }),
-          loggedHours: Number((tracked / 3600).toFixed(2))
-        };
-        evaluateRoutineTolerance(prevSlot, tracked);
+        evaluateRoutineTolerance(prevSlot, tracked, today);
       }
     }
 
-    // ==================== MANUAL / RANDOM STUDY TIMER (No Reset — Req #1 & #9) ====================
+    // ==================== MANUAL / RANDOM STUDY TIMER ====================
     function toggleManualTimer() {
       const now = new Date();
       const today = getTodayStr(now);
@@ -1317,7 +1480,6 @@
       if (!isManualRunning) {
         if (breakHold) releaseBreakHold(true);
         stopActiveRoutineSilently(now);
-        // Pause standalone focus if running so we never double count
         if (isTimerRunning) {
           isTimerRunning = false;
           timerEndAtMs = null;
@@ -1331,6 +1493,7 @@
       } else {
         isManualRunning = false;
         manualLastTickMs = null;
+        if (appState.autoArchive !== false) archiveDay(today, true);
         saveState();
         saveTimerRuntime();
         showToast("Manual study timer paused & saved.", "info");
@@ -1338,7 +1501,7 @@
       renderAll();
     }
 
-    // ==================== COMBINED ROUTINE START + COUNTDOWN (Req #2 & #3) ====================
+    // ==================== COMBINED ROUTINE START + COUNTDOWN ====================
     function toggleRoutineTimer(slotId) {
       const now = new Date();
       const today = getTodayStr(now);
@@ -1348,7 +1511,6 @@
       const tracked = appState.dailyStudyLogs?.[today]?.routineSecondsBySlot?.[slot.id] || 0;
 
       if (activeRoutineSlotId === slot.id && isRoutineRunning) {
-        // Pause BOTH routine study tracking AND linked countdown
         stopActiveRoutineSilently(now);
         saveState();
         saveTimerRuntime();
@@ -1358,7 +1520,6 @@
         if (isRoutineRunning && activeRoutineSlotId && activeRoutineSlotId !== slot.id) {
           stopActiveRoutineSilently(now);
         }
-        // Pause manual & standalone focus to prevent double counting
         isManualRunning = false;
         manualLastTickMs = null;
         focusLastTickMs = null;
@@ -1378,9 +1539,9 @@
         const fullSecs = Math.max(60, Math.round((slot.durationHours || calcHrs(slot.start, slot.end)) * 3600));
 
         routineStartedBeforeEnd = currentlyLive;
+        routineSchedEndMs = currentlyLive ? getSlotEndMsForNow(now, slot) : null;
         routineMode = currentlyLive ? "live" : (isPast ? "past" : "upcoming");
 
-        // Combined Countdown: counts remaining time in schedule to finish!
         let rem;
         if (currentlyLive) {
           rem = Math.max(1, remSecsToEnd(now, slot.end, slot.start));
@@ -1411,7 +1572,7 @@
       renderAll();
     }
 
-    // ==================== FLOATING BAR CONTROL (Req #3) ====================
+    // ==================== FLOATING BAR CONTROL ====================
     function toggleFloatingTimer() {
       const now = new Date();
       flushTimersToNow(now);
@@ -1439,7 +1600,6 @@
       const btnEl = document.getElementById("float-timer-btn");
 
       const anyRunning = isRoutineRunning || isManualRunning || isTimerRunning;
-      // Show floating bar on all screens when any study timer is active; on mobile always visible
       bar.classList.toggle("lg:hidden", !anyRunning);
 
       if (isRoutineRunning && activeRoutineSlotId) {
@@ -1457,7 +1617,6 @@
           valEl.textContent = fmtHMS(rem);
           subEl.textContent = `Studied ${fmtHMS(tracked)}`;
         } else if (isPastNow || routineMode === "past") {
-          // Requirement #3: for past schedule starts, floating bar shows time passed since start!
           badgeEl.textContent = "PAST · ELAPSED";
           badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-700 dark:text-amber-300";
           labelEl.textContent = slot ? slot.subject : "Past Schedule";
@@ -1550,6 +1709,7 @@
       }
       const subj = breakHold.nextStudySubject;
       breakHold = null;
+      if (appState.autoArchive !== false) archiveDay(today, true);
       saveState();
       renderAll();
       if (!silent) {
@@ -1620,7 +1780,7 @@
       toggleRoutineTimer(slotId);
     }
 
-    // ==================== TOP SECTION: LIVE SESSION & RANDOM STUDY (TODAY ONLY — Req #9 & #11) ====================
+    // ==================== TOP SECTION: LIVE SESSION & RANDOM STUDY ====================
     function renderLiveAndDailyCards(forceRebuild = false) {
       const now = new Date();
       const today = getTodayStr(now);
@@ -1718,7 +1878,6 @@
               </div>
             </div>
             <div class="text-xs font-mono-tab mt-1 ${active ? "text-[var(--text-muted)]" : "text-slate-400"}">${active ? `${fmt12(active.start)} - ${fmt12(active.end)} (${active.durationLabel})` : "Outside Scheduled Blocks"}${active?.deductedMinutes ? ` · Adjusted -${active.deductedMinutes}m` : ""}</div>
-            <p class="text-xs mt-2.5 p-2.5 rounded-xl border ${active ? "surface-input text-[var(--text-secondary)]" : "bg-slate-800 border-slate-700 text-slate-300"}">${active ? esc(active.focus) : "Use the Random / Manual Study timer beside this box when studying off-schedule."}</p>
           </div>
           <div class="mt-3 space-y-2">
             <div class="w-full h-2 bg-slate-500/20 rounded-full overflow-hidden"><div data-live-pct-bar class="h-full rounded-full" style="width:${pct}%;background:var(--accent-primary)"></div></div>
@@ -1740,7 +1899,6 @@
         if (holdNode) holdNode.textContent = `+${fmtHMS(holdLiveSecs)}`;
       }
 
-      // Daily Study Duration + Manual/Random Study Box (NO RESET BUTTON — Req #1 & #7)
       const { manualS, routineS, focusS, heldS, totalS } = getDayTotalStudySeconds(today, true);
       const targetHrs = timeline.filter(s => s.category !== "break").reduce((sum, s) => sum + (s.durationHours || calcHrs(s.start, s.end)), 0);
       const goalS = Math.max(60, Math.round(targetHrs * 3600));
@@ -1789,7 +1947,7 @@
       }
     }
 
-    // ==================== FOLDABLE FOCUS & POMODORO TIMER CARD (Req #1, #7, #8) ====================
+    // ==================== FOLDABLE FOCUS & POMODORO TIMER CARD ====================
     function toggleFocusFold() {
       appState.focusTimerFolded = !appState.focusTimerFolded;
       saveState();
@@ -1838,7 +1996,6 @@
       const now = new Date();
       flushTimersToNow(now);
 
-      // If linked to an active routine slot, delegate so both stay combined
       if (timerLinkedRoutineSlotId) {
         toggleRoutineTimer(timerLinkedRoutineSlotId);
         return;
@@ -1861,6 +2018,7 @@
         timerEndAtMs = null;
         focusLastTickMs = null;
         isTimerRunning = false;
+        if (appState.autoArchive !== false) archiveDay(getTodayStr(now), true);
         saveState();
       }
       saveTimerRuntime();
@@ -1868,7 +2026,6 @@
     }
 
     function resetCountdownTimer() {
-      // Only allowed when paused/stopped; NEVER decreases Daily Study Duration (Req #1 & #7)
       if (isTimerRunning) return;
       timerEndAtMs = null;
       focusLastTickMs = null;
@@ -1928,7 +2085,6 @@
               <button type="button" onclick="toggleNotifications()" class="px-2 py-1 rounded-lg border text-[11px] font-bold cursor-pointer ${notificationsEnabled ? "accent-soft border-[var(--accent-primary)]" : "surface-input"}">${notificationsEnabled ? "Alerts: On" : "Enable Alerts"}</button>
               <button type="button" onclick="toggleSound()" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">${isSoundEnabled ? "Sound: On" : "Sound: Off"}</button>
             </div>
-            <!-- Pomodoro Fixed Time Slots -->
             <div class="grid grid-cols-3 gap-1.5">
               <button type="button" onclick="setPresetTimer(25,'Pomodoro Focus (25m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold accent-soft cursor-pointer">25m Pomo</button>
               <button type="button" onclick="setPresetTimer(45,'Pomodoro Focus (45m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 cursor-pointer">45m Focus</button>
@@ -1937,7 +2093,6 @@
               <button type="button" onclick="setPresetTimer(15,'English Typing (15m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 cursor-pointer">15m Eng</button>
               <button type="button" onclick="setPresetTimer(15,'Hindi Typing (15m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-orange-500/15 text-orange-700 dark:text-orange-300 cursor-pointer">15m Hindi</button>
             </div>
-            <!-- Custom Time Input -->
             <form onsubmit="applyCustomFocusTime(event)" class="flex gap-1.5">
               <input type="number" id="custom-focus-mins" min="1" max="600" placeholder="Custom mins (e.g. 35)" class="flex-1 rounded-xl border surface-input px-3 py-1.5 text-xs font-mono-tab" />
               <button type="submit" class="px-3 py-1.5 rounded-xl accent-soft text-xs font-extrabold cursor-pointer">Set &amp; Start</button>
@@ -1946,7 +2101,6 @@
               <div data-focus-disp class="font-mono-tab text-3xl font-extrabold text-white">${fmtHMS(timerRemSecs)}</div>
               <div data-focus-status class="text-[11px] font-bold text-slate-400 mt-1">${isTimerRunning ? "Counting into Daily Study" : "Ready"}</div>
             </div>
-            <!-- NO Reset button while running (Req #1 & #7) -->
             <div class="grid ${isTimerRunning ? "grid-cols-1" : "grid-cols-3"} gap-2">
               <button type="button" onclick="toggleCountdownTimer()" class="${isTimerRunning ? "col-span-1 bg-amber-600 text-white" : "col-span-2 accent-btn"} py-2 rounded-xl text-xs font-extrabold cursor-pointer">${isTimerRunning ? "Pause" : "Start"}</button>
               ${!isTimerRunning ? `<button type="button" onclick="resetCountdownTimer()" class="py-2 rounded-xl border surface-input text-xs font-bold cursor-pointer">Reset</button>` : ""}
@@ -2021,13 +2175,15 @@
     // ==================== STATS & TIMETABLE LIST ====================
     function renderStats(timeline) {
       const dayLog = appState.dailyLogs[currentDateStr] || {};
+      const recMap = appState.dailyStudyLogs?.[currentDateStr]?.routineSecondsBySlot || {};
       let target = 0, done = 0;
       const cats = { online: [0, 0], gk: [0, 0], reasoning: [0, 0], typing: [0, 0], other_study: [0, 0] };
       timeline.forEach(s => {
         if (s.category === "break") return;
         const h = s.durationHours || calcHrs(s.start, s.end);
         const e = dayLog[s.id];
-        const d = e?.status === "completed" ? h : Math.min(h, e?.loggedHours || 0);
+        const liveSlotHrs = (recMap[s.id] || 0) / 3600;
+        const d = e?.status === "completed" ? h : Math.min(h, Math.max(e?.loggedHours || 0, liveSlotHrs));
         target += h; done += d;
         if (!cats[s.category]) cats[s.category] = [0, 0];
         cats[s.category][0] += d; cats[s.category][1] += h;
@@ -2118,7 +2274,6 @@
         const safeId = escJsAttr(s.id);
         const safeGapId = escJsAttr(s.gapId || "");
 
-        // Combined Routine Start + Countdown button label (Req #2)
         const startBtnLabel = rRunning ? "Pause" : (rSecs > 0 ? `Resume (${fmtHMS(rSecs)})` : "Start");
 
         if (isCompact) {
@@ -2178,31 +2333,49 @@
     function archiveDay(dateStr, silent = false) {
       const timeline = buildTimeline(dateStr);
       const dayLog = appState.dailyLogs[dateStr] || {};
+      const recMap = appState.dailyStudyLogs?.[dateStr]?.routineSecondsBySlot || {};
       let target = 0, done = 0, totalSlots = 0, doneSlots = 0;
       timeline.forEach(s => {
         if (s.category === "break") return;
         const h = s.durationHours || calcHrs(s.start, s.end);
         target += h; totalSlots++;
+        const liveSlotHrs = (recMap[s.id] || 0) / 3600;
         if (dayLog[s.id]?.status === "completed") { done += h; doneSlots++; }
-        else if (dayLog[s.id]?.loggedHours) done += Math.min(h, dayLog[s.id].loggedHours);
+        else {
+          const partial = Math.max(dayLog[s.id]?.loggedHours || 0, liveSlotHrs);
+          if (partial > 0) done += Math.min(h, partial);
+        }
       });
       const { totalS } = getDayTotalStudySeconds(dateStr, false);
+      // Include standalone manual/focus hours toward daily archive percentage if higher than slot-only hours
+      const effectiveCompletedHrs = Math.min(target || 24, Math.max(done, totalS / 3600));
       appState.archives[dateStr] = {
-        date: dateStr, completedHours: Number(done.toFixed(1)), targetHours: Number(target.toFixed(1)),
-        percentage: target > 0 ? Math.round((done / target) * 100) : 0,
-        completedSlots: doneSlots, totalSlots, savedAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        date: dateStr,
+        completedHours: Number(effectiveCompletedHrs.toFixed(1)),
+        targetHours: Number(target.toFixed(1)),
+        percentage: target > 0 ? Math.min(100, Math.round((effectiveCompletedHrs / target) * 100)) : 0,
+        completedSlots: doneSlots,
+        totalSlots,
+        savedAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         trackedStudySeconds: totalS
       };
       if (!silent) { saveState(); renderAll(); showToast(`Archived ${dateStr}!`, "success"); }
     }
 
+    // Bug Fix #7: Compute effective day completion percentage even before explicit archive
+    function getEffectiveDayPercentage(dateStr) {
+      const archPct = appState.archives?.[dateStr]?.percentage || 0;
+      const { totalS } = getDayTotalStudySeconds(dateStr, dateStr === getTodayStr());
+      if (totalS <= 0) return archPct;
+      const timeline = buildTimeline(dateStr);
+      const targetHrs = timeline.filter(s => s.category !== "break").reduce((sum, s) => sum + (s.durationHours || calcHrs(s.start, s.end)), 0);
+      const timerPct = targetHrs > 0 ? Math.min(100, Math.round(((totalS / 3600) / targetHrs) * 100)) : 0;
+      return Math.max(archPct, timerPct);
+    }
+
     function computeStreak() {
       const today = getTodayStr();
-      const hasActivity = key => {
-        const pct = appState.archives?.[key]?.percentage || 0;
-        const { totalS } = getDayTotalStudySeconds(key, false);
-        return pct > 0 || totalS > 0;
-      };
+      const hasActivity = key => getEffectiveDayPercentage(key) > 0;
       let cursor = hasActivity(today) ? today : shiftDateStr(today, -1);
       let streak = 0;
       while (hasActivity(cursor) && streak < 3650) {
@@ -2253,7 +2426,6 @@
       document.getElementById("edit-mode-btn").textContent = isEditMode ? "Done Editing" : "Edit Mode";
       document.getElementById("pin-btn").textContent = appState.adminPin ? "Change / Remove PIN" : "Set PIN";
 
-      // Notification permission banner
       const showNotifPrompt = typeof Notification !== "undefined" && Notification.permission === "default" && !notifBannerDismissed;
       document.getElementById("notif-permission-banner").classList.toggle("hidden", !showNotifPrompt);
 
@@ -2262,7 +2434,6 @@
         reflEl.value = appState.reflections[currentDateStr] || "";
       }
 
-      // Heatmap & Streak
       const streak = computeStreak();
       document.getElementById("streak-label").textContent = `${streak}d active streak`;
       const hm = document.getElementById("heatmap-grid");
@@ -2270,8 +2441,8 @@
       hm.innerHTML = Array.from({ length: 14 }, (_, i) => {
         const d = new Date(now); d.setDate(d.getDate() - (13 - i));
         const key = getTodayStr(d);
-        const pct = appState.archives[key]?.percentage || 0;
-        const bg = pct >= 85 ? "bg-emerald-500 text-white" : pct >= 40 ? "bg-emerald-400/60" : "bg-slate-400/20";
+        const pct = getEffectiveDayPercentage(key);
+        const bg = pct >= 85 ? "bg-emerald-500 text-white" : pct >= 40 ? "bg-emerald-400/60" : pct > 0 ? "bg-emerald-400/25" : "bg-slate-400/20";
         const ring = key === currentDateStr ? "ring-2 ring-[var(--accent-primary)]" : "";
         return `<button type="button" title="${key}: ${pct}%" onclick="currentDateStr='${key}';renderAll()" class="h-7 rounded-md ${bg} ${ring} text-[11px] font-bold font-mono-tab cursor-pointer">${d.getDate()}</button>`;
       }).join("");
@@ -2296,10 +2467,81 @@
       if (id === "reminders-modal") renderRemindersModal();
       if (id === "exam-modal") renderExamModal();
       if (id === "history-modal") renderHistoryModal();
+      if (id === "code-modal") switchCodeTab("bugs");
     }
     function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
 
-    // ==================== ROUTINE & PLANS MANAGER (Req #12, #13, #14) ====================
+    // ==================== UPDATED CODE & GAS VIEWER MODAL ====================
+    let activeCodeTab = "bugs";
+    let cachedGasCode = "";
+
+    async function switchCodeTab(tab) {
+      activeCodeTab = tab;
+      const bugsBtn = document.getElementById("tab-code-bugs");
+      const htmlBtn = document.getElementById("tab-code-html");
+      const gasBtn = document.getElementById("tab-code-gas");
+      const bugsPanel = document.getElementById("code-bugs-panel");
+      const viewer = document.getElementById("code-viewer-textarea");
+      const actions = document.getElementById("code-action-btns");
+
+      bugsBtn.className = `px-3 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer ${tab === "bugs" ? "accent-btn" : "border surface-input"}`;
+      htmlBtn.className = `px-3 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer ${tab === "html" ? "accent-btn" : "border surface-input"}`;
+      gasBtn.className = `px-3 py-1.5 rounded-xl text-xs font-extrabold cursor-pointer ${tab === "gas" ? "accent-btn" : "border surface-input"}`;
+
+      if (tab === "bugs") {
+        bugsPanel.classList.remove("hidden");
+        viewer.classList.add("hidden");
+        actions.classList.add("hidden");
+        return;
+      }
+
+      bugsPanel.classList.add("hidden");
+      viewer.classList.remove("hidden");
+      actions.classList.remove("hidden");
+
+      if (tab === "html") {
+        try {
+          const res = await fetch("/index.html?raw=" + Date.now());
+          viewer.value = await res.text();
+        } catch {
+          viewer.value = "<!doctype html>\n" + document.documentElement.outerHTML;
+        }
+      } else if (tab === "gas") {
+        if (!cachedGasCode) {
+          try {
+            const res = await fetch("/Code.gs?t=" + Date.now());
+            cachedGasCode = await res.text();
+          } catch {
+            cachedGasCode = "// Unable to load Code.gs";
+          }
+        }
+        viewer.value = cachedGasCode;
+      }
+    }
+
+    function copyActiveCode() {
+      const viewer = document.getElementById("code-viewer-textarea");
+      if (!viewer || !viewer.value) return;
+      navigator.clipboard.writeText(viewer.value).then(() => {
+        showToast(`Copied ${activeCodeTab === "html" ? "Index.html" : "Code.gs"} to clipboard!`, "success");
+      }).catch(() => {
+        viewer.select();
+        document.execCommand("copy");
+        showToast("Copied to clipboard!", "success");
+      });
+    }
+
+    function downloadActiveCode() {
+      const viewer = document.getElementById("code-viewer-textarea");
+      if (!viewer || !viewer.value) return;
+      const filename = activeCodeTab === "html" ? "Index.html" : "Code.gs";
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([viewer.value], { type: "text/plain;charset=utf-8" }));
+      a.download = filename;
+      a.click();
+    }
+
+    // ==================== ROUTINE & PLANS MANAGER ====================
     function onRoutineScopeChange() {
       const scope = document.getElementById("rm-apply-scope").value;
       const dateWrap = document.getElementById("rm-apply-date-wrap");
@@ -2394,7 +2636,6 @@
         </div>
       `).join("");
 
-      // Routine History + Custom Date Overrides timeline
       const hist = [...(appState.routineHistory || [])].sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom));
       const ovKeys = Object.keys(appState.dateOverrides || {}).sort().reverse();
 
@@ -2506,6 +2747,10 @@
 
       if (editId && appState.profiles[editId]) {
         appState.profiles[editId] = { ...appState.profiles[editId], name, title, subtitle };
+        // Bug Fix #10: Keep linked routineHistory entries in sync with updated plan metadata
+        appState.routineHistory = (appState.routineHistory || []).map(h =>
+          h.profileId === editId ? { ...h, name, title, subtitle } : h
+        );
         resetPlanForm();
         saveState(); renderPlansModal(); renderAll();
         showToast(`Updated plan "${name}".`, "success");
@@ -2530,7 +2775,7 @@
       }
     }
 
-    // ==================== SLOT ADD / EDIT / DELETE (With Scope + Confirmation Req #4, #12, #13) ====================
+    // ==================== SLOT ADD / EDIT / DELETE ====================
     function openSlotModal(slotId) {
       const sched = getScheduleForDate(currentDateStr);
       const today = getTodayStr();
@@ -2587,7 +2832,6 @@
         const entry = ensureRoutineEntryForDate(effDate);
         if (id) entry.slots = entry.slots.map(s => s.id === id ? data : s);
         else entry.slots.push(data);
-        // Also keep linked profile in sync if editing the latest routine version
         const latest = appState.routineHistory[appState.routineHistory.length - 1];
         if (latest === entry && entry.profileId && appState.profiles[entry.profileId]) {
           appState.profiles[entry.profileId].slots = cloneSlots(entry.slots);
@@ -2612,6 +2856,7 @@
             activeRoutineSlotId = null;
             routineLastTickMs = null;
             routineStartedBeforeEnd = false;
+            routineSchedEndMs = null;
             if (timerLinkedRoutineSlotId === id) {
               isTimerRunning = false;
               timerEndAtMs = null;
@@ -2708,10 +2953,11 @@
       document.getElementById("history-list").innerHTML = keys.length ? keys.map(k => {
         const a = appState.archives[k];
         const { totalS } = getDayTotalStudySeconds(k, false);
+        const pct = getEffectiveDayPercentage(k);
         return `
           <div class="p-3 rounded-2xl border surface-input flex justify-between items-center gap-2">
             <div>
-              <div class="text-xs font-extrabold font-mono-tab">${esc(k)} ${a ? `· ${a.percentage}%` : ""} ${totalS > 0 ? `· Timer Total: ${fmtHM(totalS)}` : ""}</div>
+              <div class="text-xs font-extrabold font-mono-tab">${esc(k)} ${pct > 0 || a ? `· ${pct}%` : ""} ${totalS > 0 ? `· Timer Total: ${fmtHM(totalS)}` : ""}</div>
               <div class="text-[11px] text-[var(--text-muted)]">${a ? `${a.completedHours}/${a.targetHours} Hrs` : "Tracked via Study Timer"}</div>
             </div>
             <button type="button" onclick="currentDateStr='${escJsAttr(k)}';closeModal('history-modal');renderAll()" class="px-2.5 py-1 rounded-lg accent-soft text-xs font-bold cursor-pointer">Open</button>
@@ -2740,7 +2986,7 @@
       });
     }
 
-    // ==================== DATE NAV, EDIT MODE & CHANGE PIN (Req #4 & #6) ====================
+    // ==================== DATE NAV, EDIT MODE & CHANGE PIN ====================
     function shiftDate(off) { currentDateStr = shiftDateStr(currentDateStr, off); renderAll(); }
     function jumpToday() { currentDateStr = getTodayStr(); renderAll(); }
     function toggleEditMode() {
@@ -2775,7 +3021,6 @@
         openModal("pin-modal");
         setTimeout(() => newInp.focus(), 50);
       } else if (appState.adminPin) {
-        // Change existing PIN to a new one (Req #6)
         titleEl.textContent = "Change Admin PIN";
         curWrap.classList.remove("hidden");
         confWrap.classList.remove("hidden");
@@ -2786,7 +3031,6 @@
         openModal("pin-modal");
         setTimeout(() => curInp.focus(), 50);
       } else {
-        // Set brand-new PIN
         titleEl.textContent = "Set New Admin PIN";
         curWrap.classList.add("hidden");
         confWrap.classList.remove("hidden");
@@ -2817,7 +3061,6 @@
         return;
       }
 
-      // Setting or Changing PIN
       if (appState.adminPin) {
         if (curVal !== appState.adminPin) return showToast("Current PIN is incorrect.", "error");
       }
@@ -2900,8 +3143,13 @@
       document.getElementById("live-clock").textContent = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
       const today = getTodayStr(now);
 
+      // Flush timers FIRST so any midnight rollover splits pre-midnight and post-midnight seconds accurately
+      flushTimersToNow(now);
+
       if (today !== lastKnownToday) {
-        const wasViewingPrevToday = currentDateStr === lastKnownToday;
+        const prevDay = lastKnownToday;
+        const wasViewingPrevToday = currentDateStr === prevDay;
+        if (appState.autoArchive !== false) archiveDay(prevDay, true);
         lastKnownToday = today;
         prevLiveSlotId = null;
         mountedNotif = false;
@@ -2913,17 +3161,15 @@
         }
       }
 
-      flushTimersToNow(now);
-
       const timeline = buildTimeline(today);
       const currM = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
 
-      // Custom Reminders + 10-min Pre-Shift + Break Entry + Shift Change -> In-App + Device Notification (Req #5)
       const hhmm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       (appState.customReminders || []).forEach(r => {
         const ck = `${today}:${r.id}`;
         if (r.enabled && r.time24 === hhmm && !firedCustomKeys.has(ck)) {
           firedCustomKeys.add(ck);
+          saveFiredAlertKeys();
           pushReminder({ id: `cust-${r.id}-${today}`, title: "Custom Reminder", subject: r.title, timeRange: fmt12(r.time24), message: r.message }, `Reminder: ${r.title}`, r.message);
         }
       });
@@ -2936,6 +3182,7 @@
           const pk = `${today}:pre10:${s.id}`;
           if (diff > 0 && diff <= 10 && !firedPreShiftKeys.has(pk)) {
             firedPreShiftKeys.add(pk);
+            saveFiredAlertKeys();
             const mins = Math.max(1, Math.ceil(diff));
             pushReminder({ id: `pre-${s.id}-${today}`, title: `Upcoming in ${mins} min`, subject: s.subject, timeRange: `${fmt12(s.start)} - ${fmt12(s.end)}`, message: `Starts in ${mins} min: ${s.focus}`, slotId: s.id }, `Upcoming in ${mins}m: ${s.subject}`, s.focus);
           }
@@ -2963,7 +3210,6 @@
       renderLiveAndDailyCards(false);
     }, 1000);
 
-    // Periodic multi-device sync every 45s when tab is active
     setInterval(() => {
       if (document.visibilityState === "visible") pullCloud();
     }, 45000);
@@ -2992,9 +3238,11 @@
 
       const tb = document.getElementById("hdr-toolbar");
       let dragDown = false, startX = 0, scrollStart = 0;
+      let tbTargetX = 0, tbRaf = null;
       tb.addEventListener("mousedown", e => {
         if (e.target.closest("button, input, select, a, label")) return;
         dragDown = true; startX = e.pageX - tb.offsetLeft; scrollStart = tb.scrollLeft; tb.classList.add("cursor-grabbing");
+        if (tbRaf) { cancelAnimationFrame(tbRaf); tbRaf = null; }
       });
       window.addEventListener("mouseup", () => { dragDown = false; tb.classList.remove("cursor-grabbing"); });
       tb.addEventListener("mousemove", e => {
@@ -3002,6 +3250,83 @@
         e.preventDefault();
         tb.scrollLeft = scrollStart - ((e.pageX - tb.offsetLeft) - startX);
       });
+      tb.addEventListener("wheel", e => {
+        if (tb.scrollWidth <= tb.clientWidth) return;
+        const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+        if (!delta) return;
+        e.preventDefault();
+        if (!tbRaf) tbTargetX = tb.scrollLeft;
+        const maxScroll = tb.scrollWidth - tb.clientWidth;
+        tbTargetX = Math.max(0, Math.min(maxScroll, tbTargetX + delta * 1.1));
+        const stepX = () => {
+          const diff = tbTargetX - tb.scrollLeft;
+          if (Math.abs(diff) < 0.5) {
+            tb.scrollLeft = tbTargetX;
+            tbRaf = null;
+            return;
+          }
+          tb.scrollLeft += diff * 0.18;
+          tbRaf = requestAnimationFrame(stepX);
+        };
+        if (!tbRaf) tbRaf = requestAnimationFrame(stepX);
+      }, { passive: false });
+
+      // Smooth mouse-wheel scrolling across the page and all scrollable panels/modals
+      const smoothTargets = new WeakMap();
+      function findVerticalScrollTarget(el) {
+        let node = el;
+        while (node && node !== document.body && node !== document.documentElement) {
+          const style = window.getComputedStyle(node);
+          const overflowY = style.overflowY;
+          if ((overflowY === "auto" || overflowY === "scroll") && node.scrollHeight > node.clientHeight + 1) {
+            return node;
+          }
+          node = node.parentElement;
+        }
+        return document.scrollingElement || document.documentElement;
+      }
+
+      window.addEventListener("wheel", e => {
+        if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        if (Math.abs(e.deltaY) < Math.abs(e.deltaX) || e.deltaY === 0) return;
+        // Let precision trackpads with tiny fractional pixel deltas use native momentum
+        if (e.deltaMode === 0 && Math.abs(e.deltaY) < 25) return;
+
+        const target = findVerticalScrollTarget(e.target);
+        const maxScroll = target.scrollHeight - target.clientHeight;
+        if (maxScroll <= 0) return;
+
+        let deltaPx = e.deltaY;
+        if (e.deltaMode === 1) deltaPx *= 36;
+        else if (e.deltaMode === 2) deltaPx *= target.clientHeight;
+
+        const atTop = target.scrollTop <= 0 && deltaPx < 0;
+        const atBottom = target.scrollTop >= maxScroll - 1 && deltaPx > 0;
+        if (atTop || atBottom) return;
+
+        e.preventDefault();
+        let state = smoothTargets.get(target);
+        if (!state) {
+          state = { targetY: target.scrollTop, raf: null };
+          smoothTargets.set(target, state);
+        }
+        if (!state.raf) state.targetY = target.scrollTop;
+        state.targetY = Math.max(0, Math.min(maxScroll, state.targetY + deltaPx * 1.05));
+
+        if (!state.raf) {
+          const tick = () => {
+            const diff = state.targetY - target.scrollTop;
+            if (Math.abs(diff) < 0.6) {
+              target.scrollTop = state.targetY;
+              state.raf = null;
+              return;
+            }
+            target.scrollTop += diff * 0.16;
+            state.raf = requestAnimationFrame(tick);
+          };
+          state.raf = requestAnimationFrame(tick);
+        }
+      }, { passive: false });
 
       document.querySelectorAll("[data-modal-backdrop]").forEach(overlay => {
         overlay.addEventListener("click", e => {
@@ -3023,5 +3348,6 @@
       pullCloud();
     });
   </script>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
