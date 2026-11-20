@@ -92,8 +92,8 @@
     .thin-scroll::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.45); border-radius: 9999px; }
   </style>
 </head>
-<body data-theme="light" data-accent="indigo" class="pb-24 lg:pb-14 antialiased selection:bg-indigo-500 selection:text-white">
-  <div id="toast-root" class="fixed bottom-20 lg:bottom-5 right-3 sm:right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-1.5rem)]"></div>
+<body data-theme="light" data-accent="indigo" class="pb-28 antialiased selection:bg-indigo-500 selection:text-white">
+  <div id="toast-root" class="fixed bottom-24 right-3 sm:right-5 z-[70] flex flex-col gap-2 pointer-events-none max-w-[calc(100vw-1.5rem)]"></div>
 
   <!-- HEADER -->
   <header class="sticky top-0 z-30 surface-panel border-b">
@@ -102,6 +102,7 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
             <h1 id="hdr-title" class="text-sm sm:text-lg font-extrabold truncate">DAILY STUDY TIMETABLE</h1>
+            <span id="hdr-day-badge" class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">TODAY</span>
             <span id="hdr-hours" class="text-xs font-bold accent-text font-mono-tab"></span>
           </div>
           <div class="flex items-center gap-2 flex-wrap">
@@ -110,10 +111,11 @@
           </div>
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <div class="flex items-center gap-1 p-1 rounded-xl border surface-input">
-            <button type="button" onclick="setTheme('light')" data-theme-opt="light" class="px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer">Light</button>
-            <button type="button" onclick="setTheme('dark')" data-theme-opt="dark" class="px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer">Midnight</button>
-            <button type="button" onclick="setTheme('paper')" data-theme-opt="paper" class="px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer">Paper</button>
+          <!-- Emoji-style Theme Switcher -->
+          <div class="flex items-center gap-1 p-1 rounded-xl border surface-input" role="group" aria-label="Color Mode">
+            <button type="button" onclick="setTheme('light')" data-theme-opt="light" title="Light Mode" aria-label="Light Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">☀️</button>
+            <button type="button" onclick="setTheme('dark')" data-theme-opt="dark" title="Midnight Mode" aria-label="Midnight Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">🌙</button>
+            <button type="button" onclick="setTheme('paper')" data-theme-opt="paper" title="Paper Mode" aria-label="Paper Mode" class="px-2 py-1 rounded-lg text-sm leading-none cursor-pointer">📜</button>
           </div>
           <div class="flex items-center gap-1 px-2 py-1.5 rounded-xl border surface-input">
             <button type="button" onclick="setAccent('indigo')" class="w-3.5 h-3.5 rounded-full bg-indigo-600 cursor-pointer" title="Indigo"></button>
@@ -129,11 +131,13 @@
       <div id="hdr-toolbar" class="thin-scroll flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 select-none cursor-grab">
         <div id="live-clock" class="shrink-0 bg-slate-900 text-white px-3 py-1.5 rounded-xl border border-slate-700 font-mono-tab text-xs sm:text-sm font-bold whitespace-nowrap">00:00:00 AM</div>
         <div class="shrink-0 flex items-center border surface-input rounded-xl px-1 py-0.5">
-          <button type="button" onclick="shiftDate(-1)" class="p-1.5 text-xs font-bold cursor-pointer">&#9664;</button>
+          <button type="button" onclick="shiftDate(-1)" class="p-1.5 text-xs font-bold cursor-pointer" title="Previous Day">&#9664;</button>
           <input type="date" id="date-input" class="text-xs sm:text-sm font-semibold bg-transparent border-none focus:outline-none px-1 font-mono-tab" />
-          <button type="button" onclick="shiftDate(1)" class="p-1.5 text-xs font-bold cursor-pointer">&#9654;</button>
-          <button type="button" id="today-btn" onclick="jumpToday()" class="hidden ml-1 px-2 py-1 rounded-lg accent-soft text-[11px] font-extrabold cursor-pointer">Today</button>
+          <button type="button" onclick="shiftDate(1)" class="p-1.5 text-xs font-bold cursor-pointer" title="Next Day">&#9654;</button>
+          <span id="today-indicator-pill" class="ml-1 px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold uppercase">Today</span>
+          <button type="button" id="today-btn" onclick="jumpToday()" class="hidden ml-1 px-2 py-1 rounded-lg accent-soft text-[11px] font-extrabold cursor-pointer">Go to Today</button>
         </div>
+        <button type="button" onclick="openModal('plans-modal')" class="shrink-0 px-3 py-1.5 rounded-xl accent-soft text-xs font-bold whitespace-nowrap cursor-pointer">Routine &amp; Plans</button>
         <button type="button" onclick="openModal('history-modal')" id="history-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">History</button>
         <button type="button" onclick="toggleEditMode()" id="edit-mode-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">Edit Mode</button>
       </div>
@@ -141,29 +145,44 @@
   </header>
 
   <main class="max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-5">
+    <!-- DEVICE NOTIFICATION PERMISSION BANNER -->
+    <div id="notif-permission-banner" class="hidden surface-panel rounded-2xl p-3.5 border border-[var(--accent-primary)]/40 flex flex-wrap items-center justify-between gap-3">
+      <div class="text-xs sm:text-sm">
+        <strong class="accent-text">Enable Device Notifications:</strong>
+        <span class="text-[var(--text-secondary)]"> Allow browser &amp; mobile alerts so schedule reminders notify you on every open device.</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <button type="button" onclick="toggleNotifications()" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Allow Notifications</button>
+        <button type="button" onclick="dismissNotifBanner()" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Later</button>
+      </div>
+    </div>
+
     <!-- MULTIPLE CONCURRENT REMINDERS STACK -->
     <div id="reminders-stack" class="space-y-2.5 hidden"></div>
 
-    <!-- PROMOTED TOP LIVE SCHEDULE STATUS + DAILY MANUAL STUDY DURATION BOX (Desktop & Mobile) -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+    <!-- TODAY ONLY: LIVE SCHEDULE STATUS + DAILY MANUAL STUDY DURATION BOX -->
+    <section id="today-live-section" class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
       <div id="live-status-card" class="lg:col-span-7 rounded-2xl p-4 sm:p-5 border surface-panel flex flex-col justify-between"></div>
       <div id="daily-study-card" class="lg:col-span-5 rounded-2xl p-4 sm:p-5 surface-panel flex flex-col justify-between gap-3"></div>
     </section>
+
+    <!-- NON-TODAY (PAST / UPCOMING DAY): COMPACT SCHEDULE SUMMARY BANNER (No Live Session / No Random Study) -->
+    <section id="other-day-banner" class="hidden surface-panel rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"></section>
 
     <!-- EDIT MODE TOOLBAR -->
     <div id="edit-banner" class="hidden surface-panel rounded-2xl p-4 border-2 border-amber-400/80 flex flex-wrap items-center justify-between gap-3">
       <div>
         <div class="text-xs sm:text-sm font-extrabold text-amber-600 dark:text-amber-400 uppercase">Edit Mode Active</div>
-        <div class="text-xs text-[var(--text-secondary)]">Add or edit slots, manage study plans, or export/import JSON backups.</div>
+        <div id="edit-scope-hint" class="text-xs text-[var(--text-secondary)]">Add or edit slots, customize routines for today/custom day/from now on, or manage PIN &amp; backups.</div>
       </div>
       <div class="flex flex-wrap gap-2">
         <button type="button" onclick="openSlotModal(null)" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-bold cursor-pointer">+ Add Slot</button>
-        <button type="button" onclick="openModal('plans-modal')" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-bold cursor-pointer">Manage Plans</button>
+        <button type="button" onclick="openModal('plans-modal')" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-bold cursor-pointer">Routine &amp; Plans</button>
         <button type="button" onclick="exportJson()" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Export JSON</button>
         <label class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">
           Import JSON <input type="file" accept=".json" class="hidden" onchange="importJson(this)" />
         </label>
-        <button type="button" onclick="openModal('pin-modal')" id="pin-btn" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Set PIN</button>
+        <button type="button" onclick="openPinModal('manage')" id="pin-btn" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Set PIN</button>
       </div>
     </div>
 
@@ -174,11 +193,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       <!-- TIMETABLE LIST -->
       <div class="lg:col-span-8 space-y-4">
+        <!-- Schedule Context Strip (Today / Custom Day / Daily Routine version) -->
+        <div id="schedule-context-strip" class="surface-panel rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs"></div>
+
         <div class="surface-panel rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5">
           <div id="filter-bar" class="flex items-center gap-1.5 flex-wrap"></div>
           <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
-            <select id="profile-select" onchange="switchProfile(this.value)" class="flex-1 sm:flex-none rounded-xl border surface-input px-2.5 py-1.5 text-xs font-bold cursor-pointer"></select>
-            <button type="button" onclick="openModal('plans-modal')" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Plans</button>
+            <button type="button" onclick="openModal('plans-modal')" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Routine &amp; Plans</button>
             <div class="flex items-center p-0.5 rounded-xl border surface-input" role="group" aria-label="View type">
               <button type="button" id="view-compact-btn" onclick="setDensity('compact')" class="px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer">Compact</button>
               <button type="button" id="view-cards-btn" onclick="setDensity('comfortable')" class="px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer">Cards</button>
@@ -206,42 +227,8 @@
         <!-- FOLDABLE STICKY NOTES -->
         <div id="sticky-notes-card" class="surface-panel rounded-2xl p-4 sm:p-5"></div>
 
-        <!-- FOCUS & SHIFT COUNTDOWN TIMER -->
-        <div class="surface-panel rounded-2xl p-5 space-y-3">
-          <div class="flex items-center justify-between gap-2">
-            <div class="min-w-0">
-              <h3 class="text-sm font-extrabold">Focus &amp; Shift Countdown</h3>
-              <p id="timer-label" class="text-[11px] font-semibold text-[var(--text-muted)] truncate">Pomodoro Focus (25m)</p>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <button type="button" onclick="toggleNotifications()" id="notif-btn" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Alerts</button>
-              <button type="button" onclick="toggleSound()" id="sound-btn" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Sound: On</button>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-1.5">
-            <button type="button" onclick="setPresetTimer(25,'Pomodoro Focus (25m)')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold accent-soft cursor-pointer">25m Focus</button>
-            <button type="button" onclick="setPresetTimer(50,'Deep Study Block (50m)')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-purple-500/15 text-purple-600 dark:text-purple-300 cursor-pointer">50m Block</button>
-            <button type="button" onclick="setPresetTimer(15,'English Typing (15m)')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 cursor-pointer">15m Eng Typing</button>
-            <button type="button" onclick="setPresetTimer(15,'Hindi Typing (15m)')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-orange-500/15 text-orange-700 dark:text-orange-300 cursor-pointer">15m Hindi Typing</button>
-          </div>
-          <div class="bg-slate-900 rounded-2xl p-4 text-center border border-slate-800">
-            <div id="timer-display" class="font-mono-tab text-3xl font-extrabold text-white">25:00</div>
-            <div id="timer-status" class="text-[11px] font-bold text-slate-400 mt-1">Ready</div>
-          </div>
-          <div class="grid grid-cols-3 gap-2">
-            <button type="button" onclick="toggleCountdownTimer()" id="timer-toggle-btn" class="col-span-2 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Start</button>
-            <button type="button" onclick="resetCountdownTimer()" class="py-2 rounded-xl border surface-input text-xs font-bold cursor-pointer">Reset</button>
-          </div>
-          <div class="pt-3 border-t border-slate-500/15 grid grid-cols-4 gap-1.5">
-            <select id="wpm-lang" class="rounded-lg border surface-input px-1.5 py-1.5 text-xs font-bold">
-              <option value="Eng">Eng</option>
-              <option value="Hindi">Hindi</option>
-            </select>
-            <input type="number" id="wpm-speed" placeholder="WPM" class="rounded-lg border surface-input px-2 py-1.5 text-xs font-mono-tab" />
-            <input type="number" id="wpm-acc" placeholder="Acc%" class="rounded-lg border surface-input px-2 py-1.5 text-xs font-mono-tab" />
-            <button type="button" onclick="logTyping()" class="rounded-lg bg-amber-500 text-white text-xs font-extrabold cursor-pointer">Save</button>
-          </div>
-        </div>
+        <!-- FOLDABLE FOCUS & POMODORO COUNTDOWN TIMER (With Custom Time & Presets) -->
+        <div id="focus-timer-card" class="surface-panel rounded-2xl p-4 sm:p-5"></div>
 
         <!-- HEATMAP -->
         <div class="surface-panel rounded-2xl p-5 space-y-3">
@@ -257,21 +244,35 @@
     </div>
   </main>
 
-  <!-- MOBILE FLOATING BAR -->
-  <div class="lg:hidden fixed bottom-3 inset-x-3 z-40 surface-panel rounded-2xl px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-xl">
-    <div class="min-w-0">
-      <div id="mob-slot-label" class="text-[10px] font-extrabold uppercase accent-text truncate">Pomodoro</div>
-      <div id="mob-timer-val" class="font-mono-tab text-base font-extrabold">25:00</div>
+  <!-- FLOATING STUDY TIMER BAR (Desktop & Mobile — directly connected to active study timer) -->
+  <div id="floating-timer-bar" class="fixed bottom-3 inset-x-3 lg:inset-x-auto lg:right-5 lg:w-[390px] z-40 surface-panel rounded-2xl px-4 py-3 flex items-center justify-between gap-3 shadow-2xl border-2 border-[var(--accent-primary)]/40">
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-1.5">
+        <span id="float-mode-badge" class="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft">FOCUS</span>
+        <span id="float-slot-label" class="text-[11px] font-extrabold truncate text-[var(--text-secondary)]">Pomodoro Focus (25m)</span>
+      </div>
+      <div class="flex items-baseline gap-2 mt-0.5">
+        <div id="float-timer-val" class="font-mono-tab text-lg sm:text-xl font-extrabold leading-tight">25:00</div>
+        <div id="float-timer-sub" class="text-[10px] font-mono-tab text-[var(--text-muted)] truncate">Ready</div>
+      </div>
     </div>
-    <button type="button" onclick="toggleCountdownTimer()" id="mob-timer-btn" class="px-3.5 py-1.5 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Start</button>
+    <button type="button" onclick="toggleFloatingTimer()" id="float-timer-btn" class="shrink-0 px-4 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Start</button>
   </div>
 
   <!-- MODALS -->
-  <div id="slot-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
-    <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-3">
-      <div class="flex justify-between items-center"><h3 id="slot-modal-title" class="text-base font-extrabold">Add / Edit Slot</h3><button type="button" onclick="closeModal('slot-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
+  <!-- SLOT ADD / EDIT MODAL -->
+  <div id="slot-modal" data-modal-backdrop="slot-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-3 max-h-[92dvh] overflow-y-auto">
+      <div class="flex justify-between items-center">
+        <h3 id="slot-modal-title" class="text-base font-extrabold">Add / Edit Slot</h3>
+        <button type="button" onclick="closeModal('slot-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button>
+      </div>
       <form onsubmit="saveSlotForm(event)" class="space-y-3">
         <input type="hidden" id="sm-id" />
+        <div class="p-2.5 rounded-xl border surface-input space-y-1">
+          <label class="text-[11px] font-extrabold uppercase text-[var(--text-muted)]">Apply Slot Change To</label>
+          <select id="sm-scope" class="w-full rounded-lg border surface-input px-2 py-1.5 text-xs font-bold"></select>
+        </div>
         <div class="grid grid-cols-2 gap-2">
           <div><label class="text-[11px] font-bold">Start</label><input type="time" id="sm-start" required class="w-full rounded-xl border surface-input px-2.5 py-2 text-xs font-bold" /></div>
           <div><label class="text-[11px] font-bold">End</label><input type="time" id="sm-end" required class="w-full rounded-xl border surface-input px-2.5 py-2 text-xs font-bold" /></div>
@@ -294,25 +295,89 @@
     </div>
   </div>
 
-  <div id="plans-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
-    <div class="surface-panel rounded-3xl max-w-lg w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
-      <div class="flex justify-between items-center"><h3 class="text-base font-extrabold">Manage Study Plans</h3><button type="button" onclick="closeModal('plans-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
-      <div id="plans-list" class="space-y-2"></div>
-      <form onsubmit="savePlanForm(event)" class="p-3 rounded-2xl border surface-input space-y-2">
-        <input type="hidden" id="pm-edit-id" />
-        <div id="pm-form-heading" class="text-xs font-extrabold">Create New Study Plan</div>
-        <input type="text" id="pm-name" required placeholder="Plan Name (e.g., 12-Hr Marathon Plan)" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
-        <div class="grid grid-cols-2 gap-2">
-          <input type="text" id="pm-title" placeholder="Header Title" class="rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
-          <input type="text" id="pm-subtitle" placeholder="Subtitle" class="rounded-xl border surface-input px-3 py-2 text-xs" />
+  <!-- UNIFIED ROUTINE & STUDY PLANS MODAL (Scope: Today Only / Custom Date / From Now On + Plan Selector & Creator) -->
+  <div id="plans-modal" data-modal-backdrop="plans-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-2xl w-full p-5 space-y-4 max-h-[92dvh] overflow-y-auto thin-scroll">
+      <div class="flex justify-between items-center">
+        <div>
+          <h3 class="text-base font-extrabold">Routine &amp; Study Plans Manager</h3>
+          <p class="text-[11px] text-[var(--text-muted)]">Apply a plan or create a routine for Today Only, a Custom Date, or From Now On without altering past days.</p>
         </div>
-        <select id="pm-copy-from" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold"></select>
-        <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Save Study Plan</button>
+        <button type="button" onclick="closeModal('plans-modal')" class="px-2.5 py-1 text-xs font-bold cursor-pointer">Close</button>
+      </div>
+
+      <!-- Current Date Status Banner -->
+      <div id="pm-current-status" class="p-3 rounded-2xl border surface-input text-xs"></div>
+
+      <!-- SECTION 1: APPLY A PLAN TO SCOPE (Today / Custom Day / From Now On) -->
+      <div class="p-4 rounded-2xl border-2 border-[var(--accent-primary)]/35 surface-input space-y-3">
+        <div class="text-xs font-extrabold uppercase accent-text">Apply Routine / Plan</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="text-[11px] font-bold block mb-1">1. Choose Routine Scope</label>
+            <select id="rm-apply-scope" onchange="onRoutineScopeChange()" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold">
+              <option value="from_now">From Now On (Daily Routine — preserves past)</option>
+              <option value="today">Today Only (Custom schedule for Today)</option>
+              <option value="custom_day">Custom Date Only (Doesn't affect daily routine)</option>
+            </select>
+          </div>
+          <div id="rm-apply-date-wrap">
+            <label id="rm-apply-date-label" class="text-[11px] font-bold block mb-1">Effective Start Date</label>
+            <input type="date" id="rm-apply-date" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-mono-tab font-bold" />
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div class="sm:col-span-2">
+            <label class="text-[11px] font-bold block mb-1">2. Choose Study Plan</label>
+            <select id="rm-apply-plan" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold"></select>
+          </div>
+          <div class="flex items-end">
+            <button type="button" onclick="applySelectedRoutinePlan()" class="w-full py-2 px-3 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Apply Routine</button>
+          </div>
+        </div>
+        <div id="rm-scope-explain" class="text-[11px] text-[var(--text-muted)]"></div>
+      </div>
+
+      <!-- SECTION 2: CREATE / EDIT STUDY PLAN (Inside Routine Option) -->
+      <form onsubmit="savePlanForm(event)" class="p-4 rounded-2xl border surface-input space-y-2.5">
+        <input type="hidden" id="pm-edit-id" />
+        <div class="flex items-center justify-between gap-2">
+          <div id="pm-form-heading" class="text-xs font-extrabold uppercase">Create New Routine / Study Plan</div>
+          <button type="button" id="pm-cancel-edit" onclick="resetPlanForm()" class="hidden text-[11px] font-bold text-[var(--text-muted)] hover:underline cursor-pointer">Cancel Edit</button>
+        </div>
+        <input type="text" id="pm-name" required placeholder="Plan Name (e.g., 12-Hr Marathon Plan)" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <input type="text" id="pm-title" placeholder="Header Title (optional)" class="rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+          <input type="text" id="pm-subtitle" placeholder="Subtitle (optional)" class="rounded-xl border surface-input px-3 py-2 text-xs" />
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <select id="pm-copy-from" class="rounded-xl border surface-input px-3 py-2 text-xs font-bold"></select>
+          <select id="pm-create-apply-scope" class="rounded-xl border surface-input px-3 py-2 text-xs font-bold">
+            <option value="from_now">Save &amp; Apply: From Now On (Daily)</option>
+            <option value="today">Save &amp; Apply: Today Only</option>
+            <option value="custom_day">Save &amp; Apply: Selected Date Only</option>
+            <option value="library_only">Save to Plans Library Only</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full py-2 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Save Study Plan</button>
       </form>
+
+      <!-- SECTION 3: SAVED STUDY PLANS LIBRARY -->
+      <div class="space-y-2">
+        <div class="text-xs font-extrabold uppercase text-[var(--text-muted)]">Saved Study Plans Library</div>
+        <div id="plans-list" class="space-y-2"></div>
+      </div>
+
+      <!-- SECTION 4: ROUTINE TIMELINE & CUSTOM DAY OVERRIDES -->
+      <div class="space-y-2 pt-2 border-t border-slate-500/15">
+        <div class="text-xs font-extrabold uppercase text-[var(--text-muted)]">Scheduled Routine Timeline &amp; Custom Days</div>
+        <div id="routine-timeline-list" class="space-y-2"></div>
+      </div>
     </div>
   </div>
 
-  <div id="reminders-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+  <!-- REMINDERS MODAL -->
+  <div id="reminders-modal" data-modal-backdrop="reminders-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
     <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
       <div class="flex justify-between items-center"><h3 class="text-base font-extrabold">Multiple Study Reminders</h3><button type="button" onclick="closeModal('reminders-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
       <form onsubmit="addCustomReminder(event)" class="space-y-2">
@@ -329,7 +394,8 @@
     </div>
   </div>
 
-  <div id="exam-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+  <!-- EXAM GOALS MODAL -->
+  <div id="exam-modal" data-modal-backdrop="exam-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
     <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
       <div class="flex justify-between items-center"><h3 class="text-base font-extrabold">Multiple Exam Goals</h3><button type="button" onclick="closeModal('exam-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
       <form onsubmit="addExamGoal(event)" class="space-y-2">
@@ -343,23 +409,55 @@
     </div>
   </div>
 
-  <div id="history-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+  <!-- HISTORY MODAL -->
+  <div id="history-modal" data-modal-backdrop="history-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
     <div class="surface-panel rounded-3xl max-w-2xl w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
       <div class="flex justify-between items-center"><h3 class="text-base font-extrabold">History &amp; Daily Study Durations</h3><button type="button" onclick="closeModal('history-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
       <div id="history-list" class="space-y-2"></div>
+      <div id="history-typing-section" class="pt-3 border-t border-slate-500/15 space-y-2"></div>
     </div>
   </div>
 
-  <div id="pin-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
+  <!-- ADMIN PIN MODAL (Unlock / Set / Change to New PIN / Remove with Confirmation) -->
+  <div id="pin-modal" data-modal-backdrop="pin-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
     <div class="surface-panel rounded-3xl max-w-sm w-full p-5 space-y-3">
-      <div class="flex justify-between items-center"><h3 id="pin-modal-title" class="text-base font-extrabold">Admin PIN</h3><button type="button" onclick="closeModal('pin-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button></div>
-      <form onsubmit="submitPin(event)" class="space-y-3">
-        <input type="password" id="pin-input" maxlength="4" inputmode="numeric" placeholder="4-digit PIN" class="w-full rounded-xl border surface-input px-3 py-2 text-center font-mono-tab text-lg font-bold" />
-        <div class="flex gap-2">
-          <button type="button" onclick="removePin()" id="remove-pin-btn" class="hidden px-3 py-2 rounded-xl bg-rose-500/15 text-rose-600 text-xs font-bold cursor-pointer">Remove PIN</button>
-          <button type="submit" class="flex-1 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Confirm</button>
+      <div class="flex justify-between items-center">
+        <h3 id="pin-modal-title" class="text-base font-extrabold">Admin PIN</h3>
+        <button type="button" onclick="closeModal('pin-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button>
+      </div>
+      <form onsubmit="submitPin(event)" class="space-y-2.5">
+        <div id="pin-current-wrap" class="hidden space-y-1">
+          <label class="text-[11px] font-bold text-[var(--text-muted)]">Current 4-Digit PIN</label>
+          <input type="password" id="pin-current" maxlength="4" inputmode="numeric" placeholder="Current PIN" class="w-full rounded-xl border surface-input px-3 py-2 text-center font-mono-tab text-base font-bold" />
+        </div>
+        <div class="space-y-1">
+          <label id="pin-new-label" class="text-[11px] font-bold text-[var(--text-muted)]">4-Digit PIN</label>
+          <input type="password" id="pin-input" maxlength="4" inputmode="numeric" placeholder="4-digit PIN" class="w-full rounded-xl border surface-input px-3 py-2 text-center font-mono-tab text-base font-bold" />
+        </div>
+        <div id="pin-confirm-wrap" class="hidden space-y-1">
+          <label class="text-[11px] font-bold text-[var(--text-muted)]">Confirm New PIN</label>
+          <input type="password" id="pin-confirm" maxlength="4" inputmode="numeric" placeholder="Re-enter new PIN" class="w-full rounded-xl border surface-input px-3 py-2 text-center font-mono-tab text-base font-bold" />
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button type="button" onclick="requestRemovePin()" id="remove-pin-btn" class="hidden px-3 py-2 rounded-xl bg-rose-500/15 text-rose-600 text-xs font-bold cursor-pointer">Remove PIN</button>
+          <button type="submit" id="pin-submit-btn" class="flex-1 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Confirm</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- GLOBAL DELETE CONFIRMATION MODAL -->
+  <div id="confirm-modal" data-modal-backdrop="confirm-modal" class="hidden fixed inset-0 z-[60] bg-slate-950/70 backdrop-blur-sm p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-sm w-full p-5 space-y-3 border-2 border-rose-500/40">
+      <div class="flex items-center justify-between gap-2">
+        <h3 id="confirm-title" class="text-base font-extrabold text-rose-600 dark:text-rose-400">Confirm Delete</h3>
+        <button type="button" onclick="cancelConfirm()" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button>
+      </div>
+      <p id="confirm-message" class="text-xs text-[var(--text-secondary)] leading-relaxed"></p>
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="cancelConfirm()" class="flex-1 py-2 rounded-xl border surface-input text-xs font-bold cursor-pointer">Cancel</button>
+        <button type="button" onclick="executeConfirm()" id="confirm-ok-btn" class="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold cursor-pointer">Yes, Delete</button>
+      </div>
     </div>
   </div>
 
@@ -367,6 +465,7 @@
     // Private Apps Script Endpoint (embedded directly; never displayed on UI)
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwHwLCXgeZyiEfuVJT3pO7RAgSTyM5Jx0CFjRB9MMSDxwr2E4aquzs14wuqwjtmtqXs/exec";
     const STORAGE_KEY = "daily_study_timetable_pro_v2";
+    const TIMER_RUNTIME_KEY = "daily_study_timer_runtime_v3";
 
     const DEFAULT_TIMETABLE = [
       { id: "slot-1", start: "07:00", end: "09:30", durationLabel: "2.5 hrs", durationHours: 2.5, category: "online", subject: "Online Classes (Slot 1)", focus: "Recorded backlog classes at 1.25x-1.5x speed + short notes." },
@@ -399,7 +498,12 @@
       break: { label: "Break", text: "text-amber-700 dark:text-amber-400", border: "border-l-amber-400", bar: "bg-slate-400" }
     };
 
+    function cloneSlots(slots) {
+      return JSON.parse(JSON.stringify(Array.isArray(slots) ? slots : []));
+    }
+
     function createInitialState() {
+      const defSlots = cloneSlots(DEFAULT_TIMETABLE);
       return {
         theme: "light",
         accent: "indigo",
@@ -407,13 +511,28 @@
         autoArchive: true,
         shiftAlertsEnabled: true,
         stickyNotesFolded: true,
+        focusTimerFolded: false,
+        soundEnabled: true,
         adminPin: null,
         updatedAt: 0,
         activeProfileId: "default-10hr",
         profiles: {
-          "default-10hr": { name: "10-Hr Backlog Plan", title: "DAILY STUDY TIMETABLE", subtitle: "Backlog Focus + Typing + Reasoning + GK/GS", slots: JSON.parse(JSON.stringify(DEFAULT_TIMETABLE)) },
-          "weekend-mock": { name: "Weekend Mock & Revision", title: "WEEKEND MOCK & REVISION PLAN", subtitle: "Full Mock + Deep Analysis + Weekly CA Revision", slots: JSON.parse(JSON.stringify(WEEKEND_MOCK_TIMETABLE)) }
+          "default-10hr": { name: "10-Hr Backlog Plan", title: "DAILY STUDY TIMETABLE", subtitle: "Backlog Focus + Typing + Reasoning + GK/GS", slots: cloneSlots(defSlots) },
+          "weekend-mock": { name: "Weekend Mock & Revision", title: "WEEKEND MOCK & REVISION PLAN", subtitle: "Full Mock + Deep Analysis + Weekly CA Revision", slots: cloneSlots(WEEKEND_MOCK_TIMETABLE) }
         },
+        // Effective-dated daily routine history (preserves past schedules, applies forward until next change date)
+        routineHistory: [
+          {
+            effectiveFrom: "2000-01-01",
+            profileId: "default-10hr",
+            name: "10-Hr Backlog Plan",
+            title: "DAILY STUDY TIMETABLE",
+            subtitle: "Backlog Focus + Typing + Reasoning + GK/GS",
+            slots: cloneSlots(defSlots)
+          }
+        ],
+        // Single-day custom schedules that never affect daily routine
+        dateOverrides: {},
         dailyLogs: {},
         dailyStudyLogs: {},
         gapBreakNames: {},
@@ -423,33 +542,96 @@
         archives: {},
         typingLogs: [],
         examGoals: [],
-        stickyNotes: []
+        stickyNotes: [],
+        activeBreakHold: null
+      };
+    }
+
+    function normalizeState(raw) {
+      const base = createInitialState();
+      const s = raw && typeof raw === "object" ? raw : {};
+      const profiles = s.profiles && typeof s.profiles === "object" && Object.keys(s.profiles).length > 0 ? s.profiles : base.profiles;
+      const activeProfileId = profiles[s.activeProfileId] ? s.activeProfileId : Object.keys(profiles)[0];
+
+      let routineHistory = Array.isArray(s.routineHistory) && s.routineHistory.length > 0
+        ? s.routineHistory.filter(e => e && typeof e.effectiveFrom === "string" && Array.isArray(e.slots))
+        : [];
+      if (routineHistory.length === 0) {
+        const p = profiles[activeProfileId] || Object.values(profiles)[0];
+        routineHistory = [{
+          effectiveFrom: "2000-01-01",
+          profileId: activeProfileId,
+          name: p.name || "Daily Routine",
+          title: p.title || "DAILY STUDY TIMETABLE",
+          subtitle: p.subtitle || "",
+          slots: cloneSlots(p.slots)
+        }];
+      }
+      routineHistory.sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom));
+
+      return {
+        ...base,
+        ...s,
+        activeProfileId,
+        profiles,
+        routineHistory,
+        dateOverrides: s.dateOverrides && typeof s.dateOverrides === "object" ? s.dateOverrides : {},
+        dailyLogs: s.dailyLogs && typeof s.dailyLogs === "object" ? s.dailyLogs : {},
+        dailyStudyLogs: s.dailyStudyLogs && typeof s.dailyStudyLogs === "object" ? s.dailyStudyLogs : {},
+        gapBreakNames: s.gapBreakNames && typeof s.gapBreakNames === "object" ? s.gapBreakNames : {},
+        slotAdjustments: s.slotAdjustments && typeof s.slotAdjustments === "object" ? s.slotAdjustments : {},
+        customReminders: Array.isArray(s.customReminders) ? s.customReminders : [],
+        reflections: s.reflections && typeof s.reflections === "object" ? s.reflections : {},
+        archives: s.archives && typeof s.archives === "object" ? s.archives : {},
+        typingLogs: Array.isArray(s.typingLogs) ? s.typingLogs : [],
+        examGoals: Array.isArray(s.examGoals) ? s.examGoals : [],
+        stickyNotes: Array.isArray(s.stickyNotes) ? s.stickyNotes : [],
+        activeBreakHold: s.activeBreakHold && typeof s.activeBreakHold === "object" ? s.activeBreakHold : null
       };
     }
 
     let appState = createInitialState();
     let currentDateStr = getTodayStr();
+    let lastKnownToday = getTodayStr();
     let currentFilter = "all";
     let isEditMode = false;
-    let pinMode = "set";
+    let pinMode = "manage"; // "unlock" | "manage"
+    let notifBannerDismissed = false;
+    let pendingConfirmAction = null;
 
-    // Timers & Reminder state
+    // Timers & Reminder state (wall-clock backed)
     let timerTotalSecs = 25 * 60;
     let timerRemSecs = 25 * 60;
+    let timerEndAtMs = null;
     let timerLabel = "Pomodoro Focus (25m)";
     let isTimerRunning = false;
+    let timerLinkedRoutineSlotId = null; // non-null when Focus Countdown is linked to an active Routine slot
+    let focusLastTickMs = null; // tracks standalone focus seconds into Daily Study Duration (never decreases!)
 
     let isManualRunning = false;
+    let manualLastTickMs = null;
+
     let activeRoutineSlotId = null;
     let isRoutineRunning = false;
-    let breakHold = null; // { startedAtMs, breakId, breakLabel, nextStudySlotId, nextStudySubject }
+    let routineLastTickMs = null;
+    let routineStartedBeforeEnd = false;
+    let routineMode = "live"; // "live" | "past" | "upcoming"
+    let routineSessionStartMs = null;
+    let routineSessionElapsedBase = 0;
+
+    let breakHold = null;
 
     let isSoundEnabled = true;
     let notificationsEnabled = typeof Notification !== "undefined" && Notification.permission === "granted";
     let activeReminders = [];
     let renamingBreakId = null;
     let syncTimeout = null;
+    let stickySaveTimeout = null;
     let tickCounter = 0;
+
+    let lastLiveCardKey = "";
+    let lastDailyCardKey = "";
+    let lastFocusCardKey = "";
 
     let prevLiveSlotId = null;
     let mountedNotif = false;
@@ -458,16 +640,39 @@
     const autoPausedKeys = new Set();
 
     function esc(s) {
-      return String(s || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+    function escJsAttr(s) {
+      return String(s ?? "")
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\r?\n/g, " ");
     }
     function getTodayStr(d = new Date()) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+    function formatPrettyDate(dateStr) {
+      try {
+        const [y, m, d] = dateStr.split("-").map(Number);
+        const dt = new Date(y, m - 1, d);
+        return dt.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+      } catch {
+        return dateStr;
+      }
     }
     function shiftDateStr(dateStr, offset) {
       const [y, m, d] = dateStr.split("-").map(Number);
       const dt = new Date(y, m - 1, d);
       dt.setDate(dt.getDate() + offset);
       return getTodayStr(dt);
+    }
+    function daysBetweenDates(dateStrA, dateStrB) {
+      const [y1, m1, d1] = dateStrA.split("-").map(Number);
+      const [y2, m2, d2] = dateStrB.split("-").map(Number);
+      return Math.round((Date.UTC(y2, m2 - 1, d2) - Date.UTC(y1, m1 - 1, d1)) / 86400000);
     }
     function toMins(t24) {
       const [h, m] = String(t24 || "00:00").split(":").map(Number);
@@ -507,6 +712,11 @@
       if (s === e) return false;
       return e > s ? (currM >= s && currM < e) : (currM >= s || currM < e);
     }
+    function isPastSlotToday(currM, s24, e24) {
+      const s = toMins(s24), e = toMins(e24);
+      if (e > s) return currM >= e;
+      return false;
+    }
     function remSecsToEnd(now, e24, s24) {
       const currS = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
       const endM = toMins(e24), startM = s24 ? toMins(s24) : endM;
@@ -514,15 +724,124 @@
       if (s24 && endM <= startM && currS >= startM * 60) endS += 86400;
       return Math.max(0, endS - currS);
     }
-
-    function getActiveProfile() {
-      return appState.profiles[appState.activeProfileId] || Object.values(appState.profiles)[0];
+    function getSlotEndMsForNow(now, slot) {
+      return now.getTime() + remSecsToEnd(now, slot.end, slot.start) * 1000;
     }
 
-    function buildTimeline() {
-      const prof = getActiveProfile();
-      const sorted = [...(prof.slots || [])].sort((a, b) => toMins(a.start) - toMins(b.start));
-      const adj = (appState.slotAdjustments && appState.slotAdjustments[currentDateStr]) || {};
+    // ==================== EFFECTIVE-DATED SCHEDULE RESOLUTION ====================
+    function getScheduleForDate(dateStr = currentDateStr) {
+      if (appState.dateOverrides && appState.dateOverrides[dateStr]) {
+        const ov = appState.dateOverrides[dateStr];
+        return {
+          ...ov,
+          isCustomOverride: true,
+          effectiveFrom: dateStr,
+          nextChangeDate: null,
+          scopeKey: `override::${dateStr}`
+        };
+      }
+      const hist = [...(appState.routineHistory || [])].sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom));
+      let matchedIdx = -1;
+      for (let i = 0; i < hist.length; i++) {
+        if (hist[i].effectiveFrom <= dateStr) matchedIdx = i;
+      }
+      if (matchedIdx === -1) matchedIdx = 0;
+      const entry = hist[matchedIdx];
+      const nextEntry = matchedIdx + 1 < hist.length ? hist[matchedIdx + 1] : null;
+      return {
+        ...entry,
+        isCustomOverride: false,
+        nextChangeDate: nextEntry ? nextEntry.effectiveFrom : null,
+        scopeKey: `routine::${entry.effectiveFrom}`
+      };
+    }
+
+    // Returns mutable reference to the slots array for a given scope ("custom_day" or "from_now")
+    function ensureRoutineEntryForDate(effectiveDate) {
+      const existing = appState.routineHistory.find(e => e.effectiveFrom === effectiveDate);
+      if (existing) return existing;
+      const resolved = getScheduleForDate(effectiveDate);
+      const newEntry = {
+        effectiveFrom: effectiveDate,
+        profileId: resolved.profileId || appState.activeProfileId,
+        name: resolved.name || "Daily Routine",
+        title: resolved.title || "DAILY STUDY TIMETABLE",
+        subtitle: resolved.subtitle || "",
+        slots: cloneSlots(resolved.slots)
+      };
+      appState.routineHistory.push(newEntry);
+      appState.routineHistory.sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom));
+      return newEntry;
+    }
+
+    function ensureCustomOverrideForDate(dateStr) {
+      if (appState.dateOverrides[dateStr]) return appState.dateOverrides[dateStr];
+      const resolved = getScheduleForDate(dateStr);
+      appState.dateOverrides[dateStr] = {
+        profileId: resolved.profileId || appState.activeProfileId,
+        name: `${resolved.name || "Schedule"} (Custom)`,
+        title: resolved.title || "CUSTOM DAY TIMETABLE",
+        subtitle: resolved.subtitle || `Custom schedule for ${dateStr}`,
+        slots: cloneSlots(resolved.slots)
+      };
+      return appState.dateOverrides[dateStr];
+    }
+
+    function applyPlanToScope(planObj, scope, targetDateStr) {
+      const today = getTodayStr();
+      const dateToUse = scope === "today" ? today : (targetDateStr || currentDateStr || today);
+
+      if (scope === "today" || scope === "custom_day") {
+        appState.dateOverrides[dateToUse] = {
+          profileId: planObj.profileId || null,
+          name: planObj.name,
+          title: planObj.title,
+          subtitle: planObj.subtitle,
+          slots: cloneSlots(planObj.slots)
+        };
+        if (dateToUse === today) stopActiveRoutineSilently();
+        currentDateStr = dateToUse;
+        saveState();
+        renderAll();
+        showToast(`Applied "${planObj.name}" for ${dateToUse === today ? "Today only" : dateToUse + " only"} (daily routine unchanged).`, "success");
+      } else {
+        // from_now: effective from dateToUse onward (until any later routineHistory date), never touches past!
+        const effDate = dateToUse < today ? today : dateToUse;
+        const idx = appState.routineHistory.findIndex(e => e.effectiveFrom === effDate);
+        const entry = {
+          effectiveFrom: effDate,
+          profileId: planObj.profileId || null,
+          name: planObj.name,
+          title: planObj.title,
+          subtitle: planObj.subtitle,
+          slots: cloneSlots(planObj.slots)
+        };
+        if (idx >= 0) appState.routineHistory[idx] = entry;
+        else appState.routineHistory.push(entry);
+        appState.routineHistory.sort((a, b) => a.effectiveFrom.localeCompare(b.effectiveFrom));
+        if (planObj.profileId && appState.profiles[planObj.profileId]) {
+          appState.activeProfileId = planObj.profileId;
+        }
+        // If user had a custom override on effDate and explicitly applies "from now on" starting effDate, remove that override so the new routine shows
+        if (appState.dateOverrides[effDate]) delete appState.dateOverrides[effDate];
+        if (effDate === today) stopActiveRoutineSilently();
+        currentDateStr = effDate;
+        saveState();
+        renderAll();
+        const nextEntry = appState.routineHistory.find(e => e.effectiveFrom > effDate);
+        showToast(
+          nextEntry
+            ? `Daily routine updated from ${effDate} until ${nextEntry.effectiveFrom} (past unchanged).`
+            : `Daily routine updated from ${effDate} onward (past schedules preserved).`,
+          "success"
+        );
+      }
+    }
+
+    function buildTimeline(targetDateStr = currentDateStr) {
+      const sched = getScheduleForDate(targetDateStr);
+      const sorted = [...(sched.slots || [])].sort((a, b) => toMins(a.start) - toMins(b.start));
+      const adj = (appState.slotAdjustments && appState.slotAdjustments[targetDateStr]) || {};
       const out = [];
       for (let i = 0; i < sorted.length; i++) {
         const s = sorted[i];
@@ -546,7 +865,7 @@
           if (currEndM >= toMins(s.start) && nextStartM > currEndM) {
             const gapId = `gap-${s.end}-${next.start}`;
             const gapH = Math.round(((nextStartM - currEndM) / 60) * 100) / 100;
-            const custom = appState.gapBreakNames?.[`${appState.activeProfileId}::${gapId}`];
+            const custom = appState.gapBreakNames?.[`${sched.scopeKey}::${gapId}`] || appState.gapBreakNames?.[`${appState.activeProfileId}::${gapId}`];
             out.push({
               id: gapId, gapId, isGapBreak: true,
               start: s.end, end: next.start,
@@ -561,6 +880,26 @@
       return out;
     }
 
+    // ==================== GLOBAL CONFIRMATION MODAL (Req #4) ====================
+    function requestConfirm(title, message, onConfirm, okLabel = "Yes, Delete") {
+      pendingConfirmAction = onConfirm;
+      document.getElementById("confirm-title").textContent = title || "Confirm Delete";
+      document.getElementById("confirm-message").textContent = message || "Are you sure you want to delete this item?";
+      document.getElementById("confirm-ok-btn").textContent = okLabel;
+      document.getElementById("confirm-modal").classList.remove("hidden");
+    }
+    function cancelConfirm() {
+      pendingConfirmAction = null;
+      document.getElementById("confirm-modal").classList.add("hidden");
+    }
+    function executeConfirm() {
+      const fn = pendingConfirmAction;
+      pendingConfirmAction = null;
+      document.getElementById("confirm-modal").classList.add("hidden");
+      if (typeof fn === "function") fn();
+    }
+
+    // ==================== TOASTS, AUDIO & DEVICE NOTIFICATIONS (Req #5) ====================
     function showToast(msg, type = "info") {
       const root = document.getElementById("toast-root");
       const el = document.createElement("div");
@@ -568,7 +907,7 @@
       el.className = `${cls} text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-bold`;
       el.textContent = msg;
       root.appendChild(el);
-      setTimeout(() => el.remove(), 2600);
+      setTimeout(() => el.remove(), 2800);
     }
 
     function playChime() {
@@ -590,27 +929,116 @@
     }
 
     function sendDeviceNotif(title, body, tag) {
-      if (!notificationsEnabled || typeof Notification === "undefined" || Notification.permission !== "granted") return;
-      try { new Notification(title, { body, tag }); } catch {}
+      try { if (navigator.vibrate) navigator.vibrate([180, 80, 180]); } catch {}
+      if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.ready.then(reg => {
+            if (reg && reg.showNotification) {
+              reg.showNotification(title, { body, tag, vibrate: [180, 80, 180], renotify: true });
+            } else {
+              new Notification(title, { body, tag });
+            }
+          }).catch(() => {
+            try { new Notification(title, { body, tag }); } catch {}
+          });
+        } else {
+          new Notification(title, { body, tag });
+        }
+      } catch {}
     }
 
     function pushReminder(rem, notifTitle, notifBody) {
       if (activeReminders.some(r => r.id === rem.id)) return;
       activeReminders = [rem, ...activeReminders].slice(0, 6);
       playChime();
-      if (notifTitle) sendDeviceNotif(notifTitle, notifBody || rem.message, rem.id);
+      sendDeviceNotif(notifTitle || rem.title, notifBody || `${rem.subject} — ${rem.message}`, rem.id);
       renderReminders();
+    }
+
+    function dismissNotifBanner() {
+      notifBannerDismissed = true;
+      document.getElementById("notif-permission-banner").classList.add("hidden");
+    }
+
+    async function toggleNotifications() {
+      if (typeof Notification === "undefined") return showToast("Browser notifications unsupported on this device.", "error");
+      if (Notification.permission === "denied") {
+        return showToast("Notifications are blocked in browser settings. Enable them in site settings.", "error");
+      }
+      const p = await Notification.requestPermission();
+      notificationsEnabled = p === "granted";
+      if (notificationsEnabled) {
+        notifBannerDismissed = true;
+        sendDeviceNotif("Study Alerts Enabled!", "You will receive live timetable reminders on this device.", "notif-enabled");
+      }
+      renderHeaderAndWidgets();
+      renderFocusTimerCard(true);
+      showToast(notificationsEnabled ? "Device notifications enabled!" : "Notification permission not granted.", notificationsEnabled ? "success" : "error");
+    }
+
+    // ==================== PERSISTENCE & CLOUD SYNC ====================
+    function saveTimerRuntime() {
+      try {
+        localStorage.setItem(TIMER_RUNTIME_KEY, JSON.stringify({
+          timerTotalSecs,
+          timerRemSecs,
+          timerEndAtMs,
+          timerLabel,
+          isTimerRunning,
+          timerLinkedRoutineSlotId,
+          focusLastTickMs,
+          isManualRunning,
+          manualLastTickMs,
+          activeRoutineSlotId,
+          isRoutineRunning,
+          routineLastTickMs,
+          routineStartedBeforeEnd,
+          routineMode,
+          routineSessionStartMs,
+          routineSessionElapsedBase
+        }));
+      } catch {}
+    }
+
+    function loadTimerRuntime() {
+      try {
+        const raw = localStorage.getItem(TIMER_RUNTIME_KEY);
+        if (!raw) return;
+        const rt = JSON.parse(raw);
+        if (!rt || typeof rt !== "object") return;
+        timerTotalSecs = Number(rt.timerTotalSecs) || 1500;
+        timerRemSecs = Math.max(0, Number(rt.timerRemSecs) ?? 1500);
+        timerEndAtMs = rt.timerEndAtMs ? Number(rt.timerEndAtMs) : null;
+        timerLabel = rt.timerLabel || "Pomodoro Focus (25m)";
+        isTimerRunning = Boolean(rt.isTimerRunning && timerEndAtMs);
+        timerLinkedRoutineSlotId = rt.timerLinkedRoutineSlotId || null;
+        focusLastTickMs = rt.focusLastTickMs ? Number(rt.focusLastTickMs) : null;
+        isManualRunning = Boolean(rt.isManualRunning && rt.manualLastTickMs);
+        manualLastTickMs = rt.manualLastTickMs ? Number(rt.manualLastTickMs) : null;
+        activeRoutineSlotId = rt.activeRoutineSlotId || null;
+        isRoutineRunning = Boolean(rt.isRoutineRunning && activeRoutineSlotId && rt.routineLastTickMs);
+        routineLastTickMs = rt.routineLastTickMs ? Number(rt.routineLastTickMs) : null;
+        routineStartedBeforeEnd = Boolean(rt.routineStartedBeforeEnd);
+        routineMode = rt.routineMode || "live";
+        routineSessionStartMs = rt.routineSessionStartMs ? Number(rt.routineSessionStartMs) : null;
+        routineSessionElapsedBase = Number(rt.routineSessionElapsedBase) || 0;
+      } catch {}
     }
 
     function loadState() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) appState = { ...createInitialState(), ...JSON.parse(saved) };
+        if (saved) appState = normalizeState(JSON.parse(saved));
       } catch {}
+      isSoundEnabled = appState.soundEnabled !== false;
+      breakHold = appState.activeBreakHold || null;
+      loadTimerRuntime();
     }
 
     function saveState(skipCloud = false) {
       appState.updatedAt = Date.now();
+      appState.activeBreakHold = breakHold;
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
       if (!skipCloud) {
         clearTimeout(syncTimeout);
@@ -639,31 +1067,43 @@
 
     function applyRemoteState(remote) {
       if (!remote || !remote.profiles) return;
-      if (!appState.updatedAt || (remote.updatedAt && remote.updatedAt >= appState.updatedAt)) {
-        appState = { ...createInitialState(), ...appState, ...remote };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      if (!appState.updatedAt || (remote.updatedAt && Number(remote.updatedAt) > Number(appState.updatedAt))) {
+        appState = normalizeState({ ...appState, ...remote });
+        isSoundEnabled = appState.soundEnabled !== false;
+        breakHold = appState.activeBreakHold || null;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
         applyThemeAccent();
         renderAll();
-      } else {
+      } else if (remote.updatedAt && Number(remote.updatedAt) < Number(appState.updatedAt)) {
         pushCloud();
       }
     }
 
-    async function pushCloud() {
+    async function pushCloud(opts = {}) {
       if (!hasGas()) return;
       try {
         if (typeof google !== "undefined" && google.script && google.script.run) {
-          google.script.run.saveTimetableState(JSON.stringify(appState), false);
+          google.script.run.withSuccessHandler(res => {
+            if (res && res.skippedStale && res.existingState) applyRemoteState(res.existingState);
+          }).saveTimetableState(JSON.stringify(appState), Boolean(opts.force));
         } else {
-          await fetch(GAS_WEB_APP_URL, {
+          const res = await fetch(GAS_WEB_APP_URL, {
             method: "POST",
+            keepalive: Boolean(opts.keepalive),
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "saveState", state: appState, force: false })
+            body: JSON.stringify({ action: "saveState", state: appState, force: Boolean(opts.force) })
           });
+          if (res.ok && !opts.keepalive) {
+            try {
+              const data = await res.json();
+              if (data?.skippedStale && data?.remoteState) applyRemoteState(data.remoteState);
+            } catch {}
+          }
         }
       } catch {}
     }
 
+    // ==================== THEME & ACCENT (Emoji Style Req #10) ====================
     function applyThemeAccent() {
       const t = appState.theme || "light", a = appState.accent || "indigo";
       document.body.setAttribute("data-theme", t);
@@ -671,122 +1111,439 @@
       document.documentElement.classList.toggle("dark", t === "dark");
       document.querySelectorAll("[data-theme-opt]").forEach(btn => {
         const active = btn.getAttribute("data-theme-opt") === t;
-        btn.className = `px-2 py-1 rounded-lg text-[11px] font-bold cursor-pointer ${active ? "accent-btn shadow-sm" : "text-[var(--text-secondary)]"}`;
+        btn.className = `px-2 py-1 rounded-lg text-sm leading-none cursor-pointer transition ${active ? "accent-btn shadow-sm scale-105" : "opacity-70 hover:opacity-100"}`;
       });
     }
     function setTheme(t) { appState.theme = t; saveState(); applyThemeAccent(); }
     function setAccent(a) { appState.accent = a; saveState(); applyThemeAccent(); }
     function setDensity(d) { appState.density = d; saveState(); renderAll(); }
 
+    // ==================== DAILY STUDY LOG HELPER ====================
+    function ensureDayStudyLog(dayStr) {
+      if (!appState.dailyStudyLogs[dayStr]) {
+        appState.dailyStudyLogs[dayStr] = { manualSeconds: 0, routineSecondsBySlot: {}, focusSeconds: 0, heldBreakSeconds: 0 };
+      }
+      if (!appState.dailyStudyLogs[dayStr].routineSecondsBySlot) appState.dailyStudyLogs[dayStr].routineSecondsBySlot = {};
+      if (typeof appState.dailyStudyLogs[dayStr].focusSeconds !== "number") appState.dailyStudyLogs[dayStr].focusSeconds = 0;
+      return appState.dailyStudyLogs[dayStr];
+    }
+
+    function getDayTotalStudySeconds(dayStr, includeLiveHold = false) {
+      const rec = appState.dailyStudyLogs?.[dayStr];
+      const manualS = rec?.manualSeconds || 0;
+      const routineS = Object.values(rec?.routineSecondsBySlot || {}).reduce((a, b) => a + (b || 0), 0);
+      const focusS = rec?.focusSeconds || 0;
+      const holdLive = includeLiveHold && breakHold ? Math.max(0, Math.floor((Date.now() - breakHold.startedAtMs) / 1000)) : 0;
+      const heldS = (rec?.heldBreakSeconds || 0) + holdLive;
+      return { manualS, routineS, focusS, heldS, totalS: manualS + routineS + focusS + heldS };
+    }
+
+    // ==================== 20% COMPLETION RULE (Req #15) ====================
     function evaluateRoutineTolerance(slot, trackedSecs) {
       const today = getTodayStr();
       const targetSecs = Math.max(60, Math.round((slot.durationHours || calcHrs(slot.start, slot.end)) * 3600));
-      if (trackedSecs >= Math.max(60, targetSecs - 1800)) {
+      // Within 20% difference of scheduled duration (>= 80% of slot duration) => Complete!
+      const requiredSecs = Math.max(1, Math.round(targetSecs * 0.80));
+      if (trackedSecs >= requiredSecs) {
         appState.dailyLogs[today] = appState.dailyLogs[today] || {};
         const prev = appState.dailyLogs[today][slot.id] || {};
+        const wasAlreadyDone = prev.status === "completed";
         appState.dailyLogs[today][slot.id] = { ...prev, status: "completed", loggedHours: Number((trackedSecs / 3600).toFixed(2)) };
         if (appState.autoArchive !== false) archiveDay(today, true);
-        saveState();
-        playChime();
-        showToast(`"${slot.subject}" auto-completed (within 30-min tolerance)!`, "success");
+        if (!wasAlreadyDone) {
+          saveState();
+          playChime();
+          sendDeviceNotif("Slot Completed!", `"${slot.subject}" reached ≥80% (within 20%) of schedule.`, `done-${slot.id}-${today}`);
+          showToast(`"${slot.subject}" marked complete (within 20% of schedule)!`, "success");
+          renderStats(buildTimeline());
+          renderTimelineList();
+        }
       }
     }
 
+    // ==================== WALL-CLOCK TIMER FLUSH ====================
+    function flushTimersToNow(now = new Date()) {
+      const nowMs = now.getTime();
+      const today = getTodayStr(now);
+      let changed = false;
+
+      // 1. Manual / Random Study Timer
+      if (isManualRunning) {
+        if (!manualLastTickMs) manualLastTickMs = nowMs;
+        const elapsed = Math.floor((nowMs - manualLastTickMs) / 1000);
+        if (elapsed > 0) {
+          const rec = ensureDayStudyLog(today);
+          rec.manualSeconds += elapsed;
+          manualLastTickMs += elapsed * 1000;
+          changed = true;
+        }
+      }
+
+      // 2. Standalone Focus Countdown Timer -> ALWAYS adds to Daily Study Duration (never decreases on reset!)
+      if (isTimerRunning && !timerLinkedRoutineSlotId && !isRoutineRunning) {
+        if (!focusLastTickMs) focusLastTickMs = nowMs;
+        const effectiveNow = timerEndAtMs ? Math.min(nowMs, timerEndAtMs) : nowMs;
+        const elapsed = Math.max(0, Math.floor((effectiveNow - focusLastTickMs) / 1000));
+        if (elapsed > 0) {
+          const rec = ensureDayStudyLog(today);
+          rec.focusSeconds += elapsed;
+          focusLastTickMs += elapsed * 1000;
+          changed = true;
+        }
+      }
+
+      // 3. Routine Study Timer (+ coupled Countdown)
+      if (isRoutineRunning && activeRoutineSlotId) {
+        if (!routineLastTickMs) routineLastTickMs = nowMs;
+        const timeline = buildTimeline(today);
+        const rs = timeline.find(s => s.id === activeRoutineSlotId);
+        const autoKey = `${today}:${activeRoutineSlotId}`;
+        const currM = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+
+        if (rs && routineStartedBeforeEnd && !autoPausedKeys.has(autoKey) && !isInSlot(currM, rs.start, rs.end)) {
+          const startDate = new Date(routineLastTickMs);
+          const schedEndMs = getSlotEndMsForNow(startDate, rs);
+          const cappedElapsed = Math.max(0, Math.floor((Math.min(nowMs, schedEndMs) - routineLastTickMs) / 1000));
+          const rec = ensureDayStudyLog(today);
+          if (cappedElapsed > 0) {
+            rec.routineSecondsBySlot[activeRoutineSlotId] = (rec.routineSecondsBySlot[activeRoutineSlotId] || 0) + cappedElapsed;
+          }
+          autoPausedKeys.add(autoKey);
+          isRoutineRunning = false;
+          routineLastTickMs = null;
+          routineStartedBeforeEnd = false;
+          if (timerLinkedRoutineSlotId === rs.id) {
+            isTimerRunning = false;
+            timerEndAtMs = null;
+            timerRemSecs = 0;
+            timerLinkedRoutineSlotId = null;
+          }
+          const totalTracked = rec.routineSecondsBySlot[rs.id] || 0;
+          appState.dailyLogs[today] = appState.dailyLogs[today] || {};
+          appState.dailyLogs[today][rs.id] = { ...(appState.dailyLogs[today][rs.id] || { status: "pending" }), loggedHours: Number((totalTracked / 3600).toFixed(2)) };
+          evaluateRoutineTolerance(rs, totalTracked);
+          saveState();
+          saveTimerRuntime();
+          pushReminder({
+            id: `rend-${rs.id}-${today}`,
+            title: "Schedule Finished · Auto-Paused",
+            subject: rs.subject,
+            timeRange: `${fmt12(rs.start)} - ${fmt12(rs.end)}`,
+            message: "Scheduled block ended & timer auto-paused. Tap Resume Timer to continue.",
+            slotId: rs.id,
+            canResumeRoutine: true
+          }, `Finished: ${rs.subject}`, "Tap Resume Timer if you want to continue studying.");
+          renderTimelineList();
+        } else {
+          const elapsed = Math.floor((nowMs - routineLastTickMs) / 1000);
+          if (elapsed > 0) {
+            const rec = ensureDayStudyLog(today);
+            rec.routineSecondsBySlot[activeRoutineSlotId] = (rec.routineSecondsBySlot[activeRoutineSlotId] || 0) + elapsed;
+            routineLastTickMs += elapsed * 1000;
+            changed = true;
+            // Live check for 20% auto-complete rule while studying!
+            if (rs) evaluateRoutineTolerance(rs, rec.routineSecondsBySlot[activeRoutineSlotId]);
+          }
+          // Keep linked countdown perfectly synced with live slot remaining time
+          if (rs && timerLinkedRoutineSlotId === rs.id && routineMode === "live" && isInSlot(currM, rs.start, rs.end)) {
+            const rem = remSecsToEnd(now, rs.end, rs.start);
+            timerRemSecs = rem;
+            timerEndAtMs = nowMs + rem * 1000;
+          }
+        }
+      }
+
+      // 4. Countdown completion check
+      if (isTimerRunning && timerEndAtMs) {
+        timerRemSecs = Math.max(0, Math.ceil((timerEndAtMs - nowMs) / 1000));
+        if (timerRemSecs <= 0) {
+          timerRemSecs = 0;
+          timerEndAtMs = null;
+          isTimerRunning = false;
+          focusLastTickMs = null;
+          const finishedLabel = timerLabel;
+          // If standalone focus finished, chime + notify (daily study duration keeps all earned seconds!)
+          if (!timerLinkedRoutineSlotId) {
+            playChime();
+            sendDeviceNotif("Focus Timer Complete!", `${finishedLabel} finished. Study duration saved!`, `cd-${nowMs}`);
+            showToast("Focus countdown complete!", "success");
+          }
+          saveTimerRuntime();
+          renderFocusTimerCard(true);
+        }
+      }
+
+      if (changed) {
+        tickCounter++;
+        saveState(tickCounter % 15 !== 0);
+        saveTimerRuntime();
+      }
+    }
+
+    function stopActiveRoutineSilently(now = new Date()) {
+      if (!isRoutineRunning || !activeRoutineSlotId) return;
+      flushTimersToNow(now);
+      const today = getTodayStr(now);
+      const prevSlot = buildTimeline(today).find(s => s.id === activeRoutineSlotId);
+      const tracked = appState.dailyStudyLogs?.[today]?.routineSecondsBySlot?.[activeRoutineSlotId] || 0;
+      if (routineSessionStartMs) {
+        routineSessionElapsedBase += Math.max(0, Math.floor((now.getTime() - routineSessionStartMs) / 1000));
+        routineSessionStartMs = null;
+      }
+      isRoutineRunning = false;
+      routineLastTickMs = null;
+      routineStartedBeforeEnd = false;
+      if (timerLinkedRoutineSlotId === activeRoutineSlotId) {
+        isTimerRunning = false;
+        timerEndAtMs = null;
+      }
+      if (prevSlot) {
+        appState.dailyLogs[today] = appState.dailyLogs[today] || {};
+        appState.dailyLogs[today][prevSlot.id] = {
+          ...(appState.dailyLogs[today][prevSlot.id] || { status: "pending" }),
+          loggedHours: Number((tracked / 3600).toFixed(2))
+        };
+        evaluateRoutineTolerance(prevSlot, tracked);
+      }
+    }
+
+    // ==================== MANUAL / RANDOM STUDY TIMER (No Reset — Req #1 & #9) ====================
     function toggleManualTimer() {
+      const now = new Date();
+      const today = getTodayStr(now);
+      if (currentDateStr !== today) return;
+      flushTimersToNow(now);
+
       if (!isManualRunning) {
-        isRoutineRunning = false;
+        if (breakHold) releaseBreakHold(true);
+        stopActiveRoutineSilently(now);
+        // Pause standalone focus if running so we never double count
+        if (isTimerRunning) {
+          isTimerRunning = false;
+          timerEndAtMs = null;
+          focusLastTickMs = null;
+          timerLinkedRoutineSlotId = null;
+        }
         isManualRunning = true;
+        manualLastTickMs = now.getTime();
+        saveTimerRuntime();
         showToast("Manual daily study timer started!", "success");
       } else {
         isManualRunning = false;
+        manualLastTickMs = null;
         saveState();
+        saveTimerRuntime();
         showToast("Manual study timer paused & saved.", "info");
       }
-      renderLiveAndDailyCards();
-      renderTimelineList();
+      renderAll();
     }
 
-    function resetManualTimer() {
-      const today = getTodayStr();
-      appState.dailyStudyLogs[today] = appState.dailyStudyLogs[today] || { manualSeconds: 0, routineSecondsBySlot: {}, heldBreakSeconds: 0 };
-      appState.dailyStudyLogs[today].manualSeconds = 0;
-      saveState();
-      renderLiveAndDailyCards();
-    }
-
+    // ==================== COMBINED ROUTINE START + COUNTDOWN (Req #2 & #3) ====================
     function toggleRoutineTimer(slotId) {
-      const slot = buildTimeline().find(s => s.id === slotId);
+      const now = new Date();
+      const today = getTodayStr(now);
+      flushTimersToNow(now);
+      const slot = buildTimeline(today).find(s => s.id === slotId);
       if (!slot || slot.category === "break") return;
-      const today = getTodayStr();
       const tracked = appState.dailyStudyLogs?.[today]?.routineSecondsBySlot?.[slot.id] || 0;
 
       if (activeRoutineSlotId === slot.id && isRoutineRunning) {
-        isRoutineRunning = false;
-        appState.dailyLogs[today] = appState.dailyLogs[today] || {};
-        appState.dailyLogs[today][slot.id] = { ...(appState.dailyLogs[today][slot.id] || { status: "pending" }), loggedHours: Number((tracked / 3600).toFixed(2)) };
-        evaluateRoutineTolerance(slot, tracked);
+        // Pause BOTH routine study tracking AND linked countdown
+        stopActiveRoutineSilently(now);
         saveState();
-        showToast(`Stopped routine timer for "${slot.subject}"`, "info");
+        saveTimerRuntime();
+        showToast(`Paused "${slot.subject}" — study duration saved.`, "info");
       } else {
+        if (breakHold) releaseBreakHold(true);
+        if (isRoutineRunning && activeRoutineSlotId && activeRoutineSlotId !== slot.id) {
+          stopActiveRoutineSilently(now);
+        }
+        // Pause manual & standalone focus to prevent double counting
         isManualRunning = false;
+        manualLastTickMs = null;
+        focusLastTickMs = null;
+
+        const switchingSlot = activeRoutineSlotId !== slot.id;
         activeRoutineSlotId = slot.id;
         isRoutineRunning = true;
-        const now = new Date();
-        if (isInSlot(now.getHours() * 60 + now.getMinutes(), slot.start, slot.end)) {
-          const rem = Math.max(1, remSecsToEnd(now, slot.end, slot.start));
-          timerTotalSecs = rem; timerRemSecs = rem;
-          timerLabel = `${slot.subject} (Shift Remaining)`;
-          isTimerRunning = true;
+        routineLastTickMs = now.getTime();
+        if (switchingSlot) {
+          routineSessionElapsedBase = tracked;
         }
-        showToast(`Tracking routine study: "${slot.subject}"`, "success");
+        routineSessionStartMs = now.getTime();
+
+        const currM = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+        const currentlyLive = isInSlot(currM, slot.start, slot.end);
+        const isPast = isPastSlotToday(currM, slot.start, slot.end);
+        const fullSecs = Math.max(60, Math.round((slot.durationHours || calcHrs(slot.start, slot.end)) * 3600));
+
+        routineStartedBeforeEnd = currentlyLive;
+        routineMode = currentlyLive ? "live" : (isPast ? "past" : "upcoming");
+
+        // Combined Countdown: counts remaining time in schedule to finish!
+        let rem;
+        if (currentlyLive) {
+          rem = Math.max(1, remSecsToEnd(now, slot.end, slot.start));
+          timerLabel = `${slot.subject} (Live Remaining)`;
+        } else {
+          rem = Math.max(0, fullSecs - tracked);
+          timerLabel = isPast ? `${slot.subject} (Past Slot)` : `${slot.subject} (Remaining)`;
+        }
+        timerTotalSecs = currentlyLive ? fullSecs : Math.max(fullSecs, rem || fullSecs);
+        timerRemSecs = rem;
+        timerLinkedRoutineSlotId = slot.id;
+        if (rem > 0) {
+          timerEndAtMs = now.getTime() + rem * 1000;
+          isTimerRunning = true;
+        } else {
+          timerEndAtMs = null;
+          isTimerRunning = false;
+        }
+
+        saveTimerRuntime();
+        showToast(
+          currentlyLive
+            ? `Started "${slot.subject}" — ${fmtHMS(rem)} remaining in schedule.`
+            : `Started "${slot.subject}" — tracking duration & countdown.`,
+          "success"
+        );
       }
       renderAll();
     }
 
-    function startShiftCountdown(slotId) {
-      const slot = buildTimeline().find(s => s.id === slotId);
-      if (!slot) return;
+    // ==================== FLOATING BAR CONTROL (Req #3) ====================
+    function toggleFloatingTimer() {
       const now = new Date();
-      const isLive = currentDateStr === getTodayStr(now) && isInSlot(now.getHours() * 60 + now.getMinutes(), slot.start, slot.end);
-      const full = Math.max(60, Math.round((slot.durationHours || calcHrs(slot.start, slot.end)) * 3600));
-      const rem = isLive ? Math.max(1, remSecsToEnd(now, slot.end, slot.start)) : full;
-      timerTotalSecs = rem; timerRemSecs = rem;
-      timerLabel = isLive ? `${slot.subject} (Remaining)` : slot.subject;
-      isTimerRunning = true;
-      if (slot.category !== "break") {
-        isManualRunning = false; activeRoutineSlotId = slot.id; isRoutineRunning = true;
+      flushTimersToNow(now);
+      if (isRoutineRunning && activeRoutineSlotId) {
+        toggleRoutineTimer(activeRoutineSlotId);
+      } else if (isManualRunning) {
+        toggleManualTimer();
+      } else if (isTimerRunning) {
+        toggleCountdownTimer();
+      } else if (activeRoutineSlotId && timerLinkedRoutineSlotId === activeRoutineSlotId) {
+        toggleRoutineTimer(activeRoutineSlotId);
+      } else {
+        toggleCountdownTimer();
       }
-      renderAll();
-      showToast(`Countdown started: ${fmtHMS(rem)} left`, "info");
     }
 
+    function renderFloatingBar() {
+      const now = new Date();
+      const today = getTodayStr(now);
+      const bar = document.getElementById("floating-timer-bar");
+      const badgeEl = document.getElementById("float-mode-badge");
+      const labelEl = document.getElementById("float-slot-label");
+      const valEl = document.getElementById("float-timer-val");
+      const subEl = document.getElementById("float-timer-sub");
+      const btnEl = document.getElementById("float-timer-btn");
+
+      const anyRunning = isRoutineRunning || isManualRunning || isTimerRunning;
+      // Show floating bar on all screens when any study timer is active; on mobile always visible
+      bar.classList.toggle("lg:hidden", !anyRunning);
+
+      if (isRoutineRunning && activeRoutineSlotId) {
+        const slot = buildTimeline(today).find(s => s.id === activeRoutineSlotId);
+        const tracked = appState.dailyStudyLogs?.[today]?.routineSecondsBySlot?.[activeRoutineSlotId] || 0;
+        const currM = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+        const isLiveNow = slot && isInSlot(currM, slot.start, slot.end);
+        const isPastNow = slot && isPastSlotToday(currM, slot.start, slot.end);
+
+        if (isLiveNow) {
+          const rem = remSecsToEnd(now, slot.end, slot.start);
+          badgeEl.textContent = "LIVE LEFT";
+          badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-700 dark:text-emerald-300";
+          labelEl.textContent = slot.subject;
+          valEl.textContent = fmtHMS(rem);
+          subEl.textContent = `Studied ${fmtHMS(tracked)}`;
+        } else if (isPastNow || routineMode === "past") {
+          // Requirement #3: for past schedule starts, floating bar shows time passed since start!
+          badgeEl.textContent = "PAST · ELAPSED";
+          badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-700 dark:text-amber-300";
+          labelEl.textContent = slot ? slot.subject : "Past Schedule";
+          valEl.textContent = fmtHMS(tracked);
+          const fullSecs = slot ? Math.max(60, Math.round((slot.durationHours || calcHrs(slot.start, slot.end)) * 3600)) : 0;
+          const remLeft = Math.max(0, fullSecs - tracked);
+          subEl.textContent = remLeft > 0 ? `Target left ${fmtHMS(remLeft)}` : "Target reached!";
+        } else {
+          badgeEl.textContent = "SCHEDULE";
+          badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft";
+          labelEl.textContent = slot ? slot.subject : "Study Slot";
+          valEl.textContent = timerRemSecs > 0 ? fmtHMS(timerRemSecs) : fmtHMS(tracked);
+          subEl.textContent = `Studied ${fmtHMS(tracked)}`;
+        }
+        btnEl.textContent = "Pause";
+        btnEl.className = "shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer";
+      } else if (isManualRunning) {
+        const manualS = appState.dailyStudyLogs?.[today]?.manualSeconds || 0;
+        badgeEl.textContent = "RANDOM STUDY";
+        badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-700 dark:text-emerald-300";
+        labelEl.textContent = "Manual / Random Study";
+        valEl.textContent = fmtHMS(manualS);
+        subEl.textContent = "Counting to Daily Study";
+        btnEl.textContent = "Pause";
+        btnEl.className = "shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer";
+      } else if (isTimerRunning) {
+        badgeEl.textContent = "FOCUS";
+        badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft";
+        labelEl.textContent = timerLabel;
+        valEl.textContent = fmtHMS(timerRemSecs);
+        subEl.textContent = "Counting to Daily Study";
+        btnEl.textContent = "Pause";
+        btnEl.className = "shrink-0 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer";
+      } else {
+        badgeEl.textContent = "FOCUS";
+        badgeEl.className = "px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider accent-soft";
+        labelEl.textContent = timerLabel;
+        valEl.textContent = fmtHMS(timerRemSecs);
+        subEl.textContent = "Ready";
+        btnEl.textContent = "Start";
+        btnEl.className = "shrink-0 px-4 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer";
+      }
+    }
+
+    // ==================== BREAK HOLD & BREAK RENAME ====================
     function holdBreak(breakId) {
-      const timeline = buildTimeline();
+      const now = new Date();
+      flushTimersToNow(now);
+      stopActiveRoutineSilently(now);
+      isManualRunning = false;
+      manualLastTickMs = null;
+      if (isTimerRunning) {
+        isTimerRunning = false;
+        timerEndAtMs = null;
+        focusLastTickMs = null;
+        timerLinkedRoutineSlotId = null;
+      }
+
+      const timeline = buildTimeline(getTodayStr(now));
       const br = timeline.find(s => s.id === breakId);
       if (!br) return;
       const brEnd = toMins(br.end);
       const study = timeline.filter(s => s.category !== "break");
       const nextStudy = study.find(s => toMins(s.start) >= brEnd) || study[0] || null;
       breakHold = {
-        startedAtMs: Date.now(),
+        startedAtMs: now.getTime(),
         breakId: br.id,
         breakLabel: br.subject,
-        nextStudySlotId: nextStudy?.id,
-        nextStudySubject: nextStudy?.subject
+        nextStudySlotId: nextStudy?.id || null,
+        nextStudySubject: nextStudy?.subject || null
       };
       activeReminders = activeReminders.filter(r => r.breakId !== br.id);
-      renderReminders();
-      renderLiveAndDailyCards();
+      saveState();
+      saveTimerRuntime();
+      renderAll();
       showToast(`Holding break — continuing study.`, "info");
     }
 
-    function releaseBreakHold() {
+    function releaseBreakHold(silent = false) {
       if (!breakHold) return;
-      const today = getTodayStr();
-      const heldSecs = Math.max(1, Math.floor((Date.now() - breakHold.startedAtMs) / 1000));
+      const now = new Date();
+      const today = getTodayStr(now);
+      const heldSecs = Math.max(1, Math.floor((now.getTime() - breakHold.startedAtMs) / 1000));
       const heldMins = Math.max(1, Math.round(heldSecs / 60));
-      appState.dailyStudyLogs[today] = appState.dailyStudyLogs[today] || { manualSeconds: 0, routineSecondsBySlot: {}, heldBreakSeconds: 0 };
-      appState.dailyStudyLogs[today].heldBreakSeconds = (appState.dailyStudyLogs[today].heldBreakSeconds || 0) + heldSecs;
+      const rec = ensureDayStudyLog(today);
+      rec.heldBreakSeconds = (rec.heldBreakSeconds || 0) + heldSecs;
       if (breakHold.nextStudySlotId) {
         appState.slotAdjustments[today] = appState.slotAdjustments[today] || {};
         appState.slotAdjustments[today][breakHold.nextStudySlotId] = (appState.slotAdjustments[today][breakHold.nextStudySlotId] || 0) + heldMins;
@@ -795,18 +1552,27 @@
       breakHold = null;
       saveState();
       renderAll();
-      showToast(subj ? `Break started! Deducted ${heldMins}m from "${subj}".` : `Break started! Credited ${heldMins}m.`, "success");
+      if (!silent) {
+        showToast(subj ? `Break started! Deducted ${heldMins}m from "${subj}".` : `Break started! Credited ${heldMins}m.`, "success");
+      }
     }
 
     function saveBreakRename(itemId, isGap, gapId) {
       const inp = document.getElementById(`rename-break-${itemId}`);
       const val = inp ? inp.value.trim() : "";
       if (val) {
+        const sched = getScheduleForDate(currentDateStr);
         if (isGap && gapId) {
-          appState.gapBreakNames[`${appState.activeProfileId}::${gapId}`] = val;
+          appState.gapBreakNames[`${sched.scopeKey}::${gapId}`] = val;
         } else {
-          const prof = getActiveProfile();
-          prof.slots = prof.slots.map(s => s.id === itemId ? { ...s, subject: val } : s);
+          const today = getTodayStr();
+          if (sched.isCustomOverride || currentDateStr < today) {
+            const ov = ensureCustomOverrideForDate(currentDateStr);
+            ov.slots = ov.slots.map(s => s.id === itemId ? { ...s, subject: val } : s);
+          } else {
+            const entry = ensureRoutineEntryForDate(currentDateStr);
+            entry.slots = entry.slots.map(s => s.id === itemId ? { ...s, subject: val } : s);
+          }
         }
         saveState();
         showToast(`Break renamed to "${val}"`, "success");
@@ -815,6 +1581,7 @@
       renderAll();
     }
 
+    // ==================== REMINDERS STACK ====================
     function renderReminders() {
       const box = document.getElementById("reminders-stack");
       if (!activeReminders.length) { box.classList.add("hidden"); box.innerHTML = ""; return; }
@@ -828,25 +1595,77 @@
           </div>
           <div class="flex flex-wrap gap-2 shrink-0">
             ${r.isBreakPrompt && !breakHold ? `
-              <button type="button" onclick="takeBreakNow('${esc(r.id)}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Take Break</button>
-              <button type="button" onclick="holdBreak('${esc(r.breakId)}')" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer">Continue Study (Hold Break)</button>
+              <button type="button" onclick="takeBreakNow('${escJsAttr(r.id)}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Take Break</button>
+              <button type="button" onclick="holdBreak('${escJsAttr(r.breakId)}')" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer">Continue Study (Hold Break)</button>
             ` : ""}
-            ${r.canResumeRoutine && r.slotId ? `<button type="button" onclick="resumeFinishedRoutine('${esc(r.id)}','${esc(r.slotId)}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Resume Timer</button>` : ""}
-            ${!r.isBreakPrompt && !r.canResumeRoutine && r.slotId ? `<button type="button" onclick="startShiftCountdown('${esc(r.slotId)}');dismissReminder('${esc(r.id)}')" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Start Shift Timer</button>` : ""}
-            <button type="button" onclick="dismissReminder('${esc(r.id)}')" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Dismiss</button>
+            ${r.canResumeRoutine && r.slotId ? `<button type="button" onclick="resumeFinishedRoutine('${escJsAttr(r.id)}','${escJsAttr(r.slotId)}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 text-white text-xs font-extrabold cursor-pointer">Resume Timer</button>` : ""}
+            ${!r.isBreakPrompt && !r.canResumeRoutine && r.slotId ? `<button type="button" onclick="toggleRoutineTimer('${escJsAttr(r.slotId)}');dismissReminder('${escJsAttr(r.id)}')" class="px-3 py-1.5 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Start Study &amp; Countdown</button>` : ""}
+            <button type="button" onclick="dismissReminder('${escJsAttr(r.id)}')" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Dismiss</button>
           </div>
         </div>
       `).join("");
     }
     function dismissReminder(id) { activeReminders = activeReminders.filter(r => r.id !== id); renderReminders(); }
-    function takeBreakNow(remId) { isRoutineRunning = false; isManualRunning = false; dismissReminder(remId); renderAll(); }
-    function resumeFinishedRoutine(remId, slotId) { activeRoutineSlotId = slotId; isRoutineRunning = true; dismissReminder(remId); renderAll(); }
-
-    function renderLiveAndDailyCards() {
+    function takeBreakNow(remId) {
       const now = new Date();
-      const timeline = buildTimeline();
+      stopActiveRoutineSilently(now);
+      isManualRunning = false;
+      manualLastTickMs = null;
+      saveTimerRuntime();
+      dismissReminder(remId);
+      renderAll();
+    }
+    function resumeFinishedRoutine(remId, slotId) {
+      dismissReminder(remId);
+      toggleRoutineTimer(slotId);
+    }
+
+    // ==================== TOP SECTION: LIVE SESSION & RANDOM STUDY (TODAY ONLY — Req #9 & #11) ====================
+    function renderLiveAndDailyCards(forceRebuild = false) {
+      const now = new Date();
       const today = getTodayStr(now);
       const isToday = currentDateStr === today;
+
+      const liveSec = document.getElementById("today-live-section");
+      const otherBanner = document.getElementById("other-day-banner");
+
+      if (!isToday) {
+        liveSec.classList.add("hidden");
+        otherBanner.classList.remove("hidden");
+        const isPast = currentDateStr < today;
+        const timeline = buildTimeline(currentDateStr);
+        const sched = getScheduleForDate(currentDateStr);
+        const targetHrs = timeline.filter(s => s.category !== "break").reduce((sum, s) => sum + (s.durationHours || calcHrs(s.start, s.end)), 0);
+        const { manualS, routineS, focusS, heldS, totalS } = getDayTotalStudySeconds(currentDateStr, false);
+
+        otherBanner.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase ${isPast ? "bg-slate-500/20 text-[var(--text-secondary)]" : "accent-soft"}">${isPast ? "PAST SCHEDULE" : "UPCOMING SCHEDULE"}</span>
+              <span class="text-xs font-bold font-mono-tab text-[var(--text-muted)]">${esc(formatPrettyDate(currentDateStr))}</span>
+              ${sched.isCustomOverride ? `<span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] font-extrabold uppercase">Custom Day</span>` : ""}
+            </div>
+            <div class="text-sm sm:text-base font-extrabold">
+              ${isPast ? `Recorded Study Duration: <span class="font-mono-tab accent-text">${fmtHMS(totalS)}</span>` : `Scheduled Study Target: <span class="font-mono-tab accent-text">${targetHrs.toFixed(1)} Hrs</span>`}
+            </div>
+            <div class="text-[11px] text-[var(--text-muted)] font-mono-tab">
+              ${isPast
+                ? `Manual: ${fmtHM(manualS)} · Routine: ${fmtHM(routineS)} · Focus: ${fmtHM(focusS)}${heldS > 0 ? ` · Held Break: ${fmtHM(heldS)}` : ""}`
+                : "Live session & random study controls only appear on Today's schedule."}
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0 flex-wrap">
+            <button type="button" onclick="openModal('plans-modal')" class="px-3 py-2 rounded-xl border surface-input text-xs font-bold cursor-pointer">Customize This Day</button>
+            <button type="button" onclick="jumpToday()" class="px-3.5 py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Back to Today</button>
+          </div>
+        `;
+        return;
+      }
+
+      liveSec.classList.remove("hidden");
+      otherBanner.classList.add("hidden");
+
+      const timeline = buildTimeline(today);
       const currM = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
       let active = null, next = null;
       for (let i = 0; i < timeline.length; i++) {
@@ -861,82 +1680,295 @@
       const pct = active ? Math.min(100, Math.max(0, Math.round(((durMins * 60 - remSecs) / (durMins * 60)) * 100))) : 0;
       const holdLiveSecs = breakHold ? Math.max(0, Math.floor((now.getTime() - breakHold.startedAtMs) / 1000)) : 0;
 
-      const liveEl = document.getElementById("live-status-card");
-      liveEl.className = `lg:col-span-7 rounded-2xl p-4 sm:p-5 border flex flex-col justify-between ${active ? "surface-panel" : "bg-slate-900 text-white border-slate-700"}`;
-      liveEl.innerHTML = `
-        <div>
-          <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider accent-text">LIVE SCHEDULE STATUS ${active?.isGapBreak ? "· GAP BREAK" : isBreak ? "· BREAK" : ""}</span>
-            <span class="font-mono-tab text-xs sm:text-sm font-extrabold accent-text">${active ? fmtHMS(remSecs) + " left" : "Rest Phase"}</span>
-          </div>
-          ${breakHold ? `
-            <div class="mb-3 p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 flex flex-wrap items-center justify-between gap-2">
-              <div class="text-xs"><strong>Break Held (+${fmtHMS(holdLiveSecs)})</strong> · Will shorten ${esc(breakHold.nextStudySubject || "next study slot")}</div>
-              <button type="button" onclick="releaseBreakHold()" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer">Take Break Now</button>
-            </div>
-          ` : ""}
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <h2 class="text-base sm:text-xl font-extrabold">${active ? esc(active.subject) : "Off-Schedule / Rest"}</h2>
-            <div class="flex items-center gap-2">
-              ${active && isToday && isBreak && !breakHold ? `<button type="button" onclick="holdBreak('${esc(active.id)}')" class="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-700 dark:text-amber-300 text-xs font-extrabold cursor-pointer">Continue Study (Hold Break)</button>` : ""}
-              ${active && isToday && !isBreak ? `<button type="button" onclick="toggleRoutineTimer('${esc(active.id)}')" class="px-3 py-1.5 rounded-xl ${activeRoutineSlotId === active.id && isRoutineRunning ? "bg-amber-600" : "accent-btn"} text-white text-xs font-extrabold cursor-pointer">${activeRoutineSlotId === active.id && isRoutineRunning ? "Stop Routine" : "Start Routine"}</button>` : ""}
-            </div>
-          </div>
-          <div class="text-xs font-mono-tab mt-1 ${active ? "text-[var(--text-muted)]" : "text-slate-400"}">${active ? `${fmt12(active.start)} - ${fmt12(active.end)} (${active.durationLabel})` : "Outside Scheduled Blocks"}${active?.deductedMinutes ? ` · Adjusted -${active.deductedMinutes}m` : ""}</div>
-          <p class="text-xs mt-2.5 p-2.5 rounded-xl border ${active ? "surface-input text-[var(--text-secondary)]" : "bg-slate-800 border-slate-700 text-slate-300"}">${active ? esc(active.focus) : "Use the Manual Study timer beside this box when studying off-schedule."}</p>
-        </div>
-        <div class="mt-3 space-y-2">
-          <div class="w-full h-2 bg-slate-500/20 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:var(--accent-primary)"></div></div>
-          <div class="pt-2 border-t border-slate-500/15 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div class="truncate"><span class="text-[var(--text-muted)]">Up Next: </span><strong>${next ? `${fmt12(next.start)} · ${esc(next.subject)}` : "—"}</strong></div>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="openModal('reminders-modal')" class="px-2.5 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Reminders (${(appState.customReminders || []).filter(r => r.enabled).length})</button>
-              <button type="button" onclick="triggerTestReminder()" class="px-2.5 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Test Alert</button>
-            </div>
-          </div>
-        </div>
-      `;
+      const enabledRemCount = (appState.customReminders || []).filter(r => r.enabled).length;
+      const liveKey = [
+        active?.id || "off",
+        active?.subject || "",
+        active?.deductedMinutes || 0,
+        next?.id || "none",
+        breakHold ? breakHold.breakId : "nohold",
+        activeRoutineSlotId === active?.id && isRoutineRunning ? 1 : 0,
+        enabledRemCount
+      ].join("|");
 
-      // Daily Study Duration + Manual Box
-      const recKey = isToday ? today : currentDateStr;
-      const rec = appState.dailyStudyLogs?.[recKey] || { manualSeconds: 0, routineSecondsBySlot: {}, heldBreakSeconds: 0 };
-      const manualS = rec.manualSeconds || 0;
-      const routineS = Object.values(rec.routineSecondsBySlot || {}).reduce((a, b) => a + (b || 0), 0);
-      const heldS = (rec.heldBreakSeconds || 0) + (isToday ? holdLiveSecs : 0);
-      const totalS = manualS + routineS + heldS;
+      const liveEl = document.getElementById("live-status-card");
+      if (forceRebuild || liveKey !== lastLiveCardKey) {
+        lastLiveCardKey = liveKey;
+        liveEl.className = `lg:col-span-7 rounded-2xl p-4 sm:p-5 border flex flex-col justify-between ${active ? "surface-panel" : "bg-slate-900 text-white border-slate-700"}`;
+        liveEl.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 text-[10px] font-extrabold uppercase">TODAY · LIVE</span>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider accent-text">${active?.isGapBreak ? "GAP BREAK" : isBreak ? "BREAK" : "LIVE SCHEDULE STATUS"}</span>
+              </div>
+              <span data-live-rem class="font-mono-tab text-xs sm:text-sm font-extrabold accent-text">${active ? fmtHMS(remSecs) + " left" : "Rest Phase"}</span>
+            </div>
+            ${breakHold ? `
+              <div class="mb-3 p-3 rounded-xl bg-amber-500/15 border border-amber-500/40 flex flex-wrap items-center justify-between gap-2">
+                <div class="text-xs"><strong>Break Held (<span data-live-hold>+${fmtHMS(holdLiveSecs)}</span>)</strong> · Will shorten ${esc(breakHold.nextStudySubject || "next study slot")}</div>
+                <button type="button" onclick="releaseBreakHold()" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white text-xs font-extrabold cursor-pointer">Take Break Now</button>
+              </div>
+            ` : ""}
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <h2 class="text-base sm:text-xl font-extrabold">${active ? esc(active.subject) : "Off-Schedule / Rest"}</h2>
+              <div class="flex items-center gap-2">
+                ${active && isBreak && !breakHold ? `<button type="button" onclick="holdBreak('${escJsAttr(active.id)}')" class="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-700 dark:text-amber-300 text-xs font-extrabold cursor-pointer">Continue Study (Hold Break)</button>` : ""}
+                ${active && !isBreak ? `<button type="button" onclick="toggleRoutineTimer('${escJsAttr(active.id)}')" class="px-3 py-1.5 rounded-xl ${activeRoutineSlotId === active.id && isRoutineRunning ? "bg-amber-600" : "accent-btn"} text-white text-xs font-extrabold cursor-pointer">${activeRoutineSlotId === active.id && isRoutineRunning ? "Pause Study" : "Start Study & Countdown"}</button>` : ""}
+              </div>
+            </div>
+            <div class="text-xs font-mono-tab mt-1 ${active ? "text-[var(--text-muted)]" : "text-slate-400"}">${active ? `${fmt12(active.start)} - ${fmt12(active.end)} (${active.durationLabel})` : "Outside Scheduled Blocks"}${active?.deductedMinutes ? ` · Adjusted -${active.deductedMinutes}m` : ""}</div>
+            <p class="text-xs mt-2.5 p-2.5 rounded-xl border ${active ? "surface-input text-[var(--text-secondary)]" : "bg-slate-800 border-slate-700 text-slate-300"}">${active ? esc(active.focus) : "Use the Random / Manual Study timer beside this box when studying off-schedule."}</p>
+          </div>
+          <div class="mt-3 space-y-2">
+            <div class="w-full h-2 bg-slate-500/20 rounded-full overflow-hidden"><div data-live-pct-bar class="h-full rounded-full" style="width:${pct}%;background:var(--accent-primary)"></div></div>
+            <div class="pt-2 border-t border-slate-500/15 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="truncate"><span class="text-[var(--text-muted)]">Up Next: </span><strong>${next ? `${fmt12(next.start)} · ${esc(next.subject)}` : "—"}</strong></div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="openModal('reminders-modal')" class="px-2.5 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Reminders (${enabledRemCount})</button>
+                <button type="button" onclick="triggerTestReminder()" class="px-2.5 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Test Alert</button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        const remNode = liveEl.querySelector("[data-live-rem]");
+        if (remNode) remNode.textContent = active ? `${fmtHMS(remSecs)} left` : "Rest Phase";
+        const barNode = liveEl.querySelector("[data-live-pct-bar]");
+        if (barNode) barNode.style.width = `${pct}%`;
+        const holdNode = liveEl.querySelector("[data-live-hold]");
+        if (holdNode) holdNode.textContent = `+${fmtHMS(holdLiveSecs)}`;
+      }
+
+      // Daily Study Duration + Manual/Random Study Box (NO RESET BUTTON — Req #1 & #7)
+      const { manualS, routineS, focusS, heldS, totalS } = getDayTotalStudySeconds(today, true);
       const targetHrs = timeline.filter(s => s.category !== "break").reduce((sum, s) => sum + (s.durationHours || calcHrs(s.start, s.end)), 0);
       const goalS = Math.max(60, Math.round(targetHrs * 3600));
       const dailyPct = Math.min(100, Math.round((totalS / goalS) * 100));
+      const breakdownText = `Manual: ${fmtHM(manualS)} · Routine: ${fmtHM(routineS)} · Focus: ${fmtHM(focusS)}${heldS > 0 ? ` · Held: ${fmtHM(heldS)}` : ""}`;
 
-      document.getElementById("daily-study-card").innerHTML = `
-        <div>
-          <div class="flex justify-between items-center text-[11px] font-extrabold uppercase accent-text">
-            <span>Daily Study Duration</span>
-            <span class="font-mono-tab text-[var(--text-muted)]">Goal: ${fmtHM(goalS)}</span>
-          </div>
-          <div class="mt-2 flex items-baseline justify-between">
-            <div class="font-mono-tab text-2xl sm:text-3xl font-extrabold">${fmtHMS(totalS)}</div>
-            <span class="font-mono-tab text-sm font-extrabold text-emerald-600 dark:text-emerald-400">${dailyPct}%</span>
-          </div>
-          <div class="w-full h-2 bg-slate-500/20 rounded-full overflow-hidden mt-2"><div class="h-full bg-emerald-500 rounded-full" style="width:${dailyPct}%"></div></div>
-          <div class="mt-2 text-[11px] font-bold text-[var(--text-secondary)] font-mono-tab">Manual: ${fmtHM(manualS)} · Routine: ${fmtHM(routineS)}${heldS > 0 ? ` · Held Break: ${fmtHM(heldS)}` : ""}</div>
-        </div>
-        <div class="p-3 rounded-xl border surface-input space-y-2">
-          <div class="flex items-center justify-between gap-2">
-            <div>
-              <div class="text-xs font-extrabold">Manual / Random Study</div>
-              <div class="text-[11px] text-[var(--text-muted)]">Start/Pause anytime outside routine</div>
+      const dailyKey = [today, isManualRunning ? 1 : 0, manualS > 0 ? 1 : 0, goalS].join("|");
+      const dailyEl = document.getElementById("daily-study-card");
+      if (forceRebuild || dailyKey !== lastDailyCardKey) {
+        lastDailyCardKey = dailyKey;
+        dailyEl.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center text-[11px] font-extrabold uppercase accent-text">
+              <span>Today's Daily Study Duration</span>
+              <span class="font-mono-tab text-[var(--text-muted)]">Goal: ${fmtHM(goalS)}</span>
             </div>
-            <div class="font-mono-tab text-sm font-extrabold">${fmtHMS(manualS)}</div>
+            <div class="mt-2 flex items-baseline justify-between">
+              <div data-daily-total class="font-mono-tab text-2xl sm:text-3xl font-extrabold">${fmtHMS(totalS)}</div>
+              <span data-daily-pct class="font-mono-tab text-sm font-extrabold text-emerald-600 dark:text-emerald-400">${dailyPct}%</span>
+            </div>
+            <div class="w-full h-2 bg-slate-500/20 rounded-full overflow-hidden mt-2"><div data-daily-bar class="h-full bg-emerald-500 rounded-full" style="width:${dailyPct}%"></div></div>
+            <div data-daily-breakdown class="mt-2 text-[11px] font-bold text-[var(--text-secondary)] font-mono-tab">${breakdownText}</div>
           </div>
-          <div class="flex gap-2">
-            <button type="button" onclick="toggleManualTimer()" class="flex-1 py-2 px-3 rounded-xl text-white text-xs font-extrabold cursor-pointer ${isManualRunning ? "bg-amber-600" : "bg-emerald-600"}">${isManualRunning ? "Pause Manual Study" : (manualS > 0 ? "Resume Manual Study" : "Start Manual Study")}</button>
-            ${manualS > 0 && !isManualRunning ? `<button type="button" onclick="resetManualTimer()" class="px-2.5 py-2 rounded-xl border surface-input text-xs font-bold cursor-pointer">Reset</button>` : ""}
+          <div class="p-3 rounded-xl border surface-input space-y-2">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <div class="text-xs font-extrabold">Manual / Random Study</div>
+                <div class="text-[11px] text-[var(--text-muted)]">Counts directly into Daily Study (pauseable, never resets)</div>
+              </div>
+              <div data-manual-hms class="font-mono-tab text-sm font-extrabold">${fmtHMS(manualS)}</div>
+            </div>
+            <button type="button" onclick="toggleManualTimer()" class="w-full py-2 px-3 rounded-xl text-white text-xs font-extrabold cursor-pointer ${isManualRunning ? "bg-amber-600" : "bg-emerald-600"}">${isManualRunning ? "Pause Manual Study" : (manualS > 0 ? "Resume Manual Study" : "Start Manual Study")}</button>
+          </div>
+        `;
+      } else {
+        const totNode = dailyEl.querySelector("[data-daily-total]");
+        if (totNode) totNode.textContent = fmtHMS(totalS);
+        const pctNode = dailyEl.querySelector("[data-daily-pct]");
+        if (pctNode) pctNode.textContent = `${dailyPct}%`;
+        const dBarNode = dailyEl.querySelector("[data-daily-bar]");
+        if (dBarNode) dBarNode.style.width = `${dailyPct}%`;
+        const brkNode = dailyEl.querySelector("[data-daily-breakdown]");
+        if (brkNode) brkNode.textContent = breakdownText;
+        const manNode = dailyEl.querySelector("[data-manual-hms]");
+        if (manNode) manNode.textContent = fmtHMS(manualS);
+      }
+    }
+
+    // ==================== FOLDABLE FOCUS & POMODORO TIMER CARD (Req #1, #7, #8) ====================
+    function toggleFocusFold() {
+      appState.focusTimerFolded = !appState.focusTimerFolded;
+      saveState();
+      renderFocusTimerCard(true);
+    }
+
+    function applyCustomFocusTime(e) {
+      e.preventDefault();
+      const inp = document.getElementById("custom-focus-mins");
+      const mins = parseInt(inp ? inp.value : "", 10);
+      if (!mins || mins < 1 || mins > 600) {
+        return showToast("Enter custom minutes between 1 and 600.", "error");
+      }
+      setPresetTimer(mins, `Custom Focus (${mins}m)`, true);
+      if (inp) inp.value = "";
+    }
+
+    function setPresetTimer(m, lbl, autoStart = false) {
+      const now = new Date();
+      flushTimersToNow(now);
+      if (isRoutineRunning && timerLinkedRoutineSlotId) {
+        stopActiveRoutineSilently(now);
+      }
+      isTimerRunning = false;
+      timerEndAtMs = null;
+      focusLastTickMs = null;
+      timerLinkedRoutineSlotId = null;
+      timerTotalSecs = m * 60;
+      timerRemSecs = m * 60;
+      timerLabel = lbl;
+      if (autoStart) {
+        isManualRunning = false;
+        manualLastTickMs = null;
+        if (breakHold) releaseBreakHold(true);
+        timerEndAtMs = Date.now() + timerRemSecs * 1000;
+        focusLastTickMs = Date.now();
+        isTimerRunning = true;
+      }
+      saveTimerRuntime();
+      renderFocusTimerCard(true);
+      renderFloatingBar();
+      if (autoStart) showToast(`Started ${lbl}`, "success");
+    }
+
+    function toggleCountdownTimer() {
+      const now = new Date();
+      flushTimersToNow(now);
+
+      // If linked to an active routine slot, delegate so both stay combined
+      if (timerLinkedRoutineSlotId) {
+        toggleRoutineTimer(timerLinkedRoutineSlotId);
+        return;
+      }
+
+      if (!isTimerRunning) {
+        if (breakHold) releaseBreakHold(true);
+        stopActiveRoutineSilently(now);
+        isManualRunning = false;
+        manualLastTickMs = null;
+        if (timerRemSecs <= 0) timerRemSecs = timerTotalSecs;
+        timerEndAtMs = Date.now() + timerRemSecs * 1000;
+        focusLastTickMs = Date.now();
+        isTimerRunning = true;
+        showToast("Focus timer started — counting toward Daily Study!", "success");
+      } else {
+        if (timerEndAtMs) {
+          timerRemSecs = Math.max(0, Math.ceil((timerEndAtMs - Date.now()) / 1000));
+        }
+        timerEndAtMs = null;
+        focusLastTickMs = null;
+        isTimerRunning = false;
+        saveState();
+      }
+      saveTimerRuntime();
+      renderAll();
+    }
+
+    function resetCountdownTimer() {
+      // Only allowed when paused/stopped; NEVER decreases Daily Study Duration (Req #1 & #7)
+      if (isTimerRunning) return;
+      timerEndAtMs = null;
+      focusLastTickMs = null;
+      timerLinkedRoutineSlotId = null;
+      timerRemSecs = timerTotalSecs;
+      saveTimerRuntime();
+      renderFocusTimerCard(true);
+      renderFloatingBar();
+      showToast("Focus countdown reset (Daily Study Duration preserved).", "info");
+    }
+
+    function renderFocusTimerCard(forceRebuild = false) {
+      const folded = Boolean(appState.focusTimerFolded);
+      const latestEng = (appState.typingLogs || []).find(t => t.lang === "Eng");
+      const latestHin = (appState.typingLogs || []).find(t => t.lang === "Hindi");
+      const typParts = [];
+      if (latestEng) typParts.push(`Eng: ${latestEng.wpm} WPM (${latestEng.acc}%)`);
+      if (latestHin) typParts.push(`Hindi: ${latestHin.wpm} WPM (${latestHin.acc}%)`);
+      const typSummary = typParts.length ? `Latest · ${typParts.join(" | ")}` : "Log Eng/Hindi typing speed & accuracy above.";
+
+      const cardKey = [
+        folded ? 1 : 0,
+        isTimerRunning ? 1 : 0,
+        timerLabel,
+        isSoundEnabled ? 1 : 0,
+        notificationsEnabled ? 1 : 0,
+        typSummary
+      ].join("|");
+
+      const el = document.getElementById("focus-timer-card");
+      if (!forceRebuild && cardKey === lastFocusCardKey) {
+        const disp = el.querySelector("[data-focus-disp]");
+        if (disp) disp.textContent = fmtHMS(timerRemSecs);
+        const st = el.querySelector("[data-focus-status]");
+        if (st) st.textContent = isTimerRunning ? "Counting into Daily Study" : "Ready";
+        return;
+      }
+      lastFocusCardKey = cardKey;
+
+      el.innerHTML = `
+        <div class="flex items-center justify-between gap-2">
+          <button type="button" onclick="toggleFocusFold()" class="flex-1 text-left min-w-0 cursor-pointer">
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm font-extrabold">Focus &amp; Pomodoro Timer</h3>
+              ${folded ? `<span data-focus-disp class="font-mono-tab text-xs font-extrabold accent-text">${fmtHMS(timerRemSecs)}</span>` : ""}
+            </div>
+            <p class="text-[11px] font-semibold text-[var(--text-muted)] truncate">${esc(timerLabel)}</p>
+          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            ${folded ? `<button type="button" onclick="toggleCountdownTimer()" class="px-2.5 py-1 rounded-xl ${isTimerRunning ? "bg-amber-600 text-white" : "accent-btn"} text-[11px] font-extrabold cursor-pointer">${isTimerRunning ? "Pause" : "Start"}</button>` : ""}
+            <button type="button" onclick="toggleFocusFold()" class="px-2.5 py-1 rounded-xl border surface-input text-[11px] font-bold cursor-pointer">${folded ? "Unfold" : "Fold"}</button>
           </div>
         </div>
+        ${!folded ? `
+          <div class="mt-3 pt-3 border-t border-slate-500/15 space-y-3">
+            <div class="flex items-center justify-end gap-1.5">
+              <button type="button" onclick="toggleNotifications()" class="px-2 py-1 rounded-lg border text-[11px] font-bold cursor-pointer ${notificationsEnabled ? "accent-soft border-[var(--accent-primary)]" : "surface-input"}">${notificationsEnabled ? "Alerts: On" : "Enable Alerts"}</button>
+              <button type="button" onclick="toggleSound()" class="px-2 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">${isSoundEnabled ? "Sound: On" : "Sound: Off"}</button>
+            </div>
+            <!-- Pomodoro Fixed Time Slots -->
+            <div class="grid grid-cols-3 gap-1.5">
+              <button type="button" onclick="setPresetTimer(25,'Pomodoro Focus (25m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold accent-soft cursor-pointer">25m Pomo</button>
+              <button type="button" onclick="setPresetTimer(45,'Pomodoro Focus (45m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 cursor-pointer">45m Focus</button>
+              <button type="button" onclick="setPresetTimer(50,'Deep Study Block (50m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-purple-500/15 text-purple-600 dark:text-purple-300 cursor-pointer">50m Block</button>
+              <button type="button" onclick="setPresetTimer(90,'Marathon Block (90m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 cursor-pointer">90m Deep</button>
+              <button type="button" onclick="setPresetTimer(15,'English Typing (15m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 cursor-pointer">15m Eng</button>
+              <button type="button" onclick="setPresetTimer(15,'Hindi Typing (15m)')" class="px-2 py-1.5 rounded-xl text-[11px] font-bold bg-orange-500/15 text-orange-700 dark:text-orange-300 cursor-pointer">15m Hindi</button>
+            </div>
+            <!-- Custom Time Input -->
+            <form onsubmit="applyCustomFocusTime(event)" class="flex gap-1.5">
+              <input type="number" id="custom-focus-mins" min="1" max="600" placeholder="Custom mins (e.g. 35)" class="flex-1 rounded-xl border surface-input px-3 py-1.5 text-xs font-mono-tab" />
+              <button type="submit" class="px-3 py-1.5 rounded-xl accent-soft text-xs font-extrabold cursor-pointer">Set &amp; Start</button>
+            </form>
+            <div class="bg-slate-900 rounded-2xl p-4 text-center border border-slate-800">
+              <div data-focus-disp class="font-mono-tab text-3xl font-extrabold text-white">${fmtHMS(timerRemSecs)}</div>
+              <div data-focus-status class="text-[11px] font-bold text-slate-400 mt-1">${isTimerRunning ? "Counting into Daily Study" : "Ready"}</div>
+            </div>
+            <!-- NO Reset button while running (Req #1 & #7) -->
+            <div class="grid ${isTimerRunning ? "grid-cols-1" : "grid-cols-3"} gap-2">
+              <button type="button" onclick="toggleCountdownTimer()" class="${isTimerRunning ? "col-span-1 bg-amber-600 text-white" : "col-span-2 accent-btn"} py-2 rounded-xl text-xs font-extrabold cursor-pointer">${isTimerRunning ? "Pause" : "Start"}</button>
+              ${!isTimerRunning ? `<button type="button" onclick="resetCountdownTimer()" class="py-2 rounded-xl border surface-input text-xs font-bold cursor-pointer">Reset</button>` : ""}
+            </div>
+            <div class="pt-3 border-t border-slate-500/15 space-y-2">
+              <div class="grid grid-cols-4 gap-1.5">
+                <select id="wpm-lang" class="rounded-lg border surface-input px-1.5 py-1.5 text-xs font-bold">
+                  <option value="Eng">Eng</option>
+                  <option value="Hindi">Hindi</option>
+                </select>
+                <input type="number" id="wpm-speed" min="1" placeholder="WPM" class="rounded-lg border surface-input px-2 py-1.5 text-xs font-mono-tab" />
+                <input type="number" id="wpm-acc" min="1" max="100" placeholder="Acc%" class="rounded-lg border surface-input px-2 py-1.5 text-xs font-mono-tab" />
+                <button type="button" onclick="logTyping()" class="rounded-lg bg-amber-500 text-white text-xs font-extrabold cursor-pointer">Save</button>
+              </div>
+              <div class="text-[11px] text-[var(--text-muted)] font-mono-tab">${esc(typSummary)}</div>
+            </div>
+          </div>
+        ` : ""}
       `;
     }
 
+    // ==================== STICKY NOTES ====================
     function renderStickyNotes() {
       const notes = [...(appState.stickyNotes || [])].sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || (b.updatedAt || 0) - (a.updatedAt || 0));
       const folded = appState.stickyNotesFolded !== false;
@@ -958,10 +1990,10 @@
             <div class="space-y-2 max-h-60 overflow-y-auto">
               ${notes.length === 0 ? `<div class="text-xs text-[var(--text-muted)] text-center py-3">No sticky notes yet.</div>` : notes.map(n => `
                 <div class="p-2.5 rounded-xl border border-amber-300/70 bg-amber-100/80 dark:bg-amber-950/40 text-amber-950 dark:text-amber-100 space-y-1.5">
-                  <textarea rows="2" onchange="updateSticky('${esc(n.id)}',this.value)" class="w-full bg-transparent text-xs font-semibold resize-none focus:outline-none">${esc(n.text)}</textarea>
+                  <textarea rows="2" oninput="updateSticky('${escJsAttr(n.id)}',this.value)" class="w-full bg-transparent text-xs font-semibold resize-none focus:outline-none">${esc(n.text)}</textarea>
                   <div class="flex justify-between text-[11px]">
-                    <button type="button" onclick="pinSticky('${esc(n.id)}')" class="font-bold cursor-pointer">${n.pinned ? "Pinned" : "Pin"}</button>
-                    <button type="button" onclick="deleteSticky('${esc(n.id)}')" class="text-rose-600 font-bold cursor-pointer">Delete</button>
+                    <button type="button" onclick="pinSticky('${escJsAttr(n.id)}')" class="font-bold cursor-pointer">${n.pinned ? "Pinned" : "Pin"}</button>
+                    <button type="button" onclick="deleteSticky('${escJsAttr(n.id)}')" class="text-rose-600 font-bold cursor-pointer">Delete</button>
                   </div>
                 </div>
               `).join("")}
@@ -972,14 +2004,25 @@
     }
     function toggleStickyFold() { appState.stickyNotesFolded = appState.stickyNotesFolded === false; saveState(); renderStickyNotes(); }
     function addStickyNote(e) { e.preventDefault(); const inp = document.getElementById("sn-draft"); if (!inp.value.trim()) return; appState.stickyNotes.unshift({ id: `sn-${Date.now()}`, text: inp.value.trim(), color: "amber", pinned: false, updatedAt: Date.now() }); saveState(); renderStickyNotes(); }
-    function updateSticky(id, text) { appState.stickyNotes = appState.stickyNotes.map(n => n.id === id ? { ...n, text, updatedAt: Date.now() } : n); saveState(); }
+    function updateSticky(id, text) {
+      appState.stickyNotes = appState.stickyNotes.map(n => n.id === id ? { ...n, text, updatedAt: Date.now() } : n);
+      clearTimeout(stickySaveTimeout);
+      stickySaveTimeout = setTimeout(() => saveState(), 400);
+    }
     function pinSticky(id) { appState.stickyNotes = appState.stickyNotes.map(n => n.id === id ? { ...n, pinned: !n.pinned } : n); saveState(); renderStickyNotes(); }
-    function deleteSticky(id) { appState.stickyNotes = appState.stickyNotes.filter(n => n.id !== id); saveState(); renderStickyNotes(); }
+    function deleteSticky(id) {
+      const note = (appState.stickyNotes || []).find(n => n.id === id);
+      requestConfirm("Delete Sticky Note", `Delete sticky note "${(note?.text || "").slice(0, 50)}"?`, () => {
+        appState.stickyNotes = appState.stickyNotes.filter(n => n.id !== id);
+        saveState(); renderStickyNotes(); showToast("Sticky note deleted.", "info");
+      });
+    }
 
+    // ==================== STATS & TIMETABLE LIST ====================
     function renderStats(timeline) {
       const dayLog = appState.dailyLogs[currentDateStr] || {};
       let target = 0, done = 0;
-      const cats = { online: [0, 0], gk: [0, 0], reasoning: [0, 0], typing: [0, 0] };
+      const cats = { online: [0, 0], gk: [0, 0], reasoning: [0, 0], typing: [0, 0], other_study: [0, 0] };
       timeline.forEach(s => {
         if (s.category === "break") return;
         const h = s.durationHours || calcHrs(s.start, s.end);
@@ -990,14 +2033,18 @@
         cats[s.category][0] += d; cats[s.category][1] += h;
       });
       const pct = target > 0 ? Math.round((done / target) * 100) : 0;
-      const grid = document.getElementById("stats-grid");
-      grid.innerHTML = `
+      const activeCats = Object.entries(cats).filter(([k, [, t]]) => t > 0 || (k !== "other_study" && cats.other_study[1] === 0)).slice(0, 4);
+      const displayCats = cats.other_study[1] > 0
+        ? Object.entries(cats).filter(([, [, t]]) => t > 0).slice(0, 4)
+        : activeCats;
+
+      document.getElementById("stats-grid").innerHTML = `
         <div class="col-span-2 md:col-span-1 lg:col-span-2 surface-card rounded-2xl p-4">
           <div class="text-xs font-bold text-[var(--text-muted)]">Total Study Goal</div>
           <div class="mt-1 font-mono-tab text-2xl font-extrabold">${done.toFixed(1)} <span class="text-sm text-[var(--text-muted)]">/ ${target.toFixed(1)} Hrs (${pct}%)</span></div>
           <div class="w-full h-2 bg-slate-500/20 rounded-full mt-2 overflow-hidden"><div class="h-full rounded-full" style="width:${pct}%;background:var(--accent-primary)"></div></div>
         </div>
-        ${Object.entries(cats).slice(0, 4).map(([k, [d, t]]) => `
+        ${displayCats.map(([k, [d, t]]) => `
           <div class="surface-card rounded-2xl p-4">
             <div class="text-xs font-bold ${CAT_META[k]?.text || ""}">${CAT_META[k]?.label || k}</div>
             <div class="mt-1 font-mono-tab text-lg font-extrabold">${k === "typing" ? Math.round(d * 60) + "m" : d.toFixed(1)} <span class="text-xs text-[var(--text-muted)]">/ ${k === "typing" ? Math.round(t * 60) + "m" : t.toFixed(1) + "h"}</span></div>
@@ -1006,25 +2053,46 @@
       `;
     }
 
+    function renderScheduleContextStrip() {
+      const today = getTodayStr();
+      const isToday = currentDateStr === today;
+      const isPast = currentDateStr < today;
+      const sched = getScheduleForDate(currentDateStr);
+      const strip = document.getElementById("schedule-context-strip");
+      const effLabel = sched.effectiveFrom === "2000-01-01" ? "Initial Routine" : `Effective from ${sched.effectiveFrom}`;
+
+      strip.innerHTML = `
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase ${isToday ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : isPast ? "bg-slate-500/20 text-[var(--text-secondary)]" : "accent-soft"}">
+            ${isToday ? "TODAY'S SCHEDULE" : isPast ? "PAST SCHEDULE" : "UPCOMING SCHEDULE"}
+          </span>
+          <span class="font-bold">${esc(formatPrettyDate(currentDateStr))}</span>
+          <span class="text-[var(--text-muted)]">·</span>
+          <span class="font-semibold text-[var(--text-secondary)]">${esc(sched.name || "Daily Routine")}</span>
+          ${sched.isCustomOverride
+            ? `<span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] font-extrabold">Custom Day Only</span>`
+            : `<span class="text-[11px] text-[var(--text-muted)] font-mono-tab">(${effLabel}${sched.nextChangeDate ? ` → until ${sched.nextChangeDate}` : ""})</span>`}
+        </div>
+        ${sched.isCustomOverride
+          ? `<button type="button" onclick="confirmRemoveDateOverride('${escJsAttr(currentDateStr)}')" class="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer">Revert to Daily Routine</button>`
+          : `<button type="button" onclick="openModal('plans-modal')" class="text-[11px] font-bold accent-text hover:underline cursor-pointer">Change Routine / Custom Day</button>`}
+      `;
+    }
+
     function renderTimelineList() {
-      const timeline = buildTimeline();
+      renderScheduleContextStrip();
+      const timeline = buildTimeline(currentDateStr);
       const dayLog = appState.dailyLogs[currentDateStr] || {};
       const rec = appState.dailyStudyLogs?.[currentDateStr]?.routineSecondsBySlot || {};
       const now = new Date();
-      const isToday = currentDateStr === getTodayStr(now);
+      const today = getTodayStr(now);
+      const isToday = currentDateStr === today;
       const currM = now.getHours() * 60 + now.getMinutes();
 
-      // View toggle states
       const isCompact = appState.density === "compact";
       document.getElementById("view-compact-btn").className = `px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer ${isCompact ? "accent-btn" : "text-[var(--text-secondary)]"}`;
       document.getElementById("view-cards-btn").className = `px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer ${!isCompact ? "accent-btn" : "text-[var(--text-secondary)]"}`;
 
-      // Profile selector
-      document.getElementById("profile-select").innerHTML = Object.entries(appState.profiles).map(([id, p]) =>
-        `<option value="${esc(id)}" ${id === appState.activeProfileId ? "selected" : ""}>${esc(p.name)}</option>`
-      ).join("");
-
-      // Filters
       document.getElementById("filter-bar").innerHTML = [
         ["all", `All (${timeline.length})`], ["study", "Study"], ["break", "Breaks"], ["pending", "Remaining"]
       ].map(([id, lbl]) => `<button type="button" onclick="currentFilter='${id}';renderTimelineList()" class="px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ${currentFilter === id ? "accent-btn" : "text-[var(--text-secondary)]"}">${lbl}</button>`).join("");
@@ -1039,27 +2107,32 @@
 
       const container = document.getElementById("slots-container");
       container.className = isCompact ? "space-y-1.5" : "space-y-3";
-      container.innerHTML = filtered.map(s => {
+      container.innerHTML = filtered.length ? filtered.map(s => {
         const meta = CAT_META[s.category] || CAT_META.other_study;
         const isBreak = s.category === "break";
         const isDone = (dayLog[s.id]?.status || "pending") === "completed";
         const isLive = isToday && isInSlot(currM, s.start, s.end);
         const rSecs = rec[s.id] || 0;
-        const rRunning = activeRoutineSlotId === s.id && isRoutineRunning;
+        const rRunning = isToday && activeRoutineSlotId === s.id && isRoutineRunning;
         const renaming = renamingBreakId === s.id;
+        const safeId = escJsAttr(s.id);
+        const safeGapId = escJsAttr(s.gapId || "");
+
+        // Combined Routine Start + Countdown button label (Req #2)
+        const startBtnLabel = rRunning ? "Pause" : (rSecs > 0 ? `Resume (${fmtHMS(rSecs)})` : "Start");
 
         if (isCompact) {
           return `
             <div class="surface-card rounded-xl px-3 py-2 border-l-4 ${meta.border} ${isLive ? "active-slot-ring" : ""} flex items-center justify-between gap-2">
               <div class="flex items-center gap-2 min-w-0 flex-1">
-                ${!s.isGapBreak ? `<input type="checkbox" ${isDone ? "checked" : ""} onchange="toggleComplete('${esc(s.id)}')" class="w-4 h-4 cursor-pointer" />` : `<span class="text-xs font-bold text-amber-600">GAP</span>`}
+                ${!s.isGapBreak ? `<input type="checkbox" ${isDone ? "checked" : ""} onchange="toggleComplete('${safeId}')" class="w-4 h-4 cursor-pointer" />` : `<span class="text-xs font-bold text-amber-600">GAP</span>`}
                 <span class="text-[11px] font-mono-tab text-[var(--text-muted)] whitespace-nowrap">${fmt12(s.start)}–${fmt12(s.end)}</span>
-                ${renaming ? `<input id="rename-break-${esc(s.id)}" value="${esc(s.subject)}" class="rounded border surface-input px-2 py-0.5 text-xs font-bold" /><button type="button" onclick="saveBreakRename('${esc(s.id)}',${Boolean(s.isGapBreak)},'${esc(s.gapId || "")}')" class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-bold">Save</button>` : `<span class="text-xs font-extrabold truncate ${isDone ? "line-through opacity-60" : ""}">${esc(s.subject)}</span>`}
+                ${renaming ? `<input id="rename-break-${esc(s.id)}" value="${esc(s.subject)}" onkeydown="if(event.key==='Enter'){event.preventDefault();saveBreakRename('${safeId}',${Boolean(s.isGapBreak)},'${safeGapId}');}else if(event.key==='Escape'){renamingBreakId=null;renderTimelineList();}" class="rounded border surface-input px-2 py-0.5 text-xs font-bold" /><button type="button" onclick="saveBreakRename('${safeId}',${Boolean(s.isGapBreak)},'${safeGapId}')" class="px-2 py-0.5 rounded bg-emerald-600 text-white text-[11px] font-bold cursor-pointer">Save</button>` : `<span class="text-xs font-extrabold truncate ${isDone ? "line-through opacity-60" : ""}">${esc(s.subject)}</span>`}
               </div>
               <div class="flex items-center gap-1.5 shrink-0">
-                ${isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${esc(s.id)}';renderTimelineList()" class="px-2 py-1 rounded border surface-input text-[10px] font-bold cursor-pointer">Rename</button>` : ""}
-                ${!isBreak ? `<button type="button" onclick="toggleRoutineTimer('${esc(s.id)}')" class="px-2 py-1 rounded text-[11px] font-bold text-white cursor-pointer ${rRunning ? "bg-amber-600" : "bg-emerald-600"}">${rRunning ? "Stop" : (rSecs > 0 ? fmtHMS(rSecs) : "Track")}</button>` : ""}
-                ${isEditMode && !s.isGapBreak ? `<button type="button" onclick="openSlotModal('${esc(s.id)}')" class="px-2 py-1 rounded bg-amber-500/20 text-xs font-bold cursor-pointer">Edit</button><button type="button" onclick="deleteSlot('${esc(s.id)}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-xs font-bold cursor-pointer">Del</button>` : ""}
+                ${isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${safeId}';renderTimelineList()" class="px-2 py-1 rounded border surface-input text-[10px] font-bold cursor-pointer">Rename</button>` : ""}
+                ${!isBreak && isToday && !isEditMode ? `<button type="button" onclick="toggleRoutineTimer('${safeId}')" class="px-2.5 py-1 rounded text-[11px] font-bold text-white cursor-pointer ${rRunning ? "bg-amber-600" : "bg-emerald-600"}">${startBtnLabel}</button>` : ""}
+                ${isEditMode && !s.isGapBreak ? `<button type="button" onclick="openSlotModal('${safeId}')" class="px-2 py-1 rounded bg-amber-500/20 text-xs font-bold cursor-pointer">Edit</button><button type="button" onclick="deleteSlot('${safeId}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-xs font-bold cursor-pointer">Del</button>` : ""}
               </div>
             </div>
           `;
@@ -1069,23 +2142,23 @@
           <div class="surface-card rounded-2xl p-4 border-l-4 ${meta.border} ${isLive ? "active-slot-ring" : ""} space-y-2">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div class="flex items-start gap-2.5 min-w-0 flex-1">
-                ${!s.isGapBreak ? `<input type="checkbox" ${isDone ? "checked" : ""} onchange="toggleComplete('${esc(s.id)}')" class="mt-1 w-4 h-4 cursor-pointer" />` : `<span class="mt-0.5 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 text-[10px] font-extrabold">GAP</span>`}
+                ${!s.isGapBreak ? `<input type="checkbox" ${isDone ? "checked" : ""} onchange="toggleComplete('${safeId}')" class="mt-1 w-4 h-4 cursor-pointer" />` : `<span class="mt-0.5 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 text-[10px] font-extrabold">GAP</span>`}
                 <div class="min-w-0 flex-1">
-                  <div class="text-xs font-mono-tab text-[var(--text-muted)]">${fmt12(s.start)} - ${fmt12(s.end)} · <strong>${esc(s.durationLabel)}</strong> ${s.deductedMinutes ? `<span class="text-amber-600 font-bold">(-${s.deductedMinutes}m break hold)</span>` : ""} ${rSecs > 0 ? `<span class="text-emerald-600 font-bold">· Tracked ${fmtHMS(rSecs)}</span>` : ""}</div>
-                  ${renaming ? `<div class="flex gap-1.5 mt-1"><input id="rename-break-${esc(s.id)}" value="${esc(s.subject)}" class="rounded-lg border surface-input px-2.5 py-1 text-xs font-bold" /><button type="button" onclick="saveBreakRename('${esc(s.id)}',${Boolean(s.isGapBreak)},'${esc(s.gapId || "")}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer">Save</button></div>` : `<h3 class="text-base font-extrabold ${isDone ? "line-through opacity-60" : ""}">${esc(s.subject)}</h3>`}
+                  <div class="text-xs font-mono-tab text-[var(--text-muted)]">${fmt12(s.start)} - ${fmt12(s.end)} · <strong>${esc(s.durationLabel)}</strong> ${s.deductedMinutes ? `<span class="text-amber-600 font-bold">(-${s.deductedMinutes}m break hold)</span>` : ""} ${rSecs > 0 ? `<span class="text-emerald-600 font-bold">· Studied ${fmtHMS(rSecs)}</span>` : ""}</div>
+                  ${renaming ? `<div class="flex gap-1.5 mt-1"><input id="rename-break-${esc(s.id)}" value="${esc(s.subject)}" onkeydown="if(event.key==='Enter'){event.preventDefault();saveBreakRename('${safeId}',${Boolean(s.isGapBreak)},'${safeGapId}');}else if(event.key==='Escape'){renamingBreakId=null;renderTimelineList();}" class="rounded-lg border surface-input px-2.5 py-1 text-xs font-bold" /><button type="button" onclick="saveBreakRename('${safeId}',${Boolean(s.isGapBreak)},'${safeGapId}')" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer">Save</button></div>` : `<h3 class="text-base font-extrabold ${isDone ? "line-through opacity-60" : ""}">${esc(s.subject)}</h3>`}
                   <p class="text-xs text-[var(--text-secondary)] mt-0.5">${esc(s.focus)}</p>
                 </div>
               </div>
               <div class="flex flex-wrap gap-1.5 shrink-0">
-                ${isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${esc(s.id)}';renderTimelineList()" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Name Break</button>` : ""}
-                ${!isBreak && !isEditMode ? `<button type="button" onclick="toggleRoutineTimer('${esc(s.id)}')" class="px-3 py-1.5 rounded-xl text-white text-xs font-extrabold cursor-pointer ${rRunning ? "bg-amber-600" : "bg-emerald-600"}">${rRunning ? "Stop Routine" : (rSecs > 0 ? "Resume" : "Start")}</button><button type="button" onclick="startShiftCountdown('${esc(s.id)}')" class="px-2.5 py-1.5 rounded-xl accent-soft text-xs font-bold cursor-pointer">Countdown</button>` : ""}
-                ${isEditMode && !s.isGapBreak ? `<button type="button" onclick="openSlotModal('${esc(s.id)}')" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-xs font-bold cursor-pointer">Edit</button><button type="button" onclick="deleteSlot('${esc(s.id)}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 text-rose-600 text-xs font-bold cursor-pointer">Delete</button>` : ""}
+                ${isBreak && !renaming ? `<button type="button" onclick="renamingBreakId='${safeId}';renderTimelineList()" class="px-2.5 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer">Name Break</button>` : ""}
+                ${!isBreak && isToday && !isEditMode ? `<button type="button" onclick="toggleRoutineTimer('${safeId}')" class="px-3.5 py-1.5 rounded-xl text-white text-xs font-extrabold cursor-pointer ${rRunning ? "bg-amber-600" : "bg-emerald-600"}">${rRunning ? "Pause Study" : (rSecs > 0 ? "Resume Study" : "Start Study & Countdown")}</button>` : ""}
+                ${isEditMode && !s.isGapBreak ? `<button type="button" onclick="openSlotModal('${safeId}')" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-xs font-bold cursor-pointer">Edit</button><button type="button" onclick="deleteSlot('${safeId}')" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 text-rose-600 text-xs font-bold cursor-pointer">Delete</button>` : ""}
               </div>
             </div>
-            ${!s.isGapBreak ? `<input type="text" value="${esc(dayLog[s.id]?.note || "")}" onchange="saveNote('${esc(s.id)}', this.value)" placeholder="Progress note..." class="w-full rounded-xl border surface-input px-3 py-1.5 text-xs" />` : ""}
+            ${!s.isGapBreak ? `<input type="text" value="${esc(dayLog[s.id]?.note || "")}" onchange="saveNote('${safeId}', this.value)" placeholder="Progress note..." class="w-full rounded-xl border surface-input px-3 py-1.5 text-xs" />` : ""}
           </div>
         `;
-      }).join("");
+      }).join("") : `<div class="surface-card rounded-2xl p-6 text-center text-xs text-[var(--text-muted)]">No slots match this filter.</div>`;
     }
 
     function toggleComplete(id) {
@@ -1101,12 +2174,10 @@
       saveState();
     }
     function saveReflection(text) { appState.reflections[currentDateStr] = text; saveState(); }
-    function switchProfile(id) { appState.activeProfileId = id; saveState(); renderAll(); }
 
     function archiveDay(dateStr, silent = false) {
-      const timeline = buildTimeline();
+      const timeline = buildTimeline(dateStr);
       const dayLog = appState.dailyLogs[dateStr] || {};
-      const study = appState.dailyStudyLogs?.[dateStr];
       let target = 0, done = 0, totalSlots = 0, doneSlots = 0;
       timeline.forEach(s => {
         if (s.category === "break") return;
@@ -1115,43 +2186,85 @@
         if (dayLog[s.id]?.status === "completed") { done += h; doneSlots++; }
         else if (dayLog[s.id]?.loggedHours) done += Math.min(h, dayLog[s.id].loggedHours);
       });
-      const tracked = (study?.manualSeconds || 0) + Object.values(study?.routineSecondsBySlot || {}).reduce((a, b) => a + (b || 0), 0) + (study?.heldBreakSeconds || 0);
+      const { totalS } = getDayTotalStudySeconds(dateStr, false);
       appState.archives[dateStr] = {
         date: dateStr, completedHours: Number(done.toFixed(1)), targetHours: Number(target.toFixed(1)),
         percentage: target > 0 ? Math.round((done / target) * 100) : 0,
         completedSlots: doneSlots, totalSlots, savedAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        trackedStudySeconds: tracked
+        trackedStudySeconds: totalS
       };
       if (!silent) { saveState(); renderAll(); showToast(`Archived ${dateStr}!`, "success"); }
     }
 
+    function computeStreak() {
+      const today = getTodayStr();
+      const hasActivity = key => {
+        const pct = appState.archives?.[key]?.percentage || 0;
+        const { totalS } = getDayTotalStudySeconds(key, false);
+        return pct > 0 || totalS > 0;
+      };
+      let cursor = hasActivity(today) ? today : shiftDateStr(today, -1);
+      let streak = 0;
+      while (hasActivity(cursor) && streak < 3650) {
+        streak++;
+        cursor = shiftDateStr(cursor, -1);
+      }
+      return streak;
+    }
+
     function renderHeaderAndWidgets() {
-      const prof = getActiveProfile();
-      const timeline = buildTimeline();
+      const sched = getScheduleForDate(currentDateStr);
+      const timeline = buildTimeline(currentDateStr);
       const totalHrs = timeline.filter(s => s.category !== "break").reduce((sum, s) => sum + (s.durationHours || calcHrs(s.start, s.end)), 0);
-      document.getElementById("hdr-title").textContent = prof.title;
-      document.getElementById("hdr-subtitle").textContent = prof.subtitle;
+      const today = getTodayStr();
+      const isToday = currentDateStr === today;
+      const isPast = currentDateStr < today;
+
+      document.getElementById("hdr-title").textContent = sched.title || "DAILY STUDY TIMETABLE";
+      document.getElementById("hdr-subtitle").textContent = sched.subtitle || "";
       document.getElementById("hdr-hours").textContent = `· ${totalHrs.toFixed(1)} Hrs Study`;
 
-      const goal = (appState.examGoals || [])[0];
-      document.getElementById("hdr-goal-btn").textContent = goal ? `${goal.title} (${goal.targetDate})` : "+ Exam Goals";
+      const badge = document.getElementById("hdr-day-badge");
+      if (isToday) {
+        badge.textContent = "TODAY";
+        badge.className = "px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide bg-emerald-500/20 text-emerald-700 dark:text-emerald-300";
+      } else if (isPast) {
+        badge.textContent = "PAST DAY";
+        badge.className = "px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide bg-slate-500/20 text-[var(--text-secondary)]";
+      } else {
+        badge.textContent = "UPCOMING";
+        badge.className = "px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide accent-soft";
+      }
+
+      const goals = [...(appState.examGoals || [])].sort((a, b) => a.targetDate.localeCompare(b.targetDate));
+      const nearest = goals.find(g => g.targetDate >= today) || goals[goals.length - 1] || null;
+      if (nearest) {
+        const dLeft = daysBetweenDates(today, nearest.targetDate);
+        const gBadge = dLeft > 0 ? `${dLeft}d left` : (dLeft === 0 ? "Today!" : `${Math.abs(dLeft)}d ago`);
+        document.getElementById("hdr-goal-btn").textContent = `${nearest.title} · ${gBadge}`;
+      } else {
+        document.getElementById("hdr-goal-btn").textContent = "+ Exam Goals";
+      }
 
       document.getElementById("date-input").value = currentDateStr;
-      document.getElementById("today-btn").classList.toggle("hidden", currentDateStr === getTodayStr());
+      document.getElementById("today-indicator-pill").classList.toggle("hidden", !isToday);
+      document.getElementById("today-btn").classList.toggle("hidden", isToday);
       document.getElementById("edit-banner").classList.toggle("hidden", !isEditMode);
       document.getElementById("edit-mode-btn").textContent = isEditMode ? "Done Editing" : "Edit Mode";
-      document.getElementById("reflection-input").value = appState.reflections[currentDateStr] || "";
+      document.getElementById("pin-btn").textContent = appState.adminPin ? "Change / Remove PIN" : "Set PIN";
 
-      // Countdown display
-      document.getElementById("timer-display").textContent = fmtHMS(timerRemSecs);
-      document.getElementById("timer-label").textContent = timerLabel;
-      document.getElementById("timer-status").textContent = isTimerRunning ? "Remaining" : "Ready";
-      document.getElementById("timer-toggle-btn").textContent = isTimerRunning ? "Pause" : "Start";
-      document.getElementById("mob-timer-val").textContent = fmtHMS(timerRemSecs);
-      document.getElementById("mob-timer-btn").textContent = isTimerRunning ? "Pause" : "Start";
-      document.getElementById("mob-slot-label").textContent = timerLabel;
+      // Notification permission banner
+      const showNotifPrompt = typeof Notification !== "undefined" && Notification.permission === "default" && !notifBannerDismissed;
+      document.getElementById("notif-permission-banner").classList.toggle("hidden", !showNotifPrompt);
 
-      // Heatmap
+      const reflEl = document.getElementById("reflection-input");
+      if (document.activeElement !== reflEl) {
+        reflEl.value = appState.reflections[currentDateStr] || "";
+      }
+
+      // Heatmap & Streak
+      const streak = computeStreak();
+      document.getElementById("streak-label").textContent = `${streak}d active streak`;
       const hm = document.getElementById("heatmap-grid");
       const now = new Date();
       hm.innerHTML = Array.from({ length: 14 }, (_, i) => {
@@ -1159,58 +2272,228 @@
         const key = getTodayStr(d);
         const pct = appState.archives[key]?.percentage || 0;
         const bg = pct >= 85 ? "bg-emerald-500 text-white" : pct >= 40 ? "bg-emerald-400/60" : "bg-slate-400/20";
-        return `<button type="button" onclick="currentDateStr='${key}';renderAll()" class="h-7 rounded-md ${bg} text-[11px] font-bold font-mono-tab cursor-pointer">${d.getDate()}</button>`;
+        const ring = key === currentDateStr ? "ring-2 ring-[var(--accent-primary)]" : "";
+        return `<button type="button" title="${key}: ${pct}%" onclick="currentDateStr='${key}';renderAll()" class="h-7 rounded-md ${bg} ${ring} text-[11px] font-bold font-mono-tab cursor-pointer">${d.getDate()}</button>`;
       }).join("");
     }
 
     function renderAll() {
-      const timeline = buildTimeline();
+      const timeline = buildTimeline(currentDateStr);
       renderHeaderAndWidgets();
-      renderLiveAndDailyCards();
+      renderLiveAndDailyCards(true);
       renderStats(timeline);
       renderTimelineList();
       renderStickyNotes();
+      renderFocusTimerCard(true);
+      renderFloatingBar();
       renderReminders();
     }
 
-    // Study Plans, Reminders, Exam Goals, Slots, History Modals
+    // ==================== MODALS ====================
     function openModal(id) {
       document.getElementById(id).classList.remove("hidden");
-      if (id === "plans-modal") renderPlansModal();
+      if (id === "plans-modal") { resetPlanForm(); renderPlansModal(); }
       if (id === "reminders-modal") renderRemindersModal();
       if (id === "exam-modal") renderExamModal();
       if (id === "history-modal") renderHistoryModal();
     }
     function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
 
+    // ==================== ROUTINE & PLANS MANAGER (Req #12, #13, #14) ====================
+    function onRoutineScopeChange() {
+      const scope = document.getElementById("rm-apply-scope").value;
+      const dateWrap = document.getElementById("rm-apply-date-wrap");
+      const dateLbl = document.getElementById("rm-apply-date-label");
+      const dateInp = document.getElementById("rm-apply-date");
+      const exp = document.getElementById("rm-scope-explain");
+      const today = getTodayStr();
+
+      if (scope === "today") {
+        dateWrap.classList.add("hidden");
+        exp.textContent = `Applies ONLY to Today (${today}). Your daily routine for tomorrow and past days will remain untouched.`;
+      } else if (scope === "custom_day") {
+        dateWrap.classList.remove("hidden");
+        dateLbl.textContent = "Custom Date";
+        dateInp.removeAttribute("min");
+        if (!dateInp.value) dateInp.value = currentDateStr;
+        exp.textContent = "Creates a custom schedule for the selected date only. Does NOT affect your daily routine.";
+      } else {
+        dateWrap.classList.remove("hidden");
+        dateLbl.textContent = "Effective From Date";
+        dateInp.setAttribute("min", today);
+        if (!dateInp.value || dateInp.value < today) dateInp.value = currentDateStr >= today ? currentDateStr : today;
+        exp.textContent = "Updates your daily routine from this date onward (stops automatically at any later routine change date). Past schedules are NEVER modified.";
+      }
+    }
+
+    function applySelectedRoutinePlan() {
+      const scope = document.getElementById("rm-apply-scope").value;
+      const planId = document.getElementById("rm-apply-plan").value;
+      const dateVal = document.getElementById("rm-apply-date").value || currentDateStr;
+      const plan = appState.profiles[planId];
+      if (!plan) return showToast("Please select a valid study plan.", "error");
+      applyPlanToScope({ ...plan, profileId: planId }, scope, dateVal);
+      renderPlansModal();
+    }
+
+    function resetPlanForm() {
+      document.getElementById("pm-edit-id").value = "";
+      document.getElementById("pm-name").value = "";
+      document.getElementById("pm-title").value = "";
+      document.getElementById("pm-subtitle").value = "";
+      document.getElementById("pm-copy-from").classList.remove("hidden");
+      document.getElementById("pm-create-apply-scope").classList.remove("hidden");
+      document.getElementById("pm-cancel-edit").classList.add("hidden");
+      document.getElementById("pm-form-heading").textContent = "Create New Routine / Study Plan";
+    }
+
     function renderPlansModal() {
+      const today = getTodayStr();
+      const sched = getScheduleForDate(currentDateStr);
       const entries = Object.entries(appState.profiles);
+
+      document.getElementById("pm-current-status").innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div class="font-extrabold">Viewing: <span class="font-mono-tab accent-text">${esc(currentDateStr)}</span> ${currentDateStr === today ? "(TODAY)" : ""}</div>
+            <div class="text-[11px] text-[var(--text-muted)]">
+              Active Schedule: <strong>${esc(sched.name || "Daily Routine")}</strong> ·
+              ${sched.isCustomOverride
+                ? "Custom single-day schedule"
+                : `Daily routine (${sched.effectiveFrom === "2000-01-01" ? "Initial" : "from " + sched.effectiveFrom}${sched.nextChangeDate ? " until " + sched.nextChangeDate : " onward"})`}
+            </div>
+          </div>
+          ${sched.isCustomOverride
+            ? `<button type="button" onclick="confirmRemoveDateOverride('${escJsAttr(currentDateStr)}')" class="px-2.5 py-1 rounded-lg bg-rose-500/15 text-rose-600 text-[11px] font-bold cursor-pointer">Revert to Daily Routine</button>`
+            : ""}
+        </div>
+      `;
+
+      const applyPlanSel = document.getElementById("rm-apply-plan");
+      applyPlanSel.innerHTML = entries.map(([id, p]) =>
+        `<option value="${esc(id)}" ${id === sched.profileId ? "selected" : ""}>${esc(p.name)} (${p.slots.length} slots)</option>`
+      ).join("");
+      document.getElementById("rm-apply-date").value = currentDateStr >= today ? currentDateStr : today;
+      onRoutineScopeChange();
+
+      document.getElementById("pm-copy-from").innerHTML =
+        `<option value="__current__">Copy slots from: Current Day (${esc(currentDateStr)})</option>` +
+        `<option value="">Start with Empty Plan</option>` +
+        entries.map(([id, p]) => `<option value="${esc(id)}">Copy slots from: ${esc(p.name)}</option>`).join("");
+
       document.getElementById("plans-list").innerHTML = entries.map(([id, p]) => `
         <div class="p-3 rounded-2xl border surface-input flex items-center justify-between gap-2">
-          <div class="min-w-0"><div class="text-sm font-extrabold truncate">${esc(p.name)}</div><div class="text-[11px] text-[var(--text-muted)]">${p.slots.length} slots</div></div>
-          <div class="flex gap-1.5">
-            ${id !== appState.activeProfileId ? `<button type="button" onclick="switchProfile('${esc(id)}');renderPlansModal()" class="px-2 py-1 rounded accent-btn text-[11px] font-bold cursor-pointer">Use</button>` : ""}
-            <button type="button" onclick="editPlan('${esc(id)}')" class="px-2 py-1 rounded border surface-input text-[11px] font-bold cursor-pointer">Edit</button>
-            ${entries.length > 1 ? `<button type="button" onclick="deletePlan('${esc(id)}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-[11px] font-bold cursor-pointer">Del</button>` : ""}
+          <div class="min-w-0">
+            <div class="text-sm font-extrabold truncate">${esc(p.name)}</div>
+            <div class="text-[11px] text-[var(--text-muted)] truncate">${p.slots.length} slots · ${esc(p.subtitle || "")}</div>
+          </div>
+          <div class="flex gap-1.5 shrink-0">
+            <button type="button" onclick="editPlan('${escJsAttr(id)}')" class="px-2.5 py-1 rounded-lg border surface-input text-[11px] font-bold cursor-pointer">Edit</button>
+            ${entries.length > 1 ? `<button type="button" onclick="deletePlan('${escJsAttr(id)}')" class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-600 text-[11px] font-bold cursor-pointer">Delete</button>` : ""}
           </div>
         </div>
       `).join("");
-      document.getElementById("pm-copy-from").innerHTML = `<option value="">Empty Plan</option>` + entries.map(([id, p]) => `<option value="${esc(id)}">Copy from: ${esc(p.name)}</option>`).join("");
+
+      // Routine History + Custom Date Overrides timeline
+      const hist = [...(appState.routineHistory || [])].sort((a, b) => b.effectiveFrom.localeCompare(a.effectiveFrom));
+      const ovKeys = Object.keys(appState.dateOverrides || {}).sort().reverse();
+
+      const timelineHtml = [
+        ...ovKeys.map(dKey => {
+          const ov = appState.dateOverrides[dKey];
+          return `
+            <div class="p-2.5 rounded-xl border border-amber-400/50 bg-amber-500/5 flex items-center justify-between gap-2 text-xs">
+              <div class="min-w-0">
+                <span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[10px] font-extrabold">CUSTOM DAY</span>
+                <strong class="font-mono-tab ml-1">${esc(dKey)}</strong> · ${esc(ov.name)} (${(ov.slots || []).length} slots)
+              </div>
+              <div class="flex gap-1.5 shrink-0">
+                <button type="button" onclick="currentDateStr='${escJsAttr(dKey)}';closeModal('plans-modal');renderAll()" class="px-2 py-1 rounded accent-soft text-[11px] font-bold cursor-pointer">Open</button>
+                <button type="button" onclick="confirmRemoveDateOverride('${escJsAttr(dKey)}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-[11px] font-bold cursor-pointer">Delete</button>
+              </div>
+            </div>
+          `;
+        }),
+        ...hist.map(h => {
+          const isInitial = h.effectiveFrom === "2000-01-01";
+          return `
+            <div class="p-2.5 rounded-xl border surface-input flex items-center justify-between gap-2 text-xs">
+              <div class="min-w-0">
+                <span class="px-1.5 py-0.5 rounded accent-soft text-[10px] font-extrabold">DAILY ROUTINE</span>
+                <strong class="font-mono-tab ml-1">${isInitial ? "Initial Baseline" : "From " + esc(h.effectiveFrom)}</strong> · ${esc(h.name)} (${(h.slots || []).length} slots)
+              </div>
+              <div class="flex gap-1.5 shrink-0">
+                ${!isInitial ? `<button type="button" onclick="currentDateStr='${escJsAttr(h.effectiveFrom)}';closeModal('plans-modal');renderAll()" class="px-2 py-1 rounded accent-soft text-[11px] font-bold cursor-pointer">Open</button>` : ""}
+                ${!isInitial && hist.length > 1 ? `<button type="button" onclick="confirmDeleteRoutineHistory('${escJsAttr(h.effectiveFrom)}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-[11px] font-bold cursor-pointer">Delete</button>` : ""}
+              </div>
+            </div>
+          `;
+        })
+      ].join("");
+
+      document.getElementById("routine-timeline-list").innerHTML = timelineHtml || `<div class="text-xs text-[var(--text-muted)]">No routine changes yet.</div>`;
     }
+
+    function confirmRemoveDateOverride(dateStr) {
+      requestConfirm(
+        "Delete Custom Day Schedule",
+        `Remove custom schedule for ${dateStr} and revert it back to your Daily Routine?`,
+        () => {
+          delete appState.dateOverrides[dateStr];
+          saveState();
+          renderAll();
+          if (!document.getElementById("plans-modal").classList.contains("hidden")) renderPlansModal();
+          showToast(`Reverted ${dateStr} to Daily Routine.`, "info");
+        },
+        "Yes, Revert"
+      );
+    }
+
+    function confirmDeleteRoutineHistory(effectiveFrom) {
+      requestConfirm(
+        "Delete Routine Version",
+        `Delete the daily routine change scheduled from ${effectiveFrom}? Dates starting ${effectiveFrom} will inherit the previous routine.`,
+        () => {
+          appState.routineHistory = appState.routineHistory.filter(e => e.effectiveFrom !== effectiveFrom);
+          if (appState.routineHistory.length === 0) {
+            appState = normalizeState(appState);
+          }
+          saveState();
+          renderAll();
+          renderPlansModal();
+          showToast(`Removed routine version (${effectiveFrom}).`, "info");
+        }
+      );
+    }
+
     function editPlan(id) {
       const p = appState.profiles[id]; if (!p) return;
       document.getElementById("pm-edit-id").value = id;
       document.getElementById("pm-name").value = p.name;
       document.getElementById("pm-title").value = p.title;
       document.getElementById("pm-subtitle").value = p.subtitle;
+      document.getElementById("pm-copy-from").classList.add("hidden");
+      document.getElementById("pm-create-apply-scope").classList.add("hidden");
+      document.getElementById("pm-cancel-edit").classList.remove("hidden");
       document.getElementById("pm-form-heading").textContent = "Edit Study Plan";
     }
+
     function deletePlan(id) {
       if (Object.keys(appState.profiles).length <= 1) return;
-      delete appState.profiles[id];
-      if (appState.activeProfileId === id) appState.activeProfileId = Object.keys(appState.profiles)[0];
-      saveState(); renderPlansModal(); renderAll();
+      const p = appState.profiles[id];
+      requestConfirm(
+        "Delete Study Plan",
+        `Permanently delete saved plan "${p?.name || id}"? (Already scheduled dates will keep their slots.)`,
+        () => {
+          delete appState.profiles[id];
+          if (appState.activeProfileId === id) appState.activeProfileId = Object.keys(appState.profiles)[0];
+          resetPlanForm();
+          saveState(); renderPlansModal(); renderAll();
+          showToast("Study plan deleted.", "info");
+        }
+      );
     }
+
     function savePlanForm(e) {
       e.preventDefault();
       const editId = document.getElementById("pm-edit-id").value;
@@ -1218,38 +2501,73 @@
       const title = document.getElementById("pm-title").value.trim() || name.toUpperCase();
       const subtitle = document.getElementById("pm-subtitle").value.trim() || "Custom Study Plan";
       const copyId = document.getElementById("pm-copy-from").value;
+      const applyScope = document.getElementById("pm-create-apply-scope").value;
       if (!name) return;
+
       if (editId && appState.profiles[editId]) {
         appState.profiles[editId] = { ...appState.profiles[editId], name, title, subtitle };
+        resetPlanForm();
+        saveState(); renderPlansModal(); renderAll();
+        showToast(`Updated plan "${name}".`, "success");
       } else {
         const newId = `plan-${Date.now()}`;
-        const slots = copyId && appState.profiles[copyId] ? JSON.parse(JSON.stringify(appState.profiles[copyId].slots)) : [];
+        let slots = [];
+        if (copyId === "__current__") {
+          slots = cloneSlots(getScheduleForDate(currentDateStr).slots);
+        } else if (copyId && appState.profiles[copyId]) {
+          slots = cloneSlots(appState.profiles[copyId].slots);
+        }
         appState.profiles[newId] = { name, title, subtitle, slots };
-        appState.activeProfileId = newId;
+        resetPlanForm();
+        if (applyScope === "library_only") {
+          saveState(); renderPlansModal(); renderAll();
+          showToast(`Saved "${name}" to Plans Library.`, "success");
+        } else {
+          const targetDate = applyScope === "custom_day" ? currentDateStr : (currentDateStr >= getTodayStr() ? currentDateStr : getTodayStr());
+          applyPlanToScope({ ...appState.profiles[newId], profileId: newId }, applyScope, targetDate);
+          renderPlansModal();
+        }
       }
-      document.getElementById("pm-edit-id").value = "";
-      document.getElementById("pm-name").value = "";
-      document.getElementById("pm-form-heading").textContent = "Create New Study Plan";
-      saveState(); renderPlansModal(); renderAll();
     }
 
+    // ==================== SLOT ADD / EDIT / DELETE (With Scope + Confirmation Req #4, #12, #13) ====================
     function openSlotModal(slotId) {
-      const prof = getActiveProfile();
-      const slot = slotId ? prof.slots.find(s => s.id === slotId) : null;
+      const sched = getScheduleForDate(currentDateStr);
+      const today = getTodayStr();
+      const slot = slotId ? (sched.slots || []).find(s => s.id === slotId) : null;
+      document.getElementById("slot-modal-title").textContent = slot ? "Edit Time Slot" : "Add Time Slot";
       document.getElementById("sm-id").value = slot ? slot.id : "";
       document.getElementById("sm-start").value = slot ? slot.start : "06:00";
       document.getElementById("sm-end").value = slot ? slot.end : "07:00";
       document.getElementById("sm-cat").value = slot ? slot.category : "other_study";
       document.getElementById("sm-subject").value = slot ? slot.subject : "";
       document.getElementById("sm-focus").value = slot ? slot.focus : "";
+
+      const scopeSel = document.getElementById("sm-scope");
+      if (currentDateStr < today) {
+        scopeSel.innerHTML = `<option value="custom_day">This Past Date Only (${currentDateStr}) — daily routine untouched</option>`;
+      } else if (sched.isCustomOverride) {
+        scopeSel.innerHTML = `
+          <option value="custom_day">This Custom Date Only (${currentDateStr})</option>
+          <option value="from_now">From ${currentDateStr} Onward (Update Daily Routine)</option>
+        `;
+      } else {
+        scopeSel.innerHTML = `
+          <option value="from_now">From ${currentDateStr} Onward (Daily Routine — preserves past)</option>
+          <option value="custom_day">This Date Only (${currentDateStr} — Custom Schedule)</option>
+        `;
+      }
       openModal("slot-modal");
     }
+
     function saveSlotForm(e) {
       e.preventDefault();
-      const prof = getActiveProfile();
       const id = document.getElementById("sm-id").value;
       const start = document.getElementById("sm-start").value;
       const end = document.getElementById("sm-end").value;
+      const scope = document.getElementById("sm-scope").value;
+      if (start === end) return showToast("Start and End times cannot be identical.", "error");
+
       const hrs = calcHrs(start, end);
       const data = {
         id: id || `slot-${Date.now()}`, start, end,
@@ -1258,27 +2576,77 @@
         subject: document.getElementById("sm-subject").value.trim(),
         focus: document.getElementById("sm-focus").value.trim()
       };
-      if (id) prof.slots = prof.slots.map(s => s.id === id ? data : s);
-      else prof.slots.push(data);
+
+      if (scope === "custom_day") {
+        const ov = ensureCustomOverrideForDate(currentDateStr);
+        if (id) ov.slots = ov.slots.map(s => s.id === id ? data : s);
+        else ov.slots.push(data);
+        showToast(`Saved slot for ${currentDateStr} only.`, "success");
+      } else {
+        const effDate = currentDateStr < getTodayStr() ? getTodayStr() : currentDateStr;
+        const entry = ensureRoutineEntryForDate(effDate);
+        if (id) entry.slots = entry.slots.map(s => s.id === id ? data : s);
+        else entry.slots.push(data);
+        // Also keep linked profile in sync if editing the latest routine version
+        const latest = appState.routineHistory[appState.routineHistory.length - 1];
+        if (latest === entry && entry.profileId && appState.profiles[entry.profileId]) {
+          appState.profiles[entry.profileId].slots = cloneSlots(entry.slots);
+        }
+        showToast(`Saved slot from ${effDate} onward (past schedules unchanged).`, "success");
+      }
       saveState(); closeModal("slot-modal"); renderAll();
     }
+
     function deleteSlot(id) {
-      const prof = getActiveProfile();
-      prof.slots = prof.slots.filter(s => s.id !== id);
-      saveState(); renderAll();
+      const sched = getScheduleForDate(currentDateStr);
+      const slot = (sched.slots || []).find(s => s.id === id);
+      const today = getTodayStr();
+      const isCustom = sched.isCustomOverride || currentDateStr < today;
+
+      requestConfirm(
+        "Delete Time Slot",
+        `Delete "${slot?.subject || "this slot"}" from ${isCustom ? `custom schedule (${currentDateStr})` : `daily routine starting ${currentDateStr} onward (past days remain unchanged)`}?`,
+        () => {
+          if (activeRoutineSlotId === id && currentDateStr === today) {
+            isRoutineRunning = false;
+            activeRoutineSlotId = null;
+            routineLastTickMs = null;
+            routineStartedBeforeEnd = false;
+            if (timerLinkedRoutineSlotId === id) {
+              isTimerRunning = false;
+              timerEndAtMs = null;
+              timerLinkedRoutineSlotId = null;
+            }
+            saveTimerRuntime();
+          }
+          if (isCustom) {
+            const ov = ensureCustomOverrideForDate(currentDateStr);
+            ov.slots = ov.slots.filter(s => s.id !== id);
+          } else {
+            const entry = ensureRoutineEntryForDate(currentDateStr);
+            entry.slots = entry.slots.filter(s => s.id !== id);
+            const latest = appState.routineHistory[appState.routineHistory.length - 1];
+            if (latest === entry && entry.profileId && appState.profiles[entry.profileId]) {
+              appState.profiles[entry.profileId].slots = cloneSlots(entry.slots);
+            }
+          }
+          saveState(); renderAll(); showToast("Slot deleted.", "info");
+        }
+      );
     }
 
+    // ==================== CUSTOM REMINDERS ====================
     function renderRemindersModal() {
       const list = appState.customReminders || [];
       document.getElementById("custom-reminders-list").innerHTML = list.length ? list.map(r => `
         <div class="p-3 rounded-2xl border surface-input flex items-center justify-between gap-2">
           <label class="flex items-center gap-2 min-w-0 cursor-pointer">
-            <input type="checkbox" ${r.enabled ? "checked" : ""} onchange="toggleCustomRem('${esc(r.id)}')" />
+            <input type="checkbox" ${r.enabled ? "checked" : ""} onchange="toggleCustomRem('${escJsAttr(r.id)}')" />
             <div class="min-w-0"><div class="text-xs font-extrabold truncate">${esc(r.title)} · ${fmt12(r.time24)}</div><div class="text-[11px] text-[var(--text-muted)] truncate">${esc(r.message)}</div></div>
           </label>
           <div class="flex gap-1.5 shrink-0">
-            <button type="button" onclick="triggerCustomRem('${esc(r.id)}')" class="px-2 py-1 rounded accent-soft text-[11px] font-bold cursor-pointer">Trigger</button>
-            <button type="button" onclick="deleteCustomRem('${esc(r.id)}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-[11px] font-bold cursor-pointer">Del</button>
+            <button type="button" onclick="triggerCustomRem('${escJsAttr(r.id)}')" class="px-2 py-1 rounded accent-soft text-[11px] font-bold cursor-pointer">Trigger</button>
+            <button type="button" onclick="deleteCustomRem('${escJsAttr(r.id)}')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-600 text-[11px] font-bold cursor-pointer">Del</button>
           </div>
         </div>
       `).join("") : `<div class="text-xs text-[var(--text-muted)] text-center py-4">No custom reminders yet.</div>`;
@@ -1287,26 +2655,46 @@
       e.preventDefault();
       appState.customReminders.push({ id: `rem-${Date.now()}`, title: document.getElementById("rm-title").value.trim(), time24: document.getElementById("rm-time").value, message: document.getElementById("rm-msg").value.trim() || "Scheduled reminder.", enabled: true });
       document.getElementById("rm-title").value = ""; document.getElementById("rm-msg").value = "";
-      saveState(); renderRemindersModal(); renderLiveAndDailyCards();
+      saveState(); renderRemindersModal(); renderLiveAndDailyCards(true);
     }
-    function toggleCustomRem(id) { appState.customReminders = appState.customReminders.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r); saveState(); renderLiveAndDailyCards(); }
-    function deleteCustomRem(id) { appState.customReminders = appState.customReminders.filter(r => r.id !== id); saveState(); renderRemindersModal(); renderLiveAndDailyCards(); }
+    function toggleCustomRem(id) { appState.customReminders = appState.customReminders.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r); saveState(); renderLiveAndDailyCards(true); }
+    function deleteCustomRem(id) {
+      const rem = (appState.customReminders || []).find(r => r.id === id);
+      requestConfirm("Delete Reminder", `Delete custom reminder "${rem?.title || "this reminder"}"?`, () => {
+        appState.customReminders = appState.customReminders.filter(r => r.id !== id);
+        saveState(); renderRemindersModal(); renderLiveAndDailyCards(true); showToast("Reminder deleted.", "info");
+      });
+    }
     function triggerCustomRem(id) {
       const r = appState.customReminders.find(x => x.id === id);
       if (r) pushReminder({ id: `man-${r.id}-${Date.now()}`, title: "Custom Reminder", subject: r.title, timeRange: fmt12(r.time24), message: r.message }, r.title, r.message);
     }
     function triggerTestReminder() {
-      const s = buildTimeline()[0];
+      const s = buildTimeline(getTodayStr())[0];
       pushReminder({ id: `test-${Date.now()}`, title: "Reminder Preview", subject: s ? s.subject : "Study Session", timeRange: s ? `${fmt12(s.start)} - ${fmt12(s.end)}` : "Live", message: s ? s.focus : "Multi-reminder preview", slotId: s?.id, breakId: s?.category === "break" ? s.id : undefined, isBreakPrompt: s?.category === "break" }, "Study Reminder", s ? s.subject : "Shift alert preview");
     }
 
+    // ==================== EXAM GOALS ====================
     function renderExamModal() {
-      document.getElementById("exam-goals-list").innerHTML = (appState.examGoals || []).map(g => `
-        <div class="p-3 rounded-2xl border surface-input flex justify-between items-center">
-          <div><div class="text-xs font-extrabold">${esc(g.title)}</div><div class="text-[11px] font-mono-tab text-[var(--text-muted)]">${esc(g.targetDate)}</div></div>
-          <button type="button" onclick="appState.examGoals=appState.examGoals.filter(x=>x.id!=='${esc(g.id)}');saveState();renderExamModal();renderAll()" class="text-rose-600 text-xs font-bold cursor-pointer">Delete</button>
-        </div>
-      `).join("");
+      const today = getTodayStr();
+      const goals = [...(appState.examGoals || [])].sort((a, b) => a.targetDate.localeCompare(b.targetDate));
+      document.getElementById("exam-goals-list").innerHTML = goals.length ? goals.map(g => {
+        const dLeft = daysBetweenDates(today, g.targetDate);
+        const badge = dLeft > 0 ? `${dLeft}d left` : (dLeft === 0 ? "Today!" : `${Math.abs(dLeft)}d ago`);
+        return `
+          <div class="p-3 rounded-2xl border surface-input flex justify-between items-center gap-2">
+            <div><div class="text-xs font-extrabold">${esc(g.title)} <span class="accent-text font-mono-tab">· ${badge}</span></div><div class="text-[11px] font-mono-tab text-[var(--text-muted)]">${esc(g.targetDate)}</div></div>
+            <button type="button" onclick="deleteExamGoal('${escJsAttr(g.id)}')" class="text-rose-600 text-xs font-bold cursor-pointer">Delete</button>
+          </div>
+        `;
+      }).join("") : `<div class="text-xs text-[var(--text-muted)] text-center py-4">No exam goals added yet.</div>`;
+    }
+    function deleteExamGoal(id) {
+      const g = (appState.examGoals || []).find(x => x.id === id);
+      requestConfirm("Delete Exam Goal", `Delete exam goal "${g?.title || "this goal"}"?`, () => {
+        appState.examGoals = (appState.examGoals || []).filter(x => x.id !== id);
+        saveState(); renderExamModal(); renderAll(); showToast("Exam goal deleted.", "info");
+      });
     }
     function addExamGoal(e) {
       e.preventDefault();
@@ -1314,57 +2702,174 @@
       document.getElementById("eg-title").value = ""; saveState(); renderExamModal(); renderAll();
     }
 
+    // ==================== HISTORY MODAL ====================
     function renderHistoryModal() {
       const keys = Array.from(new Set([...Object.keys(appState.archives), ...Object.keys(appState.dailyStudyLogs || {})])).sort().reverse();
       document.getElementById("history-list").innerHTML = keys.length ? keys.map(k => {
         const a = appState.archives[k];
-        const rec = appState.dailyStudyLogs?.[k];
-        const tot = (rec?.manualSeconds || 0) + Object.values(rec?.routineSecondsBySlot || {}).reduce((x, y) => x + (y || 0), 0) + (rec?.heldBreakSeconds || 0);
+        const { totalS } = getDayTotalStudySeconds(k, false);
         return `
           <div class="p-3 rounded-2xl border surface-input flex justify-between items-center gap-2">
             <div>
-              <div class="text-xs font-extrabold font-mono-tab">${k} ${a ? `· ${a.percentage}%` : ""} ${tot > 0 ? `· Timer Total: ${fmtHM(tot)}` : ""}</div>
+              <div class="text-xs font-extrabold font-mono-tab">${esc(k)} ${a ? `· ${a.percentage}%` : ""} ${totalS > 0 ? `· Timer Total: ${fmtHM(totalS)}` : ""}</div>
               <div class="text-[11px] text-[var(--text-muted)]">${a ? `${a.completedHours}/${a.targetHours} Hrs` : "Tracked via Study Timer"}</div>
             </div>
-            <button type="button" onclick="currentDateStr='${k}';closeModal('history-modal');renderAll()" class="px-2.5 py-1 rounded-lg accent-soft text-xs font-bold cursor-pointer">Open</button>
+            <button type="button" onclick="currentDateStr='${escJsAttr(k)}';closeModal('history-modal');renderAll()" class="px-2.5 py-1 rounded-lg accent-soft text-xs font-bold cursor-pointer">Open</button>
           </div>
         `;
       }).join("") : `<div class="text-xs text-[var(--text-muted)] text-center py-4">No study history yet.</div>`;
+
+      const typ = (appState.typingLogs || []).slice(0, 12);
+      document.getElementById("history-typing-section").innerHTML = `
+        <div class="text-xs font-extrabold uppercase text-[var(--text-muted)]">Recent Typing Logs</div>
+        ${typ.length ? `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${typ.map((t, idx) => `
+          <div class="p-2.5 rounded-xl border surface-input flex items-center justify-between gap-2 text-xs font-mono-tab">
+            <span>${esc(t.date)} · <strong>${esc(t.lang)}</strong> · <span class="font-extrabold text-amber-600 dark:text-amber-400">${t.wpm} WPM (${t.acc}%)</span></span>
+            <button type="button" onclick="deleteTypingLog(${idx})" class="text-rose-600 font-bold text-[11px] cursor-pointer">Del</button>
+          </div>
+        `).join("")}</div>` : `<div class="text-xs text-[var(--text-muted)]">No typing logs recorded yet.</div>`}
+      `;
     }
 
+    function deleteTypingLog(index) {
+      const t = appState.typingLogs[index];
+      if (!t) return;
+      requestConfirm("Delete Typing Log", `Delete typing entry (${t.date} · ${t.lang} · ${t.wpm} WPM)?`, () => {
+        appState.typingLogs.splice(index, 1);
+        saveState(); renderHistoryModal(); renderFocusTimerCard(true); showToast("Typing log deleted.", "info");
+      });
+    }
+
+    // ==================== DATE NAV, EDIT MODE & CHANGE PIN (Req #4 & #6) ====================
     function shiftDate(off) { currentDateStr = shiftDateStr(currentDateStr, off); renderAll(); }
     function jumpToday() { currentDateStr = getTodayStr(); renderAll(); }
     function toggleEditMode() {
-      if (!isEditMode && appState.adminPin) { pinMode = "unlock"; openModal("pin-modal"); return; }
+      if (!isEditMode && appState.adminPin) { openPinModal("unlock"); return; }
       isEditMode = !isEditMode; renderAll();
     }
+
+    function openPinModal(mode = "manage") {
+      pinMode = mode;
+      const curWrap = document.getElementById("pin-current-wrap");
+      const confWrap = document.getElementById("pin-confirm-wrap");
+      const curInp = document.getElementById("pin-current");
+      const newInp = document.getElementById("pin-input");
+      const confInp = document.getElementById("pin-confirm");
+      const newLbl = document.getElementById("pin-new-label");
+      const titleEl = document.getElementById("pin-modal-title");
+      const rmBtn = document.getElementById("remove-pin-btn");
+      const subBtn = document.getElementById("pin-submit-btn");
+
+      curInp.value = "";
+      newInp.value = "";
+      confInp.value = "";
+
+      if (mode === "unlock") {
+        titleEl.textContent = "Enter Admin PIN to Edit";
+        curWrap.classList.add("hidden");
+        confWrap.classList.add("hidden");
+        newLbl.textContent = "4-Digit PIN";
+        newInp.placeholder = "Enter PIN";
+        rmBtn.classList.add("hidden");
+        subBtn.textContent = "Unlock";
+        openModal("pin-modal");
+        setTimeout(() => newInp.focus(), 50);
+      } else if (appState.adminPin) {
+        // Change existing PIN to a new one (Req #6)
+        titleEl.textContent = "Change Admin PIN";
+        curWrap.classList.remove("hidden");
+        confWrap.classList.remove("hidden");
+        newLbl.textContent = "New 4-Digit PIN";
+        newInp.placeholder = "Enter new PIN";
+        rmBtn.classList.remove("hidden");
+        subBtn.textContent = "Update PIN";
+        openModal("pin-modal");
+        setTimeout(() => curInp.focus(), 50);
+      } else {
+        // Set brand-new PIN
+        titleEl.textContent = "Set New Admin PIN";
+        curWrap.classList.add("hidden");
+        confWrap.classList.remove("hidden");
+        newLbl.textContent = "New 4-Digit PIN";
+        newInp.placeholder = "Enter 4-digit PIN";
+        rmBtn.classList.add("hidden");
+        subBtn.textContent = "Set PIN";
+        openModal("pin-modal");
+        setTimeout(() => newInp.focus(), 50);
+      }
+    }
+
     function submitPin(e) {
       e.preventDefault();
-      const val = document.getElementById("pin-input").value.trim();
-      if (!/^\d{4}$/.test(val)) return showToast("Enter a 4-digit PIN.", "error");
-      if (pinMode === "unlock") {
-        if (val === appState.adminPin) { isEditMode = true; closeModal("pin-modal"); renderAll(); }
-        else showToast("Incorrect PIN.", "error");
-      } else { appState.adminPin = val; saveState(); closeModal("pin-modal"); renderAll(); }
-    }
-    function removePin() { appState.adminPin = null; saveState(); closeModal("pin-modal"); }
+      const curVal = document.getElementById("pin-current").value.trim();
+      const newVal = document.getElementById("pin-input").value.trim();
+      const confVal = document.getElementById("pin-confirm").value.trim();
 
-    function setPresetTimer(m, lbl) { isTimerRunning = false; timerTotalSecs = m * 60; timerRemSecs = m * 60; timerLabel = lbl; renderHeaderAndWidgets(); }
-    function toggleCountdownTimer() { if (!isTimerRunning && timerRemSecs <= 0) timerRemSecs = timerTotalSecs; isTimerRunning = !isTimerRunning; renderHeaderAndWidgets(); }
-    function resetCountdownTimer() { isTimerRunning = false; timerRemSecs = timerTotalSecs; renderHeaderAndWidgets(); }
-    function toggleSound() { isSoundEnabled = !isSoundEnabled; document.getElementById("sound-btn").textContent = isSoundEnabled ? "Sound: On" : "Sound: Off"; }
-    async function toggleNotifications() {
-      if (typeof Notification === "undefined") return showToast("Browser notifications unsupported.", "error");
-      const p = await Notification.requestPermission();
-      notificationsEnabled = p === "granted";
-      showToast(notificationsEnabled ? "Notifications enabled!" : "Permission denied.", notificationsEnabled ? "success" : "error");
+      if (pinMode === "unlock") {
+        if (!/^\d{4}$/.test(newVal)) return showToast("Enter a 4-digit PIN.", "error");
+        if (newVal === appState.adminPin) {
+          isEditMode = true;
+          closeModal("pin-modal");
+          renderAll();
+        } else {
+          showToast("Incorrect PIN.", "error");
+        }
+        return;
+      }
+
+      // Setting or Changing PIN
+      if (appState.adminPin) {
+        if (curVal !== appState.adminPin) return showToast("Current PIN is incorrect.", "error");
+      }
+      if (!/^\d{4}$/.test(newVal)) return showToast("New PIN must be 4 digits.", "error");
+      if (newVal !== confVal) return showToast("New PIN and Confirm PIN do not match.", "error");
+
+      const wasChange = Boolean(appState.adminPin);
+      appState.adminPin = newVal;
+      saveState();
+      closeModal("pin-modal");
+      renderAll();
+      showToast(wasChange ? "Admin PIN changed to new PIN!" : "Admin PIN set!", "success");
+    }
+
+    function requestRemovePin() {
+      const curVal = document.getElementById("pin-current").value.trim();
+      if (appState.adminPin && curVal !== appState.adminPin) {
+        return showToast("Enter your Current PIN first to remove it.", "error");
+      }
+      requestConfirm(
+        "Remove Admin PIN",
+        "Remove the Admin PIN lock? Anyone using this device will be able to open Edit Mode without a PIN.",
+        () => {
+          appState.adminPin = null;
+          saveState();
+          closeModal("pin-modal");
+          renderAll();
+          showToast("Admin PIN removed.", "info");
+        },
+        "Yes, Remove"
+      );
+    }
+
+    // ==================== SOUND, TYPING & BACKUP ====================
+    function toggleSound() {
+      isSoundEnabled = !isSoundEnabled;
+      appState.soundEnabled = isSoundEnabled;
+      saveState();
+      renderFocusTimerCard(true);
     }
     function logTyping() {
-      const wpm = parseInt(document.getElementById("wpm-speed").value, 10);
-      const acc = parseInt(document.getElementById("wpm-acc").value, 10) || 100;
-      if (!wpm) return;
+      const speedEl = document.getElementById("wpm-speed");
+      const accEl = document.getElementById("wpm-acc");
+      const wpm = parseInt(speedEl.value, 10);
+      const acc = Math.min(100, Math.max(1, parseInt(accEl.value, 10) || 100));
+      if (!wpm || wpm <= 0) return showToast("Enter valid WPM.", "error");
       appState.typingLogs.unshift({ date: currentDateStr, lang: document.getElementById("wpm-lang").value, wpm, acc });
-      saveState(); showToast(`Logged ${wpm} WPM`, "success");
+      speedEl.value = "";
+      accEl.value = "";
+      saveState();
+      renderFocusTimerCard(true);
+      showToast(`Logged ${wpm} WPM (${acc}%)`, "success");
     }
     function exportJson() {
       const a = document.createElement("a");
@@ -1375,73 +2880,59 @@
       const f = inp.files?.[0]; if (!f) return;
       const r = new FileReader();
       r.onload = e => {
-        try { appState = { ...createInitialState(), ...JSON.parse(e.target.result) }; saveState(); renderAll(); showToast("Backup restored!", "success"); }
-        catch { showToast("Invalid JSON.", "error"); }
+        try {
+          appState = normalizeState(JSON.parse(e.target.result));
+          isSoundEnabled = appState.soundEnabled !== false;
+          breakHold = appState.activeBreakHold || null;
+          saveState();
+          renderAll();
+          showToast("Backup restored!", "success");
+        } catch {
+          showToast("Invalid JSON.", "error");
+        }
       };
       r.readAsText(f); inp.value = "";
     }
 
-    // Main 1-second loop: clock, countdown, manual/routine study tracking, 10m pre-shift, break prompts, auto-pause
+    // ==================== MAIN 1-SECOND ENGINE ====================
     setInterval(() => {
       const now = new Date();
       document.getElementById("live-clock").textContent = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
       const today = getTodayStr(now);
-      const timeline = buildTimeline();
+
+      if (today !== lastKnownToday) {
+        const wasViewingPrevToday = currentDateStr === lastKnownToday;
+        lastKnownToday = today;
+        prevLiveSlotId = null;
+        mountedNotif = false;
+        if (wasViewingPrevToday) {
+          currentDateStr = today;
+          renderAll();
+        } else {
+          renderHeaderAndWidgets();
+        }
+      }
+
+      flushTimersToNow(now);
+
+      const timeline = buildTimeline(today);
       const currM = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
 
-      if (isTimerRunning) {
-        timerRemSecs--;
-        if (timerRemSecs <= 0) {
-          timerRemSecs = 0; isTimerRunning = false; playChime();
-          sendDeviceNotif("Timer Complete!", `${timerLabel} finished.`, `cd-${Date.now()}`);
-          showToast("Countdown complete!", "success");
-        }
-      }
-
-      if (isManualRunning || (isRoutineRunning && activeRoutineSlotId)) {
-        appState.dailyStudyLogs[today] = appState.dailyStudyLogs[today] || { manualSeconds: 0, routineSecondsBySlot: {}, heldBreakSeconds: 0 };
-        if (isManualRunning) appState.dailyStudyLogs[today].manualSeconds++;
-        if (isRoutineRunning && activeRoutineSlotId) {
-          appState.dailyStudyLogs[today].routineSecondsBySlot[activeRoutineSlotId] = (appState.dailyStudyLogs[today].routineSecondsBySlot[activeRoutineSlotId] || 0) + 1;
-        }
-        tickCounter++;
-        saveState(tickCounter % 15 !== 0);
-      }
-
-      // Check Routine auto-pause on scheduled end
-      if (isRoutineRunning && activeRoutineSlotId) {
-        const rs = timeline.find(s => s.id === activeRoutineSlotId);
-        const autoKey = `${today}:${activeRoutineSlotId}`;
-        if (rs && !autoPausedKeys.has(autoKey)) {
-          const curS = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-          if (curS >= toMins(rs.end) * 60 && toMins(rs.end) > toMins(rs.start)) {
-            autoPausedKeys.add(autoKey);
-            isRoutineRunning = false;
-            evaluateRoutineTolerance(rs, appState.dailyStudyLogs[today]?.routineSecondsBySlot?.[rs.id] || 0);
-            pushReminder({
-              id: `rend-${rs.id}-${today}`, title: "Schedule Finished · Auto-Paused", subject: rs.subject,
-              timeRange: `${fmt12(rs.start)} - ${fmt12(rs.end)}`,
-              message: "Scheduled block ended & timer auto-paused. Tap Resume Timer to continue.",
-              slotId: rs.id, canResumeRoutine: true
-            }, `Finished: ${rs.subject}`, "Tap Resume Timer if you want to continue studying.");
-          }
-        }
-      }
-
-      // 10-min Pre-Shift + Break Entry + Shift Change + Custom Reminders
+      // Custom Reminders + 10-min Pre-Shift + Break Entry + Shift Change -> In-App + Device Notification (Req #5)
       const hhmm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       (appState.customReminders || []).forEach(r => {
         const ck = `${today}:${r.id}`;
         if (r.enabled && r.time24 === hhmm && !firedCustomKeys.has(ck)) {
           firedCustomKeys.add(ck);
-          pushReminder({ id: `cust-${r.id}-${today}`, title: "Custom Reminder", subject: r.title, timeRange: fmt12(r.time24), message: r.message }, r.title, r.message);
+          pushReminder({ id: `cust-${r.id}-${today}`, title: "Custom Reminder", subject: r.title, timeRange: fmt12(r.time24), message: r.message }, `Reminder: ${r.title}`, r.message);
         }
       });
 
       if (appState.shiftAlertsEnabled !== false) {
         timeline.forEach(s => {
           if (s.category === "break") return;
-          const diff = toMins(s.start) - currM;
+          let diff = toMins(s.start) - currM;
+          if (diff < -1400) diff += 1440;
           const pk = `${today}:pre10:${s.id}`;
           if (diff > 0 && diff <= 10 && !firedPreShiftKeys.has(pk)) {
             firedPreShiftKeys.add(pk);
@@ -1451,25 +2942,83 @@
         });
 
         const live = timeline.find(s => isInSlot(currM, s.start, s.end)) || null;
-        if (!mountedNotif) { mountedNotif = true; prevLiveSlotId = live?.id || null; }
-        else if (live && live.id !== prevLiveSlotId) {
-          prevLiveSlotId = live.id;
-          if (live.category === "break") {
-            pushReminder({ id: `brk-${live.id}-${Date.now()}`, title: live.isGapBreak ? "Schedule Gap · Break" : "Break Started", subject: live.subject, timeRange: `${fmt12(live.start)} - ${fmt12(live.end)}`, message: "Take a break or hold break to continue studying.", breakId: live.id, isBreakPrompt: true }, `Break: ${live.subject}`, "Take break or continue studying.");
-          } else {
-            pushReminder({ id: `sh-${live.id}-${Date.now()}`, title: "Study Shift Started", subject: live.subject, timeRange: `${fmt12(live.start)} - ${fmt12(live.end)}`, message: live.focus, slotId: live.id }, `Shift Started: ${live.subject}`, live.focus);
+        if (!mountedNotif) {
+          mountedNotif = true;
+          prevLiveSlotId = live ? live.id : null;
+        } else {
+          const liveId = live ? live.id : null;
+          if (live && liveId !== prevLiveSlotId) {
+            if (live.category === "break") {
+              pushReminder({ id: `brk-${live.id}-${Date.now()}`, title: live.isGapBreak ? "Schedule Gap · Break" : "Break Started", subject: live.subject, timeRange: `${fmt12(live.start)} - ${fmt12(live.end)}`, message: "Take a break or hold break to continue studying.", breakId: live.id, isBreakPrompt: true }, `Break: ${live.subject}`, "Take break or continue studying.");
+            } else {
+              pushReminder({ id: `sh-${live.id}-${Date.now()}`, title: "Study Shift Started", subject: live.subject, timeRange: `${fmt12(live.start)} - ${fmt12(live.end)}`, message: live.focus, slotId: live.id }, `Shift Started: ${live.subject}`, live.focus);
+            }
           }
+          prevLiveSlotId = liveId;
         }
       }
 
-      renderHeaderAndWidgets();
-      renderLiveAndDailyCards();
+      renderFocusTimerCard(false);
+      renderFloatingBar();
+      renderLiveAndDailyCards(false);
     }, 1000);
+
+    // Periodic multi-device sync every 45s when tab is active
+    setInterval(() => {
+      if (document.visibilityState === "visible") pullCloud();
+    }, 45000);
+
+    function flushAndSyncOnHide() {
+      flushTimersToNow(new Date());
+      saveTimerRuntime();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch {}
+      clearTimeout(syncTimeout);
+      pushCloud({ keepalive: true });
+    }
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") flushAndSyncOnHide();
+      else { flushTimersToNow(new Date()); renderAll(); pullCloud(); }
+    });
+    window.addEventListener("pagehide", flushAndSyncOnHide);
 
     window.addEventListener("DOMContentLoaded", () => {
       loadState();
       applyThemeAccent();
-      document.getElementById("date-input").addEventListener("change", e => { if (e.target.value) { currentDateStr = e.target.value; renderAll(); } });
+      flushTimersToNow(new Date());
+
+      document.getElementById("date-input").addEventListener("change", e => {
+        if (e.target.value) { currentDateStr = e.target.value; renderAll(); }
+      });
+
+      const tb = document.getElementById("hdr-toolbar");
+      let dragDown = false, startX = 0, scrollStart = 0;
+      tb.addEventListener("mousedown", e => {
+        if (e.target.closest("button, input, select, a, label")) return;
+        dragDown = true; startX = e.pageX - tb.offsetLeft; scrollStart = tb.scrollLeft; tb.classList.add("cursor-grabbing");
+      });
+      window.addEventListener("mouseup", () => { dragDown = false; tb.classList.remove("cursor-grabbing"); });
+      tb.addEventListener("mousemove", e => {
+        if (!dragDown) return;
+        e.preventDefault();
+        tb.scrollLeft = scrollStart - ((e.pageX - tb.offsetLeft) - startX);
+      });
+
+      document.querySelectorAll("[data-modal-backdrop]").forEach(overlay => {
+        overlay.addEventListener("click", e => {
+          if (e.target === overlay) {
+            const id = overlay.getAttribute("data-modal-backdrop");
+            if (id === "confirm-modal") cancelConfirm();
+            else closeModal(id);
+          }
+        });
+      });
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+          cancelConfirm();
+          document.querySelectorAll("[data-modal-backdrop]").forEach(overlay => overlay.classList.add("hidden"));
+        }
+      });
+
       renderAll();
       pullCloud();
     });
