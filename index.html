@@ -236,6 +236,76 @@
     }
     .logout-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
     .logout-btn:active { transform: scale(0.97); }
+    .profile-close-icon-btn {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #f97316 100%);
+      color: #ffffff;
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      box-shadow:
+        0 8px 18px -5px rgba(244, 63, 94, 0.55),
+        0 0 0 3px rgba(244, 63, 94, 0.14),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.42);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
+    .profile-close-icon-btn svg {
+      transition: transform 0.22s ease;
+    }
+    .profile-close-icon-btn:hover {
+      filter: brightness(1.07);
+      transform: translateY(-1px) scale(1.06);
+      box-shadow:
+        0 12px 22px -5px rgba(236, 72, 153, 0.65),
+        0 0 0 4px rgba(244, 63, 94, 0.2),
+        inset 0 1.5px 0 rgba(255, 255, 255, 0.52);
+    }
+    .profile-close-icon-btn:hover svg {
+      transform: rotate(90deg);
+    }
+    .profile-close-icon-btn:active {
+      transform: scale(0.94);
+    }
+    .profile-hero-banner {
+      position: relative;
+      background:
+        radial-gradient(circle at 14% 20%, rgba(255, 255, 255, 0.24), transparent 46%),
+        radial-gradient(circle at 86% 85%, rgba(255, 255, 255, 0.16), transparent 50%),
+        linear-gradient(125deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+    }
+    .profile-avatar-ring {
+      border: 4px solid var(--surface-panel);
+      box-shadow: 0 10px 24px -8px rgba(15, 23, 42, 0.32);
+    }
+    .profile-avatar-cam {
+      background: var(--surface-card);
+      color: var(--text-primary);
+      border: 1.5px solid var(--border-panel);
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+      transition: transform 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .profile-avatar-cam:hover {
+      transform: scale(1.08);
+      color: var(--accent-text);
+      border-color: var(--accent-primary);
+    }
+    .profile-tabs-track {
+      background: var(--surface-input);
+      border: 1px solid var(--border-panel);
+    }
+    .profile-tab-btn {
+      transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .profile-detail-row {
+      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+    }
+    .profile-detail-row:last-child {
+      border-bottom: none;
+    }
   </style>
 </head>
 <body data-theme="light" data-accent="indigo" class="pb-28 antialiased selection:bg-indigo-500 selection:text-white">
@@ -707,110 +777,206 @@
   </div>
 
   <!-- USER PROFILE MODAL -->
-  <div id="profile-modal" data-modal-backdrop="profile-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-4 flex items-center justify-center">
-    <div class="surface-panel rounded-3xl max-w-md w-full p-5 space-y-4 max-h-[90dvh] overflow-y-auto">
-      <div class="flex justify-between items-center">
-        <h3 class="text-base font-extrabold">My Study Profile</h3>
-        <button type="button" onclick="closeModal('profile-modal')" class="px-2 py-1 text-xs font-bold cursor-pointer">Close</button>
-      </div>
-      <div class="p-3.5 rounded-2xl border surface-input flex items-center gap-3.5">
-        <div id="prof-preview-avatar" class="w-14 h-14 rounded-full accent-btn flex items-center justify-center text-lg font-extrabold overflow-hidden shrink-0 shadow-sm">S</div>
-        <div class="min-w-0 flex-1">
-          <div id="prof-preview-name" class="text-sm font-extrabold truncate">Student</div>
-          <div id="prof-preview-target" class="text-[11px] text-[var(--text-muted)] truncate">Set your target exam or motto</div>
-          <div id="prof-stats-summary" class="text-[11px] font-mono-tab font-bold accent-text mt-1">0d streak · 0.0 Hrs total</div>
-        </div>
-      </div>
-      <form onsubmit="saveProfileForm(event)" class="space-y-3">
-        <button type="button" onclick="toggleCredPanel('username')" class="w-full px-3 py-2 rounded-xl border surface-input flex items-center justify-between gap-2 text-xs font-bold cursor-pointer hover:opacity-90 transition">
-          <span class="flex items-center gap-1.5 text-[var(--text-muted)]">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>Username</span>
-          </span>
-          <span id="prof-form-username" class="accent-text font-mono-tab font-extrabold truncate">—</span>
+  <div id="profile-modal" data-modal-backdrop="profile-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm p-3 sm:p-4 flex items-center justify-center">
+    <div class="surface-panel rounded-3xl max-w-lg w-full overflow-hidden max-h-[92dvh] flex flex-col shadow-2xl">
+      <!-- Profile Hero Banner -->
+      <div class="profile-hero-banner h-24 px-5 pt-4 flex items-start justify-between shrink-0">
+        <h3 class="text-base font-extrabold text-white tracking-tight drop-shadow-sm">Profile</h3>
+        <button type="button" onclick="closeModal('profile-modal')" aria-label="Close profile" title="Close" class="profile-close-icon-btn cursor-pointer shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 drop-shadow-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
-        <div class="space-y-1">
-          <label class="text-[11px] font-bold text-[var(--text-muted)]">Display Name</label>
-          <input type="text" id="prof-name" required maxlength="36" oninput="updateProfileModalPreview()" placeholder="Your name" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
+      </div>
+
+      <!-- Profile Identity & Stats Header -->
+      <div class="px-5 pb-3.5 shrink-0">
+        <div class="flex items-end justify-between gap-3 -mt-10">
+          <div class="relative shrink-0">
+            <div id="prof-preview-avatar" class="profile-avatar-ring w-20 h-20 rounded-full accent-btn flex items-center justify-center text-2xl font-extrabold overflow-hidden">S</div>
+            <label for="prof-avatar-file" title="Change profile photo" class="profile-avatar-cam absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </label>
+            <input type="file" id="prof-avatar-file" accept="image/*" onchange="handleProfileAvatarUpload(this)" class="hidden" />
+          </div>
+          <div class="min-w-0 flex-1 pb-0.5 pt-11">
+            <div id="prof-preview-name" class="text-lg font-extrabold tracking-tight leading-tight truncate">Student</div>
+            <div id="prof-auth-username" class="text-xs font-mono-tab font-bold accent-text truncate mt-0.5">—</div>
+          </div>
         </div>
-        <div class="space-y-1">
-          <label class="text-[11px] font-bold text-[var(--text-muted)]">Target Exam / Bio</label>
-          <input type="text" id="prof-target" maxlength="80" oninput="updateProfileModalPreview()" placeholder="e.g., SSC CGL 2026 · Focus & Consistency" class="w-full rounded-xl border surface-input px-3 py-2 text-xs" />
-        </div>
-        <div class="flex items-center justify-between gap-2 pt-0.5">
-          <button type="button" id="prof-remove-avatar-btn" onclick="removeProfileAvatar()" class="hidden px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-600 text-xs font-bold cursor-pointer">Remove Photo</button>
-        </div>
-        <button type="submit" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Save Profile</button>
-        <button type="button" onclick="logoutUser()" class="logout-btn w-full py-2 rounded-xl text-xs font-extrabold cursor-pointer">Log Out</button>
-      </form>
-      <div class="pt-3 border-t border-slate-500/15 space-y-3">
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <button type="button" id="prof-toggle-user-btn" onclick="toggleCredPanel('username')" class="py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span class="truncate">Change Username</span>
-          </button>
-          <button type="button" id="prof-toggle-pass-btn" onclick="toggleCredPanel('password')" class="py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span class="truncate">Change Password</span>
-          </button>
-          <button type="button" id="prof-toggle-theme-btn" onclick="toggleCredPanel('theme')" class="col-span-2 sm:col-span-1 py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
-            <span class="truncate">Change Theme</span>
-          </button>
+        <p id="prof-preview-target" class="text-xs text-[var(--text-muted)] mt-2 leading-relaxed">Set your target exam or motto</p>
+
+        <!-- Real Study Metrics Strip -->
+        <div class="grid grid-cols-4 border-y border-slate-500/15 py-2.5 mt-3 text-center">
+          <div class="px-1">
+            <div id="prof-stat-streak" class="text-sm font-mono-tab font-extrabold">0d</div>
+            <div class="text-[11px] text-[var(--text-muted)] font-semibold">Streak</div>
+          </div>
+          <div class="px-1 border-l border-slate-500/15">
+            <div id="prof-stat-today" class="text-sm font-mono-tab font-extrabold">0.0h</div>
+            <div class="text-[11px] text-[var(--text-muted)] font-semibold">Today</div>
+          </div>
+          <div class="px-1 border-l border-slate-500/15">
+            <div id="prof-stat-total" class="text-sm font-mono-tab font-extrabold">0.0h</div>
+            <div class="text-[11px] text-[var(--text-muted)] font-semibold">Total</div>
+          </div>
+          <div class="px-1 border-l border-slate-500/15">
+            <div id="prof-stat-days" class="text-sm font-mono-tab font-extrabold">0</div>
+            <div class="text-[11px] text-[var(--text-muted)] font-semibold">Days</div>
+          </div>
         </div>
 
-        <form id="prof-change-user-form" onsubmit="handleChangeUsername(event)" class="hidden space-y-2.5 p-3 rounded-2xl border surface-input">
-          <div class="text-[11px] font-extrabold accent-text">Change Username</div>
-          <div class="space-y-1">
-            <label class="text-[11px] font-bold text-[var(--text-muted)]">New Username</label>
-            <input type="text" id="user-new-name" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" autocomplete="username" placeholder="Enter new username (no spaces)" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
-          </div>
-          <div class="space-y-1">
-            <label class="text-[11px] font-bold text-[var(--text-muted)]">Current Password</label>
-            <input type="password" id="user-current-pass" required autocomplete="current-password" placeholder="Verify current password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
-          </div>
-          <div id="user-status-msg" class="hidden text-[11px] font-bold rounded-xl px-2.5 py-2"></div>
-          <button type="submit" id="user-submit-btn" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Update Username</button>
-        </form>
+        <!-- Profile Section Navigation Tabs -->
+        <div class="profile-tabs-track grid grid-cols-4 gap-1 p-1 rounded-2xl mt-3">
+          <button type="button" data-prof-tab="overview" onclick="switchProfileTab('overview')" class="profile-tab-btn py-1.5 px-2 rounded-xl text-xs font-extrabold whitespace-nowrap cursor-pointer accent-btn shadow-sm">Overview</button>
+          <button type="button" data-prof-tab="edit" onclick="switchProfileTab('edit')" class="profile-tab-btn py-1.5 px-2 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]">Edit</button>
+          <button type="button" data-prof-tab="account" onclick="switchProfileTab('account')" class="profile-tab-btn py-1.5 px-2 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]">Account</button>
+          <button type="button" data-prof-tab="theme" onclick="switchProfileTab('theme')" class="profile-tab-btn py-1.5 px-2 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-primary)]">Theme</button>
+        </div>
+      </div>
 
-        <form id="prof-change-pass-form" onsubmit="handleChangePassword(event)" class="hidden space-y-2.5 p-3 rounded-2xl border surface-input">
-          <div class="text-[11px] font-extrabold accent-text">Change Password</div>
-          <div class="space-y-1">
-            <label class="text-[11px] font-bold text-[var(--text-muted)]">Current Password</label>
-            <input type="password" id="pass-current-pass" required autocomplete="current-password" placeholder="Enter current password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+      <!-- Scrollable Profile Section Body -->
+      <div class="px-5 pb-5 overflow-y-auto flex-1 space-y-4">
+        <!-- TAB 1: OVERVIEW -->
+        <div id="prof-tab-overview" class="space-y-4">
+          <div class="divide-y divide-slate-500/15">
+            <div class="profile-detail-row py-2.5 flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold text-[var(--text-muted)] shrink-0">Username</span>
+              <div class="flex items-center gap-2 min-w-0">
+                <span id="prof-ov-username" class="text-xs font-mono-tab font-extrabold accent-text truncate">—</span>
+                <button type="button" onclick="openAccountCredentialPanel('username')" class="text-[11px] font-bold text-[var(--text-muted)] hover:underline cursor-pointer shrink-0">Change</button>
+              </div>
+            </div>
+            <div class="profile-detail-row py-2.5 flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold text-[var(--text-muted)] shrink-0">Display Name</span>
+              <span id="prof-ov-name" class="text-xs font-bold text-right truncate">Student</span>
+            </div>
+            <div class="profile-detail-row py-2.5 flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold text-[var(--text-muted)] shrink-0">Exam Focus</span>
+              <span id="prof-ov-target" class="text-xs font-semibold text-right truncate">Not set yet</span>
+            </div>
+            <div class="profile-detail-row py-2.5 flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold text-[var(--text-muted)] shrink-0">Next Exam Goal</span>
+              <span id="prof-ov-goal" class="text-xs font-mono-tab font-bold text-right truncate">No exam goal set</span>
+            </div>
+            <div class="profile-detail-row py-2.5 flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold text-[var(--text-muted)] shrink-0">Best Typing</span>
+              <span id="prof-ov-typing" class="text-xs font-mono-tab font-bold text-right truncate">No typing logs yet</span>
+            </div>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <div class="space-y-1">
-              <label class="text-[11px] font-bold text-[var(--text-muted)]">New Password</label>
-              <input type="password" id="pass-new-pass" required minlength="4" autocomplete="new-password" placeholder="Min 4 chars" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+
+          <div class="grid grid-cols-2 gap-2.5 pt-1">
+            <button type="button" onclick="switchProfileTab('edit')" class="py-2.5 px-4 rounded-xl accent-btn text-xs font-extrabold whitespace-nowrap cursor-pointer">Edit Profile</button>
+            <button type="button" onclick="logoutUser()" class="logout-btn py-2.5 px-4 rounded-xl text-xs font-extrabold whitespace-nowrap cursor-pointer">Log Out</button>
+          </div>
+        </div>
+
+        <!-- TAB 2: EDIT PROFILE -->
+        <div id="prof-tab-edit" class="hidden">
+          <form onsubmit="saveProfileForm(event)" class="space-y-3.5">
+            <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-500/15">
+              <div>
+                <div class="text-xs font-bold">Profile Photo</div>
+                <div class="text-[11px] text-[var(--text-muted)]">Square image, auto-cropped</div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <label for="prof-avatar-file" class="px-3 py-1.5 rounded-xl border surface-input text-xs font-bold cursor-pointer hover:opacity-90 transition whitespace-nowrap">Upload Photo</label>
+                <button type="button" id="prof-remove-avatar-btn" onclick="removeProfileAvatar()" class="hidden px-3 py-1.5 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 text-xs font-bold cursor-pointer whitespace-nowrap">Remove</button>
+              </div>
             </div>
             <div class="space-y-1">
-              <label class="text-[11px] font-bold text-[var(--text-muted)]">Confirm Password</label>
-              <input type="password" id="pass-confirm-pass" required minlength="4" autocomplete="new-password" placeholder="Re-enter password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+              <label for="prof-name" class="text-[11px] font-bold text-[var(--text-muted)]">Display Name</label>
+              <input type="text" id="prof-name" required maxlength="36" oninput="updateProfileModalPreview()" placeholder="Your name" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-bold" />
             </div>
-          </div>
-          <div id="pass-status-msg" class="hidden text-[11px] font-bold rounded-xl px-2.5 py-2"></div>
-          <button type="submit" id="pass-submit-btn" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Update Password</button>
-        </form>
+            <div class="space-y-1">
+              <label for="prof-target" class="text-[11px] font-bold text-[var(--text-muted)]">Target Exam / Bio</label>
+              <input type="text" id="prof-target" maxlength="80" oninput="updateProfileModalPreview()" placeholder="e.g., SSC CGL 2026 · Focus & Consistency" class="w-full rounded-xl border surface-input px-3 py-2 text-xs" />
+            </div>
+            <div class="grid grid-cols-2 gap-2.5 pt-1">
+              <button type="button" onclick="cancelProfileEdit()" class="py-2.5 px-4 rounded-xl border surface-input text-xs font-extrabold whitespace-nowrap cursor-pointer hover:opacity-90 transition">Cancel</button>
+              <button type="submit" class="py-2.5 px-4 rounded-xl accent-btn text-xs font-extrabold whitespace-nowrap cursor-pointer">Save Changes</button>
+            </div>
+          </form>
+        </div>
 
-        <div id="prof-change-theme-panel" class="hidden space-y-3 p-3 rounded-2xl border surface-input">
-          <div class="text-[11px] font-extrabold accent-text">Change Theme &amp; Accent</div>
-          <div class="space-y-1.5">
-            <div class="text-[11px] font-bold text-[var(--text-muted)]">Color Mode</div>
-            <div class="grid grid-cols-3 gap-2">
-              <button type="button" onclick="setTheme('light')" data-theme-card="light" class="py-2 px-2 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition">☀️ <span>Light</span></button>
-              <button type="button" onclick="setTheme('dark')" data-theme-card="dark" class="py-2 px-2 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition">🌙 <span>Midnight</span></button>
-              <button type="button" onclick="setTheme('paper')" data-theme-card="paper" class="py-2 px-2 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition">📜 <span>Paper</span></button>
-            </div>
+        <!-- TAB 3: ACCOUNT & SECURITY -->
+        <div id="prof-tab-account" class="hidden space-y-3.5">
+          <div class="px-3.5 py-2.5 rounded-xl border surface-input flex items-center justify-between gap-2 text-xs font-bold">
+            <span class="flex items-center gap-1.5 text-[var(--text-muted)]">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Signed in as</span>
+            </span>
+            <span id="prof-form-username" class="accent-text font-mono-tab font-extrabold truncate">—</span>
           </div>
-          <div class="space-y-1.5">
-            <div class="text-[11px] font-bold text-[var(--text-muted)]">Accent Color</div>
-            <div class="grid grid-cols-5 gap-1.5">
-              <button type="button" onclick="setAccent('indigo')" data-accent-card="indigo" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-indigo-600"></span><span>Indigo</span></button>
-              <button type="button" onclick="setAccent('emerald')" data-accent-card="emerald" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-emerald-600"></span><span>Emerald</span></button>
-              <button type="button" onclick="setAccent('teal')" data-accent-card="teal" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-teal-600"></span><span>Teal</span></button>
-              <button type="button" onclick="setAccent('amber')" data-accent-card="amber" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-amber-500"></span><span>Amber</span></button>
-              <button type="button" onclick="setAccent('rose')" data-accent-card="rose" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-rose-600"></span><span>Rose</span></button>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="prof-toggle-user-btn" onclick="toggleCredPanel('username')" class="py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span class="truncate">Change Username</span>
+            </button>
+            <button type="button" id="prof-toggle-pass-btn" onclick="toggleCredPanel('password')" class="py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span class="truncate">Change Password</span>
+            </button>
+          </div>
+
+          <form id="prof-change-user-form" onsubmit="handleChangeUsername(event)" class="hidden space-y-2.5 pt-2 border-t border-slate-500/15">
+            <div class="text-xs font-extrabold accent-text">Update Username</div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-[var(--text-muted)]">New Username</label>
+              <input type="text" id="user-new-name" required minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" autocomplete="username" placeholder="Enter new username (no spaces)" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+            </div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-[var(--text-muted)]">Current Password</label>
+              <input type="password" id="user-current-pass" required autocomplete="current-password" placeholder="Verify current password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+            </div>
+            <div id="user-status-msg" class="hidden text-[11px] font-bold rounded-xl px-2.5 py-2"></div>
+            <button type="submit" id="user-submit-btn" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Update Username</button>
+          </form>
+
+          <form id="prof-change-pass-form" onsubmit="handleChangePassword(event)" class="hidden space-y-2.5 pt-2 border-t border-slate-500/15">
+            <div class="text-xs font-extrabold accent-text">Update Password</div>
+            <div class="space-y-1">
+              <label class="text-[11px] font-bold text-[var(--text-muted)]">Current Password</label>
+              <input type="password" id="pass-current-pass" required autocomplete="current-password" placeholder="Enter current password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div class="space-y-1">
+                <label class="text-[11px] font-bold text-[var(--text-muted)]">New Password</label>
+                <input type="password" id="pass-new-pass" required minlength="4" autocomplete="new-password" placeholder="Min 4 chars" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[11px] font-bold text-[var(--text-muted)]">Confirm Password</label>
+                <input type="password" id="pass-confirm-pass" required minlength="4" autocomplete="new-password" placeholder="Re-enter password" class="w-full rounded-xl border surface-input px-3 py-2 text-xs font-semibold" />
+              </div>
+            </div>
+            <div id="pass-status-msg" class="hidden text-[11px] font-bold rounded-xl px-2.5 py-2"></div>
+            <button type="submit" id="pass-submit-btn" class="w-full py-2 rounded-xl accent-btn text-xs font-extrabold cursor-pointer">Update Password</button>
+          </form>
+
+          <div class="pt-2.5 border-t border-slate-500/15">
+            <button type="button" onclick="logoutUser()" class="logout-btn w-full py-2.5 rounded-xl text-xs font-extrabold cursor-pointer">Log Out</button>
+          </div>
+        </div>
+
+        <!-- TAB 4: THEME & APPEARANCE -->
+        <div id="prof-tab-theme" class="hidden">
+          <div id="prof-change-theme-panel" class="space-y-4">
+            <div class="space-y-2">
+              <div class="text-xs font-bold text-[var(--text-muted)]">Color Mode</div>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="setTheme('light')" data-theme-card="light" class="py-2 px-2 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition">☀️ <span>Light</span></button>
+                <button type="button" onclick="setTheme('dark')" data-theme-card="dark" class="py-2 px-2 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition">🌙 <span>Midnight</span></button>
+                <button type="button" onclick="setTheme('paper')" data-theme-card="paper" class="py-2 px-2 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1 cursor-pointer transition">📜 <span>Paper</span></button>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="text-xs font-bold text-[var(--text-muted)]">Accent Color</div>
+              <div class="grid grid-cols-5 gap-1.5">
+                <button type="button" onclick="setAccent('indigo')" data-accent-card="indigo" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-indigo-600"></span><span>Indigo</span></button>
+                <button type="button" onclick="setAccent('emerald')" data-accent-card="emerald" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-emerald-600"></span><span>Emerald</span></button>
+                <button type="button" onclick="setAccent('teal')" data-accent-card="teal" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-teal-600"></span><span>Teal</span></button>
+                <button type="button" onclick="setAccent('amber')" data-accent-card="amber" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-amber-500"></span><span>Amber</span></button>
+                <button type="button" onclick="setAccent('rose')" data-accent-card="rose" class="py-1.5 px-1 rounded-xl border surface-input text-[10px] font-extrabold flex flex-col items-center gap-1 cursor-pointer transition"><span class="w-4 h-4 rounded-full bg-rose-600"></span><span>Rose</span></button>
+              </div>
             </div>
           </div>
         </div>
@@ -3150,13 +3316,93 @@
       return totalSecs / 3600;
     }
 
+    let activeProfileTab = "overview";
+
+    function syncProfileIdentityLabels(label) {
+      ["prof-auth-username", "prof-form-username", "prof-ov-username"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = label;
+      });
+    }
+
+    function switchProfileTab(tab) {
+      const valid = ["overview", "edit", "account", "theme"].includes(tab) ? tab : "overview";
+      activeProfileTab = valid;
+      ["overview", "edit", "account", "theme"].forEach(t => {
+        const panel = document.getElementById(`prof-tab-${t}`);
+        if (panel) panel.classList.toggle("hidden", t !== valid);
+      });
+      document.querySelectorAll("[data-prof-tab]").forEach(btn => {
+        const active = btn.getAttribute("data-prof-tab") === valid;
+        btn.className = `profile-tab-btn py-1.5 px-2 rounded-xl text-xs whitespace-nowrap cursor-pointer ${
+          active ? "font-extrabold accent-btn shadow-sm" : "font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+        }`;
+      });
+      if (valid === "theme") applyThemeAccent();
+      if (valid !== "account") resetCredPanels();
+    }
+
+    function openAccountCredentialPanel(mode) {
+      switchProfileTab("account");
+      toggleCredPanel(mode);
+    }
+
+    function refreshProfileOverviewDetails() {
+      const prof = appState.userProfile || { name: "Student", examTarget: "", avatarDataUrl: "" };
+      const today = getTodayStr();
+      const streak = computeStreak();
+      const todayHrs = getDayTotalStudySeconds(today, true).totalS / 3600;
+      const totalHrs = getAllTimeStudyHours();
+      const activeDays = Object.keys(appState.dailyStudyLogs || {}).filter(d => getDayTotalStudySeconds(d, d === today).totalS > 0).length;
+
+      const streakEl = document.getElementById("prof-stat-streak");
+      const todayEl = document.getElementById("prof-stat-today");
+      const totalEl = document.getElementById("prof-stat-total");
+      const daysEl = document.getElementById("prof-stat-days");
+      if (streakEl) streakEl.textContent = `${streak}d`;
+      if (todayEl) todayEl.textContent = `${todayHrs.toFixed(1)}h`;
+      if (totalEl) totalEl.textContent = `${totalHrs.toFixed(1)}h`;
+      if (daysEl) daysEl.textContent = `${activeDays}`;
+
+      const ovName = document.getElementById("prof-ov-name");
+      const ovTarget = document.getElementById("prof-ov-target");
+      const ovGoal = document.getElementById("prof-ov-goal");
+      const ovTyping = document.getElementById("prof-ov-typing");
+      if (ovName) ovName.textContent = prof.name || "Student";
+      if (ovTarget) ovTarget.textContent = prof.examTarget || "Not set yet";
+
+      if (ovGoal) {
+        const goals = [...(appState.examGoals || [])].sort((a, b) => a.targetDate.localeCompare(b.targetDate));
+        const nearest = goals.find(g => g.targetDate >= today) || goals[goals.length - 1] || null;
+        if (nearest) {
+          const dLeft = daysBetweenDates(today, nearest.targetDate);
+          const suffix = dLeft > 0 ? `${dLeft}d left` : (dLeft === 0 ? "Today" : `${Math.abs(dLeft)}d ago`);
+          ovGoal.textContent = `${nearest.title} · ${suffix}`;
+        } else {
+          ovGoal.textContent = "No exam goal set";
+        }
+      }
+
+      if (ovTyping) {
+        const logs = appState.typingLogs || [];
+        if (logs.length > 0) {
+          const best = logs.reduce((acc, item) => ((Number(item.wpm) || 0) > (Number(acc.wpm) || 0) ? item : acc), logs[0]);
+          const accText = best.acc != null && best.acc !== "" ? ` · ${best.acc}% acc` : "";
+          ovTyping.textContent = `${best.wpm} WPM${accText}`;
+        } else {
+          ovTyping.textContent = "No typing logs yet";
+        }
+      }
+    }
+
     function updateProfileModalPreview() {
       const name = document.getElementById("prof-name").value.trim() || "Student";
       const target = document.getElementById("prof-target").value.trim();
       document.getElementById("prof-preview-name").textContent = name;
       document.getElementById("prof-preview-target").textContent = target || "Set your target exam or motto";
       renderAvatarInto(document.getElementById("prof-preview-avatar"), name, draftProfileAvatarUrl);
-      document.getElementById("prof-remove-avatar-btn").classList.toggle("hidden", !draftProfileAvatarUrl);
+      const rmBtn = document.getElementById("prof-remove-avatar-btn");
+      if (rmBtn) rmBtn.classList.toggle("hidden", !draftProfileAvatarUrl);
     }
 
     function openProfileModal() {
@@ -3164,18 +3410,22 @@
       draftProfileAvatarUrl = prof.avatarDataUrl || "";
       document.getElementById("prof-name").value = prof.name || "Student";
       document.getElementById("prof-target").value = prof.examTarget || "";
-      const streak = computeStreak();
-      const totalHrs = getAllTimeStudyHours();
-      document.getElementById("prof-stats-summary").textContent = `${streak}d streak · ${totalHrs.toFixed(1)} Hrs total studied`;
       const auth = getAuthSession();
-      const authLabel = formatAccountIdentityLabel(auth);
-      const authUserEl = document.getElementById("prof-auth-username");
-      if (authUserEl) authUserEl.textContent = authLabel;
-      const formUserEl = document.getElementById("prof-form-username");
-      if (formUserEl) formUserEl.textContent = authLabel;
+      syncProfileIdentityLabels(formatAccountIdentityLabel(auth));
+      refreshProfileOverviewDetails();
       resetCredPanels();
       updateProfileModalPreview();
+      switchProfileTab("overview");
       openModal("profile-modal");
+    }
+
+    function cancelProfileEdit() {
+      const prof = appState.userProfile || { name: "Student", examTarget: "", avatarDataUrl: "" };
+      draftProfileAvatarUrl = prof.avatarDataUrl || "";
+      document.getElementById("prof-name").value = prof.name || "Student";
+      document.getElementById("prof-target").value = prof.examTarget || "";
+      updateProfileModalPreview();
+      switchProfileTab("overview");
     }
 
     function handleProfileAvatarUpload(inp) {
@@ -3185,7 +3435,7 @@
       reader.onload = ev => {
         const img = new Image();
         img.onload = () => {
-          const size = 128;
+          const size = 160;
           const canvas = document.createElement("canvas");
           canvas.width = size;
           canvas.height = size;
@@ -3194,8 +3444,15 @@
           const sx = (img.width - minSide) / 2;
           const sy = (img.height - minSide) / 2;
           ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
-          draftProfileAvatarUrl = canvas.toDataURL("image/jpeg", 0.78);
+          draftProfileAvatarUrl = canvas.toDataURL("image/jpeg", 0.8);
           updateProfileModalPreview();
+          if (activeProfileTab !== "edit") {
+            const prof = appState.userProfile || { name: "Student", examTarget: "", avatarDataUrl: "" };
+            appState.userProfile = { ...prof, avatarDataUrl: draftProfileAvatarUrl };
+            saveState();
+            renderHeaderProfile();
+            showToast("Profile photo updated!", "success");
+          }
         };
         img.src = ev.target.result;
       };
@@ -3215,7 +3472,9 @@
       appState.userProfile = { name, examTarget, avatarDataUrl: draftProfileAvatarUrl || "" };
       saveState();
       renderHeaderProfile();
-      closeModal("profile-modal");
+      refreshProfileOverviewDetails();
+      updateProfileModalPreview();
+      switchProfileTab("overview");
       showToast("Profile updated!", "success");
     }
 
@@ -4349,38 +4608,35 @@
     function resetCredPanels() {
       const userForm = document.getElementById("prof-change-user-form");
       const passForm = document.getElementById("prof-change-pass-form");
-      const themePanel = document.getElementById("prof-change-theme-panel");
       const userBtn = document.getElementById("prof-toggle-user-btn");
       const passBtn = document.getElementById("prof-toggle-pass-btn");
-      const themeBtn = document.getElementById("prof-toggle-theme-btn");
       const userStatus = document.getElementById("user-status-msg");
       const passStatus = document.getElementById("pass-status-msg");
       if (userForm) { userForm.classList.add("hidden"); userForm.reset(); }
       if (passForm) { passForm.classList.add("hidden"); passForm.reset(); }
-      if (themePanel) themePanel.classList.add("hidden");
       if (userStatus) userStatus.classList.add("hidden");
       if (passStatus) passStatus.classList.add("hidden");
-      const baseBtn = "py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition";
+      const baseBtn = "py-2 px-2.5 rounded-xl border surface-input text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-90 transition whitespace-nowrap";
       if (userBtn) userBtn.className = baseBtn;
       if (passBtn) passBtn.className = baseBtn;
-      if (themeBtn) themeBtn.className = `col-span-2 sm:col-span-1 ${baseBtn}`;
     }
 
     function toggleCredPanel(mode) {
+      if (mode === "theme") {
+        switchProfileTab("theme");
+        return;
+      }
       const userForm = document.getElementById("prof-change-user-form");
       const passForm = document.getElementById("prof-change-pass-form");
-      const themePanel = document.getElementById("prof-change-theme-panel");
       const userBtn = document.getElementById("prof-toggle-user-btn");
       const passBtn = document.getElementById("prof-toggle-pass-btn");
-      const themeBtn = document.getElementById("prof-toggle-theme-btn");
       if (!userForm || !passForm) return;
 
       const isOpeningUser = mode === "username" && userForm.classList.contains("hidden");
       const isOpeningPass = mode === "password" && passForm.classList.contains("hidden");
-      const isOpeningTheme = mode === "theme" && themePanel && themePanel.classList.contains("hidden");
       resetCredPanels();
 
-      const activeBtn = "py-2 px-2.5 rounded-xl accent-btn text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition";
+      const activeBtn = "py-2 px-2.5 rounded-xl accent-btn text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition whitespace-nowrap";
       if (isOpeningUser) {
         userForm.classList.remove("hidden");
         if (userBtn) userBtn.className = activeBtn;
@@ -4395,10 +4651,6 @@
         passForm.classList.remove("hidden");
         if (passBtn) passBtn.className = activeBtn;
         document.getElementById("pass-current-pass")?.focus();
-      } else if (isOpeningTheme && themePanel) {
-        themePanel.classList.remove("hidden");
-        if (themeBtn) themeBtn.className = `col-span-2 sm:col-span-1 ${activeBtn}`;
-        applyThemeAccent();
       }
     }
 
@@ -4449,11 +4701,7 @@
           const updatedToken = res.token || auth?.token || "";
           const remembered = Boolean(localStorage.getItem(AUTH_SESSION_KEY));
           saveAuthSession(updatedUser, updatedToken, remembered, updatedUserId);
-          const updatedLabel = formatAccountIdentityLabel(getAuthSession());
-          const authUserEl = document.getElementById("prof-auth-username");
-          if (authUserEl) authUserEl.textContent = updatedLabel;
-          const formUserEl = document.getElementById("prof-form-username");
-          if (formUserEl) formUserEl.textContent = updatedLabel;
+          syncProfileIdentityLabels(formatAccountIdentityLabel(getAuthSession()));
           document.getElementById("prof-change-user-form")?.reset();
           const newUserInp = document.getElementById("user-new-name");
           if (newUserInp) newUserInp.value = updatedUser;
