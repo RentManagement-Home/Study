@@ -306,6 +306,47 @@
     .profile-detail-row:last-child {
       border-bottom: none;
     }
+    .dash-brand-icon {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 6px 16px -4px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    .dash-kpi-strip {
+      background: var(--surface-input);
+      border: 1px solid var(--border-panel);
+    }
+    .dash-cmd-btn {
+      background: var(--surface-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border-panel);
+      transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    }
+    .dash-cmd-btn:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-text);
+    }
+    .dash-cmd-btn:active {
+      transform: scale(0.97);
+    }
+    .dash-date-group {
+      background: var(--surface-input);
+      border: 1px solid var(--border-panel);
+    }
+    .dash-profile-trigger {
+      background: var(--surface-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-panel);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .dash-profile-trigger:hover {
+      border-color: var(--accent-primary);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    .dash-progress-track {
+      background: rgba(148, 163, 184, 0.24);
+    }
   </style>
 </head>
 <body data-theme="light" data-accent="indigo" class="pb-28 antialiased selection:bg-indigo-500 selection:text-white">
@@ -423,34 +464,82 @@
 
   <!-- HEADER -->
   <header class="sticky top-0 z-30 surface-panel border-b">
-    <div class="max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2.5">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 min-w-0">
-        <div class="min-w-0">
-          <div class="flex items-center gap-2 flex-wrap">
-            <h1 id="hdr-title" class="text-sm sm:text-lg font-extrabold truncate">DAILY STUDY TIMETABLE</h1>
-            <span id="hdr-day-badge" class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">TODAY</span>
+    <div class="max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2 xl:gap-4">
+      <!-- Zone 1: Dashboard Brand & Workspace Context -->
+      <div class="flex items-center justify-between gap-3 min-w-0">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div class="dash-brand-icon w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="7" height="9" x="3" y="3" rx="1.5"/>
+              <rect width="7" height="5" x="14" y="3" rx="1.5"/>
+              <rect width="7" height="9" x="14" y="12" rx="1.5"/>
+              <rect width="7" height="5" x="3" y="16" rx="1.5"/>
+            </svg>
           </div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <p id="hdr-subtitle" class="text-[11px] sm:text-xs text-[var(--text-muted)] truncate max-w-[240px] sm:max-w-xs"></p>
-            <button type="button" onclick="openModal('exam-modal')" id="hdr-goal-btn" class="text-[11px] font-bold accent-text hover:underline cursor-pointer"></button>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 min-w-0">
+              <h1 id="hdr-title" class="text-sm sm:text-base font-extrabold tracking-tight leading-tight truncate">DAILY STUDY TIMETABLE</h1>
+            </div>
+            <div class="flex items-center gap-1.5 text-[11px] leading-snug text-[var(--text-muted)] min-w-0 flex-wrap">
+              <span id="hdr-day-badge" class="font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">Today</span>
+              <span aria-hidden="true" class="opacity-50">·</span>
+              <span id="hdr-hours" class="font-mono-tab font-semibold text-[var(--text-secondary)] whitespace-nowrap">0.0h plan</span>
+              <span aria-hidden="true" class="opacity-50 hidden sm:inline">·</span>
+              <p id="hdr-subtitle" class="hidden sm:inline truncate max-w-[180px] lg:max-w-[220px]"></p>
+            </div>
           </div>
         </div>
+
+        <!-- Compact Mobile Goal Link (visible < md) -->
+        <button type="button" onclick="openModal('exam-modal')" id="hdr-goal-mobile-btn" class="md:hidden shrink-0 text-[11px] font-mono-tab font-bold accent-text hover:underline whitespace-nowrap cursor-pointer">+ Goal</button>
       </div>
 
-      <!-- Scrollable Toolbar -->
-      <div id="hdr-toolbar" class="thin-scroll flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 select-none cursor-grab">
-        <div class="shrink-0 flex items-center border surface-input rounded-xl px-1 py-0.5">
-          <button type="button" onclick="shiftDate(-1)" class="p-1.5 text-xs font-bold cursor-pointer" title="Previous Day">&#9664;</button>
-          <input type="date" id="date-input" class="text-xs sm:text-sm font-semibold bg-transparent border-none focus:outline-none px-1 font-mono-tab" />
-          <button type="button" onclick="shiftDate(1)" class="p-1.5 text-xs font-bold cursor-pointer" title="Next Day">&#9654;</button>
-          <span id="today-indicator-pill" class="ml-1 px-2 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-[10px] font-extrabold uppercase">Today</span>
-          <button type="button" id="today-btn" onclick="jumpToday()" class="hidden ml-1 px-2 py-1 rounded-lg accent-soft text-[11px] font-extrabold cursor-pointer">Go to Today</button>
+      <!-- Zone 2: Live Dashboard KPI Strip (md+) -->
+      <div class="dash-kpi-strip hidden md:flex items-center rounded-xl px-3 py-1.5 gap-3 shrink-0 self-start xl:self-auto">
+        <div class="flex items-center gap-2">
+          <div class="w-12 h-1.5 dash-progress-track rounded-full overflow-hidden">
+            <div id="hdr-dash-progress-bar" class="h-full rounded-full transition-all duration-200" style="width:0%;background:var(--accent-primary)"></div>
+          </div>
+          <span id="hdr-dash-progress" class="font-mono-tab text-xs font-extrabold">0%</span>
+          <span class="text-[11px] font-semibold text-[var(--text-muted)]">Done</span>
         </div>
-        <button type="button" onclick="openModal('history-modal')" id="history-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">History</button>
-        <button type="button" onclick="toggleEditMode()" id="edit-mode-btn" class="shrink-0 px-3 py-1.5 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer">Edit Mode</button>
-        <button type="button" onclick="openProfileModal()" id="hdr-profile-btn" title="Profile" class="shrink-0 flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-xl border surface-input text-xs font-bold whitespace-nowrap cursor-pointer hover:opacity-90 transition">
+        <span class="h-3.5 w-px bg-slate-500/20" aria-hidden="true"></span>
+        <div class="flex items-center gap-1.5">
+          <span id="hdr-dash-streak" class="font-mono-tab text-xs font-extrabold">0d</span>
+          <span class="text-[11px] font-semibold text-[var(--text-muted)]">Streak</span>
+        </div>
+        <span class="h-3.5 w-px bg-slate-500/20" aria-hidden="true"></span>
+        <button type="button" onclick="openModal('exam-modal')" id="hdr-goal-btn" class="inline-flex items-center gap-1 text-[11px] font-mono-tab font-bold accent-text hover:underline whitespace-nowrap cursor-pointer max-w-[175px] truncate">+ Exam Goals</button>
+      </div>
+
+      <!-- Zone 3: Dashboard Command Toolbar -->
+      <div id="hdr-toolbar" class="thin-scroll flex flex-nowrap items-center gap-2 overflow-x-auto pb-0.5 xl:pb-0 select-none cursor-grab shrink-0">
+        <div class="dash-date-group shrink-0 flex items-center rounded-xl px-1 py-0.5">
+          <button type="button" onclick="shiftDate(-1)" class="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition" title="Previous Day" aria-label="Previous Day">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <input type="date" id="date-input" class="text-xs sm:text-[13px] font-semibold bg-transparent border-none focus:outline-none px-1 font-mono-tab" />
+          <button type="button" onclick="shiftDate(1)" class="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer transition" title="Next Day" aria-label="Next Day">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <span id="today-indicator-pill" class="px-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">Today</span>
+          <button type="button" id="today-btn" onclick="jumpToday()" class="hidden ml-0.5 px-2.5 py-1 rounded-lg accent-btn text-[11px] font-extrabold whitespace-nowrap cursor-pointer">Today</button>
+        </div>
+
+        <button type="button" onclick="openModal('history-modal')" id="history-btn" class="dash-cmd-btn shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          <span>History</span>
+        </button>
+
+        <button type="button" onclick="toggleEditMode()" id="edit-mode-btn" class="dash-cmd-btn shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"/></svg>
+          <span id="edit-mode-label">Edit Mode</span>
+        </button>
+
+        <button type="button" onclick="openProfileModal()" id="hdr-profile-btn" title="Open Profile" class="dash-profile-trigger shrink-0 flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer">
           <span id="hdr-profile-avatar" class="w-6 h-6 rounded-full accent-btn flex items-center justify-center text-[10px] font-extrabold overflow-hidden shrink-0">S</span>
-          <span id="hdr-profile-name" class="max-w-[96px] truncate">Profile</span>
+          <span id="hdr-profile-name" class="max-w-[92px] truncate">Profile</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
       </div>
     </div>
@@ -2953,6 +3042,10 @@
           </div>
         `).join("")}
       `;
+      const hdrProgEl = document.getElementById("hdr-dash-progress");
+      const hdrProgBar = document.getElementById("hdr-dash-progress-bar");
+      if (hdrProgEl) hdrProgEl.textContent = `${pct}%`;
+      if (hdrProgBar) hdrProgBar.style.width = `${pct}%`;
     }
 
     function renderScheduleContextStrip() {
@@ -3143,35 +3236,41 @@
       document.getElementById("hdr-title").textContent = sched.title || "DAILY STUDY TIMETABLE";
       document.getElementById("hdr-subtitle").textContent = sched.subtitle || "";
       const hdrHoursEl = document.getElementById("hdr-hours");
-      if (hdrHoursEl) hdrHoursEl.textContent = `· ${totalHrs.toFixed(1)} Hrs Study`;
+      if (hdrHoursEl) hdrHoursEl.textContent = `${totalHrs.toFixed(1)}h plan`;
 
       const badge = document.getElementById("hdr-day-badge");
       if (isToday) {
-        badge.textContent = "TODAY";
-        badge.className = "px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide bg-emerald-500/20 text-emerald-700 dark:text-emerald-300";
+        badge.textContent = "Today";
+        badge.className = "font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap";
       } else if (isPast) {
-        badge.textContent = "PAST DAY";
-        badge.className = "px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide bg-slate-500/20 text-[var(--text-secondary)]";
+        badge.textContent = "Past Day";
+        badge.className = "font-bold text-[var(--text-secondary)] whitespace-nowrap";
       } else {
-        badge.textContent = "UPCOMING";
-        badge.className = "px-2 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wide accent-soft";
+        badge.textContent = "Upcoming";
+        badge.className = "font-bold accent-text whitespace-nowrap";
       }
 
       const goals = [...(appState.examGoals || [])].sort((a, b) => a.targetDate.localeCompare(b.targetDate));
       const nearest = goals.find(g => g.targetDate >= today) || goals[goals.length - 1] || null;
-      if (nearest) {
-        const dLeft = daysBetweenDates(today, nearest.targetDate);
-        const gBadge = dLeft > 0 ? `${dLeft}d left` : (dLeft === 0 ? "Today!" : `${Math.abs(dLeft)}d ago`);
-        document.getElementById("hdr-goal-btn").textContent = `${nearest.title} · ${gBadge}`;
-      } else {
-        document.getElementById("hdr-goal-btn").textContent = "+ Exam Goals";
-      }
+      const goalText = nearest
+        ? `${nearest.title} · ${(() => { const dLeft = daysBetweenDates(today, nearest.targetDate); return dLeft > 0 ? `${dLeft}d left` : (dLeft === 0 ? "Today!" : `${Math.abs(dLeft)}d ago`); })()}`
+        : "+ Exam Goals";
+      document.getElementById("hdr-goal-btn").textContent = goalText;
+      const mobileGoalBtn = document.getElementById("hdr-goal-mobile-btn");
+      if (mobileGoalBtn) mobileGoalBtn.textContent = nearest ? goalText : "+ Goal";
 
       document.getElementById("date-input").value = currentDateStr;
       document.getElementById("today-indicator-pill").classList.toggle("hidden", !isToday);
       document.getElementById("today-btn").classList.toggle("hidden", isToday);
       document.getElementById("edit-banner").classList.toggle("hidden", !isEditMode);
-      document.getElementById("edit-mode-btn").textContent = isEditMode ? "Done Editing" : "Edit Mode";
+      const editBtn = document.getElementById("edit-mode-btn");
+      const editLabel = document.getElementById("edit-mode-label");
+      if (editLabel) editLabel.textContent = isEditMode ? "Done Editing" : "Edit Mode";
+      if (editBtn) {
+        editBtn.className = isEditMode
+          ? "shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl accent-btn text-xs font-extrabold whitespace-nowrap cursor-pointer shadow-sm transition"
+          : "dash-cmd-btn shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer";
+      }
       document.getElementById("pin-btn").textContent = appState.adminPin ? "Change / Remove PIN" : "Set PIN";
       renderHeaderProfile();
 
@@ -3185,6 +3284,13 @@
 
       const streak = computeStreak();
       document.getElementById("streak-label").textContent = `${streak}d active streak`;
+      const hdrStreakEl = document.getElementById("hdr-dash-streak");
+      if (hdrStreakEl) hdrStreakEl.textContent = `${streak}d`;
+      const hdrProgPct = getEffectiveDayPercentage(currentDateStr);
+      const hdrProgEl = document.getElementById("hdr-dash-progress");
+      const hdrProgBar = document.getElementById("hdr-dash-progress-bar");
+      if (hdrProgEl) hdrProgEl.textContent = `${hdrProgPct}%`;
+      if (hdrProgBar) hdrProgBar.style.width = `${hdrProgPct}%`;
       const hm = document.getElementById("heatmap-grid");
       const now = new Date();
       hm.innerHTML = Array.from({ length: 14 }, (_, i) => {
